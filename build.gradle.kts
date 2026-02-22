@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") version "2.3.0"
     id("com.gradleup.shadow") version "9.3.1"
     id("io.github.revxrsal.bukkitkobjects") version "0.0.5"
-    id("xyz.jpenilla.gremlin-gradle") version "0.0.9"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     java
     id("xyz.jpenilla.run-paper") version "3.0.2"
@@ -49,16 +48,13 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":api"))
-    implementation("gg.aquatic:KRegistry:25.0.1")
-    implementation("gg.aquatic:Kommand:26.0.1")
+    compileOnly("gg.aquatic:Waves:26.0.26")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     implementation("org.reflections:reflections:0.10.2")
     implementation("net.kyori:adventure-text-minimessage:4.26.1")
     implementation("net.kyori:adventure-text-serializer-gson:4.26.1")
     implementation("net.kyori:adventure-text-serializer-plain:4.26.1")
-
-    compileOnly("com.mojang:brigadier:1.0.500")
 
     // Testing
     testImplementation("io.mockk:mockk:1.14.7")
@@ -94,8 +90,7 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
-    relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
-    //relocate("com.undefined", "gg.aquatic.waves.shadow.undefined")
+    relocate("org.bstats", "gg.aquatic.waves.libs.bstats")
 
     relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
 }
