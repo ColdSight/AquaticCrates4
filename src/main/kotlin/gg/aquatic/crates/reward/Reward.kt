@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack
 
 class Reward(
     val id: String,
-    val displayName: Component,
+    displayName: Component?,
     val previewItem: () -> ItemStack,
     val fallbackItem: () -> ItemStack?,
     val winActions: suspend (player: Player) -> Unit,
@@ -25,5 +25,9 @@ class Reward(
         val success = purchaseManager?.tryPurchase(player) ?: false
         if (success) winActions(player)
         return success
+    }
+
+    val displayName by lazy {
+        displayName ?: previewItem().itemMeta.displayName() ?: Component.text(id)
     }
 }
