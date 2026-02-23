@@ -19,7 +19,7 @@ class Reward(
     override var chance: Double
 ): Weightable {
 
-    val canBePurchased: Boolean = purchaseManager != null
+    val isPurchasable: Boolean = purchaseManager != null
 
     suspend fun tryPurchase(player: Player): Boolean {
         val success = purchaseManager?.tryPurchase(player) ?: false
