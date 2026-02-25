@@ -11,7 +11,11 @@ class CrateHandle(
 ) {
 
     val hologram = crate.hologram?.create(location, { PlaceholderContext.player })
-    val interactables = crate.interactables.map { it.create(location, GlobalAudience()) { obj, player, isLeft -> } }
+    val interactables = crate.interactables.map {
+        it.create(location, GlobalAudience()) { obj, player, isLeft ->
+            player.sendMessage("You have interacted the crate! $isLeft")
+        }
+    }
 
     suspend fun destroy() {
         hologram?.destroy()
