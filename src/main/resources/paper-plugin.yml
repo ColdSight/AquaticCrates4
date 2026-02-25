@@ -1,0 +1,19 @@
+name: AqCrates
+main: gg.aquatic.crates.CratesPlugin
+version: ${version}
+api-version: 1.21
+
+dependencies:
+  server:
+    Waves:
+      load: BEFORE
+      required: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+    Nexo:
+      load: BEFORE
+      required: false
+    CraftEngine:
+      load: BEFORE
+      required: false

@@ -20,6 +20,8 @@ out/
 .idea
 .idea/*
 
+run/
+
 ### Kotlin ###
 .kotlin
 
