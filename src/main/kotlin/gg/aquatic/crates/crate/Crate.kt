@@ -15,9 +15,11 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.ItemStack
 
 class Crate(
     val id: String,
+    val keyItem: ItemStack,
     val displayName: Component,
     val hologram: Hologram.Settings?,
     val priceGroups: Collection<OpenPriceGroup>,

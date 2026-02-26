@@ -25,5 +25,4 @@ interface PreviewMenuSettings {
         override suspend fun open(player: Player, crate: Crate, crateHandle: CrateHandle?) {
         }
     }
-
 }

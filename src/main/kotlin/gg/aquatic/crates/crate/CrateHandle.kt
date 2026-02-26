@@ -30,6 +30,12 @@ class CrateHandle(
                 }
                 return@create
             }
+
+            VirtualsCtx {
+                player.sendMessage("Opening the crate!")
+                crate.open(player)
+                player.sendMessage("Crate opened!")
+            }
         }
     }
 
