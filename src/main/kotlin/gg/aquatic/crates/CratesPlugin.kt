@@ -79,4 +79,8 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
 
     override fun onDisable() {
     }
+
+    fun reload() {
+        Waves.rebuildRegistries(this)
+    }
 }
