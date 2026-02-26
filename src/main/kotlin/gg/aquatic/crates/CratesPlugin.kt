@@ -6,6 +6,9 @@ import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.command.initializeCommands
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
+import gg.aquatic.crates.crate.preview.PreviewMenuSettings
+import gg.aquatic.kmenu.inventory.InventoryType
+import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
 import gg.aquatic.kregistry.bootstrap.RegistryHolder
 import gg.aquatic.stacked.StackedItem
 import gg.aquatic.stacked.register
@@ -25,7 +28,15 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
                     interactables = listOf(
                         ClientsideBlockSettings(VanillaBlock(Material.CHEST.createBlockData()), 50)
                     ),
-                    rewards = listOf()
+                    rewards = listOf(),
+                    preview = PreviewMenuSettings.Basic(
+                        listOf(10, 11, 12, 13, 14, 15, 16),
+                        PrivateMenuSettings(
+                            InventoryType.GENERIC9X1,
+                            "Preview Menu".toMMComponent(),
+                            hashMapOf()
+                        )
+                    )
                 )
             }
 

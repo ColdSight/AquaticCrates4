@@ -10,7 +10,7 @@ class Reward(
     val id: String,
     displayName: Component?,
     val previewItem: () -> ItemStack,
-    val fallbackItem: () -> ItemStack?,
+    val fallbackItem: (() -> ItemStack)?,
     val winActions: suspend (player: Player) -> Unit,
     val condition: suspend (Player) -> Boolean,
     val purchaseManager: RewardPurchaseHandler?,

@@ -1,6 +1,7 @@
 package gg.aquatic.crates.crate
 
 import gg.aquatic.clientside.serialize.ClientsideSettings
+import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
 import gg.aquatic.crates.reward.Reward
@@ -23,6 +24,7 @@ class Crate(
     val openConditions: OpenConditions = OpenConditions.DUMMY,
     val interactables: Collection<ClientsideSettings<*>>,
     val rewards: Collection<Reward>,
+    val preview: PreviewMenuSettings?,
 ) {
 
     val crateItem by lazy {
