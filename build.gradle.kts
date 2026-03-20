@@ -1,5 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.20"
+    kotlin("plugin.serialization") version "2.3.10"
     id("com.gradleup.shadow") version "9.3.1"
     id("io.github.revxrsal.bukkitkobjects") version "0.0.5"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
@@ -22,6 +23,13 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
+
+    processResources {
+        inputs.property("version", project.version)
+        filesMatching("paper-plugin.yml") {
+            expand("version" to project.version)
+        }
+    }
 }
 
 tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
@@ -33,6 +41,7 @@ tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         name = "papermc"
@@ -48,13 +57,12 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":api"))
-    compileOnly("gg.aquatic:Waves:26.0.33")
+    compileOnly("gg.aquatic:Waves:26.0.43-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("com.charleskorn.kaml:kaml:0.104.0")
 
     implementation("org.reflections:reflections:0.10.2")
-    implementation("net.kyori:adventure-text-minimessage:4.26.1")
-    implementation("net.kyori:adventure-text-serializer-gson:4.26.1")
-    implementation("net.kyori:adventure-text-serializer-plain:4.26.1")
 
     // Testing
     testImplementation("io.mockk:mockk:1.14.9")
@@ -82,6 +90,13 @@ subprojects {
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     archiveFileName.set("AquaticCrates-${project.version}.jar")
     archiveClassifier.set("")
+
+    dependencies {
+        exclude(dependency("org.jetbrains.kotlinx:.*:.*"))
+        exclude(dependency("org.jetbrains.kotlin:.*:.*"))
+        exclude(dependency("org.jetbrains:annotations:.*"))
+        exclude(dependency("com.intellij:annotations:.*"))
+    }
 
     exclude("kotlin/**")
     exclude("org/intellij/**")
