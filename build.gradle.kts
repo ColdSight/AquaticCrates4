@@ -59,7 +59,7 @@ dependencies {
     implementation(project(":api"))
     compileOnly("gg.aquatic:Waves:26.0.43-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("com.charleskorn.kaml:kaml:0.104.0")
 
     implementation("org.reflections:reflections:0.10.2")
