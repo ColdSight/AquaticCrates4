@@ -1,12 +1,13 @@
 package gg.aquatic.crates.crate
 
-import gg.aquatic.clientside.serialize.ClientsideSettings
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
+import gg.aquatic.crates.data.interactable.CrateInteractableData
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
 import gg.aquatic.crates.reward.Reward
 import gg.aquatic.crates.util.randomItem
 import gg.aquatic.kholograms.Hologram
+import gg.aquatic.execute.executeActions
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import gg.aquatic.stacked.stackedItem
 import net.kyori.adventure.text.Component
@@ -23,7 +24,7 @@ class Crate(
     val hologram: Hologram.Settings?,
     val priceGroups: Collection<OpenPriceGroup>,
     val openConditions: OpenConditions = OpenConditions.DUMMY,
-    val interactables: Collection<ClientsideSettings<*>>,
+    val interactables: Collection<CrateInteractableData>,
     val rewards: Collection<Reward>,
     val preview: PreviewMenuSettings?,
 ) {
@@ -62,20 +63,34 @@ class Crate(
 
     val crateItemStack by lazy { crateItem.getItem() }
 
-    suspend fun tryOpen(player: Player) {
+    suspend fun tryOpen(player: Player, crateHandle: CrateHandle? = null): Boolean {
+        if (!openConditions.check(player, this, crateHandle)) {
+            return false
+        }
+
+        if (priceGroups.isEmpty()) {
+            open(player)
+            return true
+        }
+
         for (group in priceGroups) {
             if (group.tryTake(player, 1)) {
                 open(player)
-                return
+                return true
             }
         }
+
+        return false
     }
 
     suspend fun open(player: Player, amount: Int = 1) {
-        val filteredRewards = rewards.filter { it.condition(player) }
+        val filteredRewards = rewards.filter { it.canWin(player) }
+        if (filteredRewards.isEmpty()) {
+            return
+        }
 
         repeat(amount) {
-            filteredRewards.randomItem().winActions(player)
+            filteredRewards.randomItem().winActions.executeActions(player)
         }
     }
 }

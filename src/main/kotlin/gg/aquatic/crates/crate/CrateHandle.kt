@@ -11,15 +11,13 @@ class CrateHandle(
     val persistent: Boolean,
 ) {
 
-    val hologram = crate.hologram?.create(location, { PlaceholderContext.player })
+    val hologram = crate.hologram?.create(location.clone().add(0.5, 1.0, 0.5), { PlaceholderContext.player })
     val interactables = crate.interactables.map {
-        it.create(location, GlobalAudience()) { obj, player, isLeft ->
+        it.toSettings().create(location, GlobalAudience()) { obj, player, isLeft ->
             player.sendMessage("You have interacted the crate! $isLeft")
             if (isLeft) {
                 if (player.isSneaking && player.hasPermission("aqcrates.admin")) {
-                    VirtualsCtx {
-                        destroy()
-                    }
+                    destroy()
                     player.sendMessage("Crate destroyed!")
                     return@create
                 }
@@ -33,14 +31,18 @@ class CrateHandle(
 
             VirtualsCtx {
                 player.sendMessage("Opening the crate!")
-                crate.open(player)
-                player.sendMessage("Crate opened!")
+                if (crate.tryOpen(player, this@CrateHandle)) {
+                    player.sendMessage("Crate opened!")
+                }
             }
         }
     }
 
-    suspend fun destroy() {
-        hologram?.destroy()
+    fun destroy() {
+        CrateHandler.removeHandle(this)
+        VirtualsCtx {
+            hologram?.destroy()
+        }
         interactables.forEach { it.destroy() }
     }
 }

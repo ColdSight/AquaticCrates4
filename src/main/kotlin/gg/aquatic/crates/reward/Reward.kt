@@ -1,5 +1,9 @@
 package gg.aquatic.crates.reward
 
+import gg.aquatic.execute.ActionHandle
+import gg.aquatic.execute.checkConditions
+import gg.aquatic.execute.condition.ConditionHandle
+import gg.aquatic.execute.executeActions
 import gg.aquatic.crates.util.Weightable
 import gg.aquatic.kmenu.inventory.ClickType
 import net.kyori.adventure.text.Component
@@ -11,8 +15,8 @@ class Reward(
     displayName: Component?,
     val previewItem: () -> ItemStack,
     val fallbackItem: (() -> ItemStack)?,
-    val winActions: suspend (player: Player) -> Unit,
-    val condition: suspend (Player) -> Boolean,
+    val winActions: Collection<ActionHandle<Player>>,
+    val conditions: Collection<ConditionHandle<Player>>,
     val purchaseManager: RewardPurchaseHandler?,
     val clickHandler: suspend (player: Player, clickType: ClickType) -> Unit,
     val rarity: RewardRarity,
@@ -21,9 +25,13 @@ class Reward(
 
     val isPurchasable: Boolean = purchaseManager != null
 
+    suspend fun canWin(player: Player): Boolean {
+        return conditions.checkConditions(player)
+    }
+
     suspend fun tryPurchase(player: Player): Boolean {
         val success = purchaseManager?.tryPurchase(player) ?: false
-        if (success) winActions(player)
+        if (success) winActions.executeActions(player)
         return success
     }
 

@@ -28,7 +28,7 @@ class PreviewListMenu private constructor(
             return crate.rewards.mapNotNull {
                 val context = PlaceholderContext.privateMenu()
 
-                val item = if (it.condition(player)) {
+                val item = if (it.canWin(player)) {
                     it.previewItem
                 } else it.fallbackItem ?: return@mapNotNull null
 
