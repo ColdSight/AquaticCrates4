@@ -31,6 +31,9 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
 
     override fun onEnable() {
         initializeCommands()
+        VirtualsCtx {
+            CrateHandler.loadPlacedCrates()
+        }
     }
 
     override fun onDisable() {

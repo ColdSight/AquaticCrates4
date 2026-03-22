@@ -60,6 +60,12 @@ object CrateHandler {
         }
     }
 
+    suspend fun loadPlacedCrates() {
+        runWithoutPersistenceUpdates {
+            respawnPersistentCrates()
+        }
+    }
+
     suspend fun shutdown() {
         savePlacedCrates()
         runWithoutPersistenceUpdates {

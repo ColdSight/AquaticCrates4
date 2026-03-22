@@ -57,7 +57,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":api"))
-    compileOnly("gg.aquatic:Waves:26.0.43-SNAPSHOT")
+    compileOnly("gg.aquatic:Waves:26.0.47-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.charleskorn.kaml:kaml:0.104.0")
