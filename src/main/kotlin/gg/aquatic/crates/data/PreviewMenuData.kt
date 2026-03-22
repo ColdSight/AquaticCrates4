@@ -3,6 +3,7 @@ package gg.aquatic.crates.data
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.data.editor.CrateEditorValidators
+import gg.aquatic.crates.data.editor.InventoryTypeFieldAdapter
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.settings.ButtonSettings
 import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
@@ -81,11 +82,7 @@ data class PreviewMenuData(
         fun TypedNestedSchemaBuilder<PreviewMenuData>.defineEditor() {
             field(
                 PreviewMenuData::inventoryType,
-                TextFieldAdapter,
-                TextFieldConfig(
-                    prompt = "Enter inventory type:",
-                    validator = CrateEditorValidators::validateInventoryType
-                ),
+                adapter = InventoryTypeFieldAdapter,
                 displayName = "Preview Inventory Type",
                 description = listOf("Inventory layout used for the crate preview menu.")
             )
@@ -100,19 +97,19 @@ data class PreviewMenuData(
                 PreviewMenuData::rewardSlots,
                 "Reward Slots",
                 description = listOf("Slots where reward icons can appear in the preview menu."),
-                newValueFactory = EditorEntryFactories.int("Enter reward slot:")
+                newValueFactory = EditorEntryFactories.int("Enter reward slot or range (e.g. 10-16 or 10,12,14):", unique = true)
             )
             list(
                 PreviewMenuData::previousPageSlots,
                 "Previous Page Slots",
                 description = listOf("Slots used for the previous-page button."),
-                newValueFactory = EditorEntryFactories.int("Enter previous-page slot:")
+                newValueFactory = EditorEntryFactories.int("Enter previous-page slot or range:", unique = true)
             )
             list(
                 PreviewMenuData::nextPageSlots,
                 "Next Page Slots",
                 description = listOf("Slots used for the next-page button."),
-                newValueFactory = EditorEntryFactories.int("Enter next-page slot:")
+                newValueFactory = EditorEntryFactories.int("Enter next-page slot or range:", unique = true)
             )
             map(
                 PreviewMenuData::customButtons,

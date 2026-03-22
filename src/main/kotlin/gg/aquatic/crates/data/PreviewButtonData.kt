@@ -72,7 +72,7 @@ data class PreviewButtonData(
                 PreviewButtonData::slots,
                 displayName = "Slots",
                 description = listOf("Slots where this custom button should appear."),
-                newValueFactory = EditorEntryFactories.int("Enter button slot:")
+                newValueFactory = EditorEntryFactories.int("Enter button slot or range (e.g. 0-8):", unique = true)
             )
             list(
                 PreviewButtonData::viewConditions,
