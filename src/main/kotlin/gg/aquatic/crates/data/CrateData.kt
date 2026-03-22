@@ -20,18 +20,19 @@ import gg.aquatic.crates.data.interactable.MEGCrateInteractableData
 import gg.aquatic.crates.data.interactable.MultiBlockCrateInteractableData
 import gg.aquatic.crates.data.interactable.findInteractableSubtypeId
 import gg.aquatic.crates.data.item.StackedItemData
+import gg.aquatic.crates.data.price.OpenPriceGroupData
+import gg.aquatic.crates.data.price.OpenPriceTypes
+import gg.aquatic.crates.data.price.defineOpenPriceEditor
+import gg.aquatic.crates.data.price.findOpenPriceSubtypeId
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.waves.serialization.editor.meta.EditableModel
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
-import gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
 import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.TextFieldConfig
 import gg.aquatic.waves.serialization.editor.meta.TypedEditorSchemaBuilder
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 @Serializable
 data class CrateData(
@@ -42,6 +43,7 @@ data class CrateData(
     ),
     val interactables: List<@Polymorphic CrateInteractableData> = listOf(BlockCrateInteractableData()),
     val openConditions: List<@Polymorphic PlayerConditionData> = emptyList(),
+    val priceGroups: List<OpenPriceGroupData> = listOf(OpenPriceGroupData()),
     val hologram: CrateHologramData? = null,
     val preview: PreviewMenuData? = PreviewMenuData(),
     val rewards: Map<String, RewardData> = emptyMap(),
@@ -53,7 +55,7 @@ data class CrateData(
             keyItem = keyItem.asStacked().getItem(),
             displayName = displayName.toMMComponent(),
             hologram = hologram?.toSettings(),
-            priceGroups = emptyList(),
+            priceGroups = priceGroups.map { it.toOpenPriceGroup(id, keyItem.asStacked().getItem()) },
             openConditions = openConditions
                 .map { it.toConditionHandle() }
                 .takeIf { it.isNotEmpty() }
@@ -75,20 +77,23 @@ data class CrateData(
         fun createDefault(displayName: String = "<yellow>Crate"): CrateData {
             return CrateData(
                 displayName = displayName,
-                interactables = listOf(BlockCrateInteractableData())
+                interactables = listOf(BlockCrateInteractableData()),
+                priceGroups = listOf(OpenPriceGroupData())
             )
         }
     }
 }
 
 object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) {
-    private val schemaJson = Json { encodeDefaults = true }
+    private val schemaJson = CrateDataFormats.json
 
     override fun resolveDescriptor(context: EditorFieldContext) = when {
         context.pathSegments.contains("hologram") ->
             context.findHologramLineSubtypeId()?.let(CrateHologramLineTypes::descriptor)
         context.pathSegments.contains("interactables") ->
             context.findInteractableSubtypeId()?.let(CrateInteractableTypes::descriptor)
+        context.pathSegments.contains("priceGroups") && context.pathSegments.contains("prices") ->
+            context.findOpenPriceSubtypeId()?.let(OpenPriceTypes::descriptor)
         context.pathSegments.contains("winActions") || context.pathSegments.contains("clickActions") ->
             context.findRewardActionType()?.let(RewardActionTypes::descriptor)
         context.pathSegments.contains("openConditions") || context.pathSegments.contains("conditions") ->
@@ -138,6 +143,19 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
             newValueFactory = PlayerConditionSelectionMenu.entryFactory
         ) {
             definePlayerConditionEditor()
+        }
+        list(
+            CrateData::priceGroups,
+            displayName = "Price Groups",
+            description = listOf(
+                "Alternative price groups used to open this crate.",
+                "If one group can be paid in full, the crate opens."
+            ),
+            newValueFactory = OpenPriceGroupData.defaultEntryFactory
+        ) {
+            with(OpenPriceGroupData) {
+                defineEditor()
+            }
         }
 
         group(CrateData::keyItem) {

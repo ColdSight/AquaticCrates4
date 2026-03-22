@@ -8,6 +8,7 @@ import gg.aquatic.crates.data.action.RewardActionFormats
 import gg.aquatic.crates.data.condition.PlayerConditionFormats
 import gg.aquatic.crates.data.hologram.CrateHologramLineFormats
 import gg.aquatic.crates.data.interactable.CrateInteractableFormats
+import gg.aquatic.crates.data.price.OpenPriceFormats
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -19,6 +20,7 @@ object CrateDataFormats {
         include(PlayerConditionFormats.module)
         include(CrateHologramLineFormats.module)
         include(CrateInteractableFormats.module)
+        include(OpenPriceFormats.module)
     }
 
     val json = Json {
