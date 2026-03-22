@@ -6,8 +6,8 @@ import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
 import gg.aquatic.crates.reward.Reward
 import gg.aquatic.crates.util.randomItem
-import gg.aquatic.kholograms.Hologram
 import gg.aquatic.execute.executeActions
+import gg.aquatic.kholograms.Hologram
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import gg.aquatic.stacked.stackedItem
 import net.kyori.adventure.text.Component

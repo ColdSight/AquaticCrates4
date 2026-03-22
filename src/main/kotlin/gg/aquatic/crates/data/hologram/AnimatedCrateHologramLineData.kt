@@ -2,7 +2,6 @@ package gg.aquatic.crates.data.hologram
 
 import gg.aquatic.kholograms.line.AnimatedHologramLine
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
-import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -17,7 +17,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import kotlin.collections.plusAssign
 
 object CrateManagementMenu {
 

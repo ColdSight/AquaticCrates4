@@ -2,11 +2,7 @@ package gg.aquatic.crates.data.hologram
 
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.*
 
 fun TypedNestedSchemaBuilder<CrateHologramLineData>.defineHologramLineEditor() {
     include<TextCrateHologramLineData>(visibleWhen = { it.matchesHologramLineSubtype("text") }) {

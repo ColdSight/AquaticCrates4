@@ -6,12 +6,12 @@ import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
-import org.bukkit.Material
-import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 object CrateReferenceFieldAdapter : EditorFieldAdapter {
     override fun createItem(context: EditorFieldContext, defaultItem: () -> ItemStack): ItemStack {

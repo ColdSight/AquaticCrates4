@@ -7,8 +7,8 @@ import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable

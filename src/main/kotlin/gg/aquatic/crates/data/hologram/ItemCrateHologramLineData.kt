@@ -2,11 +2,7 @@ package gg.aquatic.crates.data.hologram
 
 import gg.aquatic.crates.data.item.StackedItemData
 import gg.aquatic.kholograms.line.ItemHologramLine
-import gg.aquatic.waves.serialization.editor.meta.EnumFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.EnumFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
+import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.Display

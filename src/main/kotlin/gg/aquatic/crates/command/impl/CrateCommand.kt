@@ -3,9 +3,9 @@ package gg.aquatic.crates.command.impl
 import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
+import gg.aquatic.crates.data.CrateStorage
 import gg.aquatic.crates.data.editor.CrateEditor
 import gg.aquatic.crates.data.editor.CrateManagementMenu
-import gg.aquatic.crates.data.CrateStorage
 import gg.aquatic.kommand.CommandBuilder
 import gg.aquatic.kommand.hasPermission
 import io.papermc.paper.command.brigadier.CommandSourceStack

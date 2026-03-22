@@ -1,11 +1,7 @@
 package gg.aquatic.crates.data.interactable
 
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.*
 
 internal fun EditorFieldContext.findInteractableSubtypeId(): String? {
     val direct = (value as? JsonObject)

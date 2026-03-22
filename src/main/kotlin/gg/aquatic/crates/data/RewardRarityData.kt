@@ -2,11 +2,7 @@ package gg.aquatic.crates.data
 
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.reward.RewardRarity
-import gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.TextFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
+import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -1,11 +1,7 @@
 package gg.aquatic.crates.data.interactable
 
 import gg.aquatic.clientside.serialize.ClientsideEntitySettings
-import gg.aquatic.waves.serialization.editor.meta.EnumFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.EnumFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
+import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.EntityType

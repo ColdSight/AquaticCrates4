@@ -5,7 +5,6 @@ import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass

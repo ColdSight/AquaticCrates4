@@ -11,11 +11,7 @@ import gg.aquatic.crates.data.condition.definePlayerConditionEditor
 import gg.aquatic.crates.data.item.StackedItemData
 import gg.aquatic.crates.reward.Reward
 import gg.aquatic.kmenu.inventory.ClickType
-import gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.TextFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
+import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
 import org.bukkit.Material

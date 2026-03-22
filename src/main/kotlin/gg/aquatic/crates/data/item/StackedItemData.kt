@@ -5,36 +5,8 @@ import gg.aquatic.crates.data.editor.CrateEditorValidators
 import gg.aquatic.stacked.ItemHandler
 import gg.aquatic.stacked.StackedItem
 import gg.aquatic.stacked.impl.StackedItemImpl
-import gg.aquatic.stacked.option.AmountOptionHandle
-import gg.aquatic.stacked.option.CustomModelDataLegacyOptionHandle
-import gg.aquatic.stacked.option.CustomModelDataOptionHandle
-import gg.aquatic.stacked.option.DamageOptionHandle
-import gg.aquatic.stacked.option.DisplayNameOptionHandle
-import gg.aquatic.stacked.option.DyeOptionHandle
-import gg.aquatic.stacked.option.EnchantsOptionHandle
-import gg.aquatic.stacked.option.FlagsOptionHandle
-import gg.aquatic.stacked.option.HideTooltipOptionHandle
-import gg.aquatic.stacked.option.ItemModelOptionHandle
-import gg.aquatic.stacked.option.ItemOptionHandle
-import gg.aquatic.stacked.option.LoreOptionHandle
-import gg.aquatic.stacked.option.MaxDamageOptionHandle
-import gg.aquatic.stacked.option.MaxStackSizeOptionHandle
-import gg.aquatic.stacked.option.RarityOptionHandle
-import gg.aquatic.stacked.option.SpawnerTypeOptionHandle
-import gg.aquatic.stacked.option.TooltipStyleOptionHandle
-import gg.aquatic.stacked.option.UnbreakableOptionHandle
-import gg.aquatic.waves.serialization.editor.meta.ColorFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.ColorFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
-import gg.aquatic.waves.serialization.editor.meta.EnumFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.EnumFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.MaterialLikeFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.MaterialLikeFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
-import gg.aquatic.waves.serialization.editor.meta.TextFieldConfig
-import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
+import gg.aquatic.stacked.option.*
+import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Serializable
 import net.kyori.adventure.key.Key
 import org.bukkit.Color
@@ -43,7 +15,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
-import java.util.Locale
+import java.util.*
 
 @Serializable
 data class StackedItemData(

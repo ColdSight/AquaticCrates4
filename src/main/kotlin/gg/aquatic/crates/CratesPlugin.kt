@@ -1,9 +1,9 @@
 package gg.aquatic.crates
 
+import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.crates.command.initializeCommands
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.data.CrateStorage
-import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kregistry.bootstrap.RegistryHolder
 import gg.aquatic.stacked.StackedItem
 import gg.aquatic.stacked.register

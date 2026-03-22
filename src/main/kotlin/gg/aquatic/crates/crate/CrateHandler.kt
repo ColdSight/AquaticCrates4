@@ -2,17 +2,16 @@ package gg.aquatic.crates.crate
 
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.common.location.world.AwaitingWorld
-import gg.aquatic.snapshotmap.SuspendingSnapshotMap
 import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.snapshotmap.SuspendingSnapshotMap
 import kotlinx.coroutines.withContext
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
-import java.util.Collections
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.ConcurrentHashMap
 
 object CrateHandler {
 

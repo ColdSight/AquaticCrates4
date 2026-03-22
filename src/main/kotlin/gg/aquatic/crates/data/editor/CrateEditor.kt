@@ -3,8 +3,8 @@ package gg.aquatic.crates.data.editor
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.crates.CratesPlugin
 import gg.aquatic.crates.data.CrateData
-import gg.aquatic.crates.data.CrateDataFormats
 import gg.aquatic.crates.data.CrateDataEditorSchema
+import gg.aquatic.crates.data.CrateDataFormats
 import gg.aquatic.crates.data.CrateStorage
 import gg.aquatic.waves.serialization.editor.SerializableEditor
 import net.kyori.adventure.text.Component
