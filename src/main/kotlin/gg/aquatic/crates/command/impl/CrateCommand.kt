@@ -7,18 +7,18 @@ import gg.aquatic.crates.data.editor.CrateEditor
 import gg.aquatic.crates.data.editor.CrateManagementMenu
 import gg.aquatic.crates.data.CrateStorage
 import gg.aquatic.kommand.CommandBuilder
+import gg.aquatic.kommand.hasPermission
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import kotlinx.coroutines.withContext
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 /**
  * aqcrates crate <give> <crate-id>
  */
-internal fun CommandBuilder<CommandSourceStack>.crateCommand() =
+internal fun CommandBuilder<CommandSourceStack, CommandSender>.crateCommand() =
     "crate" {
-        requires {
-            it.sender.hasPermission("aqcrates.admin")
-        }
+        hasPermission("aqcrates.admin")
 
         "give" {
             listArgument("crate", { CrateHandler.crates.values }, { it.id }) {

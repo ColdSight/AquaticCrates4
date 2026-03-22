@@ -4,6 +4,8 @@ import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.kommand.CommandBuilder
+import gg.aquatic.kommand.hasPermission
+import gg.aquatic.kommand.playerArgument
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import kotlinx.coroutines.withContext
 import org.bukkit.command.CommandSender
@@ -12,11 +14,9 @@ import org.bukkit.entity.Player
 /**
  * aqcrates key give <crate-id> [player] [key]
  */
-internal fun CommandBuilder<CommandSourceStack>.keyCommand() =
+internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
     "key" {
-        requires {
-            it.sender.hasPermission("aqcrates.admin")
-        }
+        hasPermission("aqcrates.admin")
 
         "give" {
             listArgument("crate", { CrateHandler.crates.values }, { it.id }) {
