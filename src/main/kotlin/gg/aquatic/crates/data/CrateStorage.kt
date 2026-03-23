@@ -46,6 +46,7 @@ object CrateStorage {
         val content = yamlFile.readText()
 
         return yaml.decodeFromString(CrateData.serializer(), content)
+            .normalized(id, availableIds().toSet())
     }
 
     fun loadAllCrates(): Map<String, Crate> {
@@ -57,7 +58,7 @@ object CrateStorage {
 
     fun save(id: String, crateData: CrateData) {
         cratesDirectory.mkdirs()
-        yamlFileFor(id).writeText(encodeCompactYaml(crateData))
+        yamlFileFor(id).writeText(encodeCompactYaml(crateData.normalized(id, availableIds().toSet() + id)))
     }
 
     fun exists(id: String): Boolean {
