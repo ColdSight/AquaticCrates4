@@ -9,6 +9,7 @@ import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
+import org.bukkit.Material
 
 @Serializable
 data class CrateHologramData(
@@ -31,6 +32,7 @@ data class CrateHologramData(
             list(
                 CrateHologramData::lines,
                 "Hologram Lines",
+                iconMaterial = Material.END_CRYSTAL,
                 description = listOf("All hologram lines displayed above the crate, including text, item and animated lines."),
                 newValueFactory = HologramLineSelectionMenu.entryFactory
             ) {
@@ -41,6 +43,7 @@ data class CrateHologramData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter hologram view distance:", min = 1),
                 displayName = "Hologram View Distance",
+                iconMaterial = Material.SPYGLASS,
                 description = listOf("Maximum distance where the hologram is rendered.")
             )
         }

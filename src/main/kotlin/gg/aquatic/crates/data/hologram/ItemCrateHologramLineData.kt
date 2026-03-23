@@ -7,6 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.Material
 import org.joml.Vector3f
 
 @Serializable
@@ -57,6 +58,7 @@ data class ItemCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter line height:", min = 0.0),
                 displayName = "Height",
+                iconMaterial = Material.LIGHT_BLUE_DYE,
                 description = listOf("Vertical space taken by this hologram line.")
             )
             field(
@@ -64,6 +66,7 @@ data class ItemCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter scale:", min = 0.0),
                 displayName = "Scale",
+                iconMaterial = Material.SLIME_BALL,
                 description = listOf("Display scale applied to this item line.")
             )
             field(
@@ -71,6 +74,7 @@ data class ItemCrateHologramLineData(
                 EnumFieldAdapter,
                 EnumFieldConfig(prompt = "Enter billboard mode:", values = { Display.Billboard.entries.map { it.name } }),
                 displayName = "Billboard",
+                iconMaterial = Material.ITEM_FRAME,
                 description = listOf("Billboard mode used by the display entity.")
             )
             field(
@@ -78,6 +82,7 @@ data class ItemCrateHologramLineData(
                 EnumFieldAdapter,
                 EnumFieldConfig(prompt = "Enter item display transform:", values = { ItemDisplay.ItemDisplayTransform.entries.map { it.name } }),
                 displayName = "Item Transform",
+                iconMaterial = Material.ARMOR_STAND,
                 description = listOf("Display transform used for the item display entity.")
             )
             field(
@@ -85,6 +90,7 @@ data class ItemCrateHologramLineData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter transformation duration:", min = 0),
                 displayName = "Transformation Duration",
+                iconMaterial = Material.REPEATER,
                 description = listOf("Interpolation duration for transformation changes.")
             )
             field(
@@ -92,6 +98,7 @@ data class ItemCrateHologramLineData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter teleport interpolation:", min = 0),
                 displayName = "Teleport Interpolation",
+                iconMaterial = Material.CLOCK,
                 description = listOf("Interpolation duration used when the line moves.")
             )
             field(
@@ -99,6 +106,7 @@ data class ItemCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter translation X:"),
                 displayName = "Translation X",
+                iconMaterial = Material.ARROW,
                 description = listOf("X translation offset of the display entity.")
             )
             field(
@@ -106,6 +114,7 @@ data class ItemCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter translation Y:"),
                 displayName = "Translation Y",
+                iconMaterial = Material.SPECTRAL_ARROW,
                 description = listOf("Y translation offset of the display entity.")
             )
             field(
@@ -113,6 +122,7 @@ data class ItemCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter translation Z:"),
                 displayName = "Translation Z",
+                iconMaterial = Material.TIPPED_ARROW,
                 description = listOf("Z translation offset of the display entity.")
             )
         }

@@ -7,6 +7,7 @@ import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bukkit.Color
+import org.bukkit.Material
 import org.bukkit.entity.Display
 import org.joml.Vector3f
 
@@ -53,6 +54,7 @@ data class TextCrateHologramLineData(
                 TextFieldAdapter,
                 TextFieldConfig(prompt = "Enter hologram text:", showFormattedPreview = true),
                 displayName = "Text",
+                iconMaterial = Material.PAPER,
                 description = listOf("Text displayed by this hologram line.")
             )
             field(
@@ -60,12 +62,14 @@ data class TextCrateHologramLineData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter line width:", min = 1),
                 displayName = "Line Width",
+                iconMaterial = Material.OAK_SIGN,
                 description = listOf("Maximum width before the text display wraps.")
             )
             defineSharedEditor()
             field(
                 TextCrateHologramLineData::hasShadow,
                 displayName = "Has Shadow",
+                iconMaterial = Material.GRAY_DYE,
                 description = listOf("If enabled, renders a text shadow behind the line.")
             )
             field(
@@ -73,11 +77,13 @@ data class TextCrateHologramLineData(
                 ColorFieldAdapter,
                 ColorFieldConfig(prompt = "Enter background color (#RRGGBB or r;g;b):"),
                 displayName = "Background Color",
+                iconMaterial = Material.PURPLE_DYE,
                 description = listOf("Optional background color behind the text.")
             )
             field(
                 TextCrateHologramLineData::seeThrough,
                 displayName = "See Through",
+                iconMaterial = Material.GLASS,
                 description = listOf("If enabled, allows the text to remain visible through blocks.")
             )
         }
@@ -88,6 +94,7 @@ data class TextCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter line height:", min = 0.0),
                 displayName = "Height",
+                iconMaterial = Material.LIGHT_BLUE_DYE,
                 description = listOf("Vertical space taken by this hologram line.")
             )
             field(
@@ -95,6 +102,7 @@ data class TextCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter scale:", min = 0.0),
                 displayName = "Scale",
+                iconMaterial = Material.SLIME_BALL,
                 description = listOf("Display scale applied to this line.")
             )
             field(
@@ -105,6 +113,7 @@ data class TextCrateHologramLineData(
                     values = { Display.Billboard.entries.map { it.name } }
                 ),
                 displayName = "Billboard",
+                iconMaterial = Material.ITEM_FRAME,
                 description = listOf("Billboard mode used by the display entity.")
             )
             field(
@@ -112,6 +121,7 @@ data class TextCrateHologramLineData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter transformation duration:", min = 0),
                 displayName = "Transformation Duration",
+                iconMaterial = Material.REPEATER,
                 description = listOf("Interpolation duration for transformation changes.")
             )
             field(
@@ -119,6 +129,7 @@ data class TextCrateHologramLineData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter teleport interpolation:", min = 0),
                 displayName = "Teleport Interpolation",
+                iconMaterial = Material.CLOCK,
                 description = listOf("Interpolation duration used when the line moves.")
             )
             field(
@@ -126,6 +137,7 @@ data class TextCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter translation X:"),
                 displayName = "Translation X",
+                iconMaterial = Material.ARROW,
                 description = listOf("X translation offset of the display entity.")
             )
             field(
@@ -133,6 +145,7 @@ data class TextCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter translation Y:"),
                 displayName = "Translation Y",
+                iconMaterial = Material.SPECTRAL_ARROW,
                 description = listOf("Y translation offset of the display entity.")
             )
             field(
@@ -140,6 +153,7 @@ data class TextCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter translation Z:"),
                 displayName = "Translation Z",
+                iconMaterial = Material.TIPPED_ARROW,
                 description = listOf("Z translation offset of the display entity.")
             )
         }

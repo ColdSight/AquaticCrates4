@@ -4,6 +4,7 @@ import gg.aquatic.kholograms.line.AnimatedHologramLine
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.bukkit.Material
 
 @Serializable
 @SerialName("animated")
@@ -30,11 +31,13 @@ data class AnimatedCrateHologramLineData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter line height:", min = 0.0),
                 displayName = "Height",
+                iconMaterial = Material.LIGHT_BLUE_DYE,
                 description = listOf("Vertical space taken by this animated hologram line.")
             )
             list(
                 AnimatedCrateHologramLineData::frames,
                 displayName = "Frames",
+                iconMaterial = Material.CLOCK,
                 description = listOf("Frames played by this animated hologram line."),
                 newValueFactory = HologramLineSelectionMenu.frameEntryFactory
             ) {

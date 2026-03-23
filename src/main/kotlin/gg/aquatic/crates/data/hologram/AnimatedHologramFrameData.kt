@@ -5,6 +5,7 @@ import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
+import org.bukkit.Material
 
 @Serializable
 data class AnimatedHologramFrameData(
@@ -18,6 +19,7 @@ data class AnimatedHologramFrameData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter frame stay ticks:", min = 1),
                 displayName = "Stay Ticks",
+                iconMaterial = Material.CLOCK,
                 description = listOf("How many ticks this frame stays visible before the animation advances.")
             )
         }

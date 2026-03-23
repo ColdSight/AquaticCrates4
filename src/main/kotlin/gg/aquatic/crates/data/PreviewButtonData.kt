@@ -71,12 +71,14 @@ data class PreviewButtonData(
             list(
                 PreviewButtonData::slots,
                 displayName = "Slots",
+                iconMaterial = Material.HOPPER,
                 description = listOf("Slots where this custom button should appear."),
                 newValueFactory = EditorEntryFactories.int("Enter button slot or range (e.g. 0-8):", unique = true)
             )
             list(
                 PreviewButtonData::viewConditions,
                 displayName = "View Conditions",
+                iconMaterial = Material.TRIPWIRE_HOOK,
                 description = listOf("Conditions that must pass for the button to be visible."),
                 newValueFactory = PlayerConditionSelectionMenu.entryFactory
             ) {
@@ -85,6 +87,7 @@ data class PreviewButtonData(
             list(
                 PreviewButtonData::clickActions,
                 displayName = "Click Actions",
+                iconMaterial = Material.BLAZE_POWDER,
                 description = listOf("Actions executed when the player left-clicks this button."),
                 newValueFactory = RewardActionSelectionMenu.entryFactory
             ) {
