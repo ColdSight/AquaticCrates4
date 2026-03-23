@@ -1,7 +1,10 @@
 package gg.aquatic.crates.data.action
 
+import gg.aquatic.common.argument.ObjectArguments
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.execute.ActionHandle
+import gg.aquatic.klocale.impl.paper.PaperMessage
+import gg.aquatic.waves.util.action.MessageAction
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.SerialName
@@ -14,11 +17,14 @@ data class MessageRewardActionData(
     val lines: List<String> = listOf("<green>You won a reward!")
 ) : RewardActionData() {
     override fun toActionHandle(): ActionHandle<Player> {
-        return inlinePlayerAction { player ->
-            lines.forEach { line ->
-                player.sendMessage(line.toMMComponent())
-            }
-        }
+        return ActionHandle(
+            MessageAction,
+            ObjectArguments(
+                mapOf(
+                    "message" to PaperMessage.of(lines.map(String::toMMComponent))
+                )
+            )
+        )
     }
 
     companion object {

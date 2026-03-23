@@ -9,11 +9,4 @@ import org.bukkit.entity.Player
 @Serializable
 abstract class PlayerConditionData {
     abstract fun toConditionHandle(): ConditionHandle<Player>
-
-    protected fun conditionHandle(
-        condition: Condition<Player>,
-        arguments: ObjectArguments
-    ): ConditionHandle<Player> {
-        return ConditionHandle(condition, arguments)
-    }
 }

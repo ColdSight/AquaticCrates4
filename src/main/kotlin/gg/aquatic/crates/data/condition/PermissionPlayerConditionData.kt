@@ -1,6 +1,7 @@
 package gg.aquatic.crates.data.condition
 
 import gg.aquatic.common.argument.ObjectArguments
+import gg.aquatic.execute.condition.ConditionHandle
 import gg.aquatic.execute.condition.impl.PermissionCondition
 import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.TextFieldConfig
@@ -13,10 +14,7 @@ import kotlinx.serialization.Serializable
 data class PermissionPlayerConditionData(
     val permission: String = "example.permission"
 ) : PlayerConditionData() {
-    override fun toConditionHandle() = conditionHandle(
-        PermissionCondition,
-        ObjectArguments(mapOf("permission" to permission))
-    )
+    override fun toConditionHandle() = ConditionHandle(PermissionCondition, ObjectArguments(mapOf("permission" to permission)))
 
     companion object {
         fun TypedNestedSchemaBuilder<PermissionPlayerConditionData>.defineEditor() {

@@ -1,31 +1,10 @@
 package gg.aquatic.crates.data.action
 
-import gg.aquatic.common.argument.ArgumentContext
-import gg.aquatic.common.argument.ObjectArgument
-import gg.aquatic.common.argument.ObjectArguments
-import gg.aquatic.execute.Action
-import gg.aquatic.execute.ActionHandle
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import org.bukkit.entity.Player
-
-internal fun inlinePlayerAction(executor: suspend (Player) -> Unit): ActionHandle<Player> {
-    return ActionHandle(
-        object : Action<Player> {
-            override val binder: Class<out Player> = Player::class.java
-            override val arguments: List<ObjectArgument<*>> = emptyList()
-
-            override suspend fun execute(binder: Player, args: ArgumentContext<Player>) {
-                executor(binder)
-            }
-        },
-        ObjectArguments(emptyMap())
-    )
-}
-
 internal fun EditorFieldContext.matchesSubtype(id: String): Boolean {
     val currentType = findSubtypeId() ?: return false
     return currentType.equals(id, ignoreCase = true)
