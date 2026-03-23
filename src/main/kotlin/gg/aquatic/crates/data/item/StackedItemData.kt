@@ -2,6 +2,7 @@ package gg.aquatic.crates.data.item
 
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.data.editor.CrateEditorValidators
+import gg.aquatic.crates.data.editor.ItemFlagFieldAdapter
 import gg.aquatic.stacked.ItemHandler
 import gg.aquatic.stacked.StackedItem
 import gg.aquatic.stacked.impl.StackedItemImpl
@@ -227,6 +228,7 @@ data class StackedItemData(
                 MaterialLikeFieldAdapter,
                 MaterialLikeFieldConfig(prompt = materialPrompt),
                 displayName = materialLabel,
+                iconMaterial = Material.BRICKS,
                 description = listOf("Base item material or Factory:ItemId used for this item.")
             )
             field(
@@ -234,11 +236,13 @@ data class StackedItemData(
                 TextFieldAdapter,
                 TextFieldConfig(prompt = namePrompt, showFormattedPreview = true),
                 displayName = nameLabel,
+                iconMaterial = Material.NAME_TAG,
                 description = listOf("Custom item name shown to players.")
             )
             list(
                 StackedItemData::lore,
                 loreLabel,
+                iconMaterial = Material.WRITABLE_BOOK,
                 description = listOf("Lore lines shown under the item name."),
                 newValueFactory = EditorEntryFactories.text("Enter lore line:")
             )
@@ -247,6 +251,7 @@ data class StackedItemData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter amount:", min = 1, max = 64),
                 displayName = amountLabel,
+                iconMaterial = Material.COPPER_INGOT,
                 description = listOf("Item stack size given or shown in menus.")
             )
         }
@@ -271,11 +276,13 @@ data class StackedItemData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter legacy custom model data:"),
                 displayName = "Legacy CMD",
+                iconMaterial = Material.REDSTONE,
                 description = listOf("Legacy CustomModelData integer value.")
             )
             list(
                 StackedItemData::customModelColors,
                 "Model Colors",
+                iconMaterial = Material.MAGENTA_DYE,
                 description = listOf("Color entries used by modern item model data."),
                 newValueFactory = EditorEntryFactories.text(
                     prompt = "Enter color (#RRGGBB or r;g;b):",
@@ -285,18 +292,21 @@ data class StackedItemData(
             list(
                 StackedItemData::customModelFloats,
                 "Model Floats",
+                iconMaterial = Material.AMETHYST_SHARD,
                 description = listOf("Float entries used by modern item model data."),
                 newValueFactory = EditorEntryFactories.float("Enter float value:")
             )
             list(
                 StackedItemData::customModelFlags,
                 "Model Flags",
+                iconMaterial = Material.LEVER,
                 description = listOf("Boolean flags used by modern item model data."),
                 newValueFactory = EditorEntryFactories.boolean("Enter boolean value (true/false):")
             )
             list(
                 StackedItemData::customModelStrings,
                 "Model Strings",
+                iconMaterial = Material.PAPER,
                 description = listOf("String entries used by modern item model data."),
                 newValueFactory = EditorEntryFactories.text("Enter model string:")
             )
@@ -308,6 +318,7 @@ data class StackedItemData(
                     validator = CrateEditorValidators::validateNamespacedKey
                 ),
                 displayName = "Item Model",
+                iconMaterial = Material.ITEM_FRAME,
                 description = listOf("Namespaced item model key used by the client.")
             )
             field(
@@ -315,6 +326,7 @@ data class StackedItemData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter damage:", min = 0),
                 displayName = "Damage",
+                iconMaterial = Material.IRON_SWORD,
                 description = listOf("Current durability damage applied to the item.")
             )
             field(
@@ -322,6 +334,7 @@ data class StackedItemData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter max damage:", min = 1),
                 displayName = "Max Damage",
+                iconMaterial = Material.ANVIL,
                 description = listOf("Overrides the maximum durability of the item.")
             )
             field(
@@ -329,6 +342,7 @@ data class StackedItemData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter max stack size:", min = 1, max = 99),
                 displayName = "Max Stack Size",
+                iconMaterial = Material.CHEST,
                 description = listOf("Overrides how many items can stack together.")
             )
             field(
@@ -339,6 +353,7 @@ data class StackedItemData(
                     values = { ItemRarity.entries.map { it.name } }
                 ),
                 displayName = "Rarity",
+                iconMaterial = Material.NETHER_STAR,
                 description = listOf("Vanilla item rarity shown by the client.")
             )
             field(
@@ -349,6 +364,7 @@ data class StackedItemData(
                     values = { EntityType.entries.map { it.name } }
                 ),
                 displayName = "Spawner Type",
+                iconMaterial = Material.SPAWNER,
                 description = listOf("Entity type stored in the spawner item.")
             )
             field(
@@ -359,6 +375,7 @@ data class StackedItemData(
                     validator = CrateEditorValidators::validateNamespacedKey
                 ),
                 displayName = "Tooltip Style",
+                iconMaterial = Material.PAINTING,
                 description = listOf("Namespaced tooltip style key used by the client.")
             )
             field(
@@ -366,22 +383,22 @@ data class StackedItemData(
                 ColorFieldAdapter,
                 ColorFieldConfig(),
                 displayName = "Dye Color",
+                iconMaterial = Material.MAGENTA_DYE,
                 description = listOf("Leather armor or dyed item color.")
             )
             list(
                 StackedItemData::enchants,
                 "Enchants",
+                iconMaterial = Material.ENCHANTING_TABLE,
                 description = listOf("Enchant entries in format namespace:enchant:level."),
                 newValueFactory = EditorEntryFactories.text("Enter enchant in format enchant:level:", CrateEditorValidators::validateEnchantLine)
             )
             list(
                 StackedItemData::flags,
-                "Flags",
+                displayName = "Flags",
+                iconMaterial = Material.BOOK,
                 description = listOf("Vanilla item flags hidden on the tooltip."),
-                newValueFactory = EditorEntryFactories.text(
-                    prompt = "Enter item flag:",
-                    validator = { if (ItemFlag.entries.any { flag -> flag.name.equals(it, true) }) null else "Invalid item flag." }
-                )
+                adapter = ItemFlagFieldAdapter
             )
         }
     }
