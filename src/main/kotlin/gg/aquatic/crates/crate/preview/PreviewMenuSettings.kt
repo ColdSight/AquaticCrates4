@@ -23,6 +23,9 @@ interface PreviewMenuSettings {
         val pages: Collection<Basic>
     ): PreviewMenuSettings {
         override suspend fun open(player: Player, crate: Crate, crateHandle: CrateHandle?) {
+            if (pages.isEmpty()) return
+            val menu = PreviewCustomPagesMenu.create(player, crate, crateHandle, this, 0)
+            menu.open()
         }
     }
 }

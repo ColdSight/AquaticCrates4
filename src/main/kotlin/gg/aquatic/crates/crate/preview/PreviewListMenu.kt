@@ -1,11 +1,14 @@
 package gg.aquatic.crates.crate.preview
 
+import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandle
 import gg.aquatic.crates.reward.Reward
+import gg.aquatic.kmenu.inventory.ClickType
 import gg.aquatic.kmenu.menu.util.ListMenu
 import gg.aquatic.kmenu.privateMenu
 import gg.aquatic.replace.PlaceholderContext
+import kotlinx.coroutines.withContext
 import org.bukkit.entity.Player
 
 class PreviewListMenu private constructor(
@@ -14,7 +17,7 @@ class PreviewListMenu private constructor(
     val crateHandle: CrateHandle?,
     entries: List<Entry<Reward>>,
     private val settings: PreviewMenuSettings.Basic,
-): ListMenu<Reward>(
+) : ListMenu<Reward>(
     settings.invSettings.title,
     settings.invSettings.type,
     player,
@@ -32,16 +35,29 @@ class PreviewListMenu private constructor(
                     it.previewItem
                 } else it.fallbackItem ?: return@mapNotNull null
 
-                Entry(it,
+                Entry(
+                    it,
                     item,
                     context,
                     { e ->
-
+                        if (it.isPurchasable) {
+                            it.tryPurchase(player)
+                            withContext(BukkitCtx.ofEntity(player)) {
+                                player.updateInventory()
+                            }
+                        } else {
+                            it.clickHandler(it, player, e.buttonType)
+                        }
                     })
             }
         }
 
-        suspend fun create(player: Player, crate: Crate, crateHandle: CrateHandle?, settings: PreviewMenuSettings.Basic): PreviewListMenu {
+        suspend fun create(
+            player: Player,
+            crate: Crate,
+            crateHandle: CrateHandle?,
+            settings: PreviewMenuSettings.Basic
+        ): PreviewListMenu {
             val menu = PreviewListMenu(player, crate, crateHandle, mappedEntries(crate, player), settings)
             menu.addButtons()
             return menu
