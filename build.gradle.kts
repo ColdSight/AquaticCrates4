@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.20"
-    kotlin("plugin.serialization") version "2.3.10"
+    kotlin("plugin.serialization") version "2.3.20"
     id("com.gradleup.shadow") version "9.4.0"
     id("io.github.revxrsal.bukkitkobjects") version "0.0.5"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
@@ -59,7 +59,7 @@ dependencies {
     implementation(project(":api"))
     compileOnly("gg.aquatic:Waves:26.0.48-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("com.charleskorn.kaml:kaml:0.104.0")
 
     implementation("org.reflections:reflections:0.10.2")
