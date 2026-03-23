@@ -7,12 +7,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RewardRarityData(
-    val id: String = "default",
     val displayName: String? = null,
     val chance: Double = 1.0,
 ) {
-
-    fun toRewardRarity(): RewardRarity {
+    fun toRewardRarity(id: String): RewardRarity {
         return RewardRarity(
             id = id,
             displayName = (displayName ?: id).toMMComponent(),
@@ -22,13 +20,6 @@ data class RewardRarityData(
 
     companion object {
         fun TypedNestedSchemaBuilder<RewardRarityData>.defineEditor() {
-            field(
-                RewardRarityData::id,
-                TextFieldAdapter,
-                TextFieldConfig(prompt = "Enter rarity id:"),
-                displayName = "Rarity Id",
-                description = listOf("Internal id of the rarity group.")
-            )
             field(
                 RewardRarityData::displayName,
                 TextFieldAdapter,

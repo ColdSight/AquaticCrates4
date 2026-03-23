@@ -16,8 +16,16 @@ data class CrateKeyOpenPriceData(
     val crateId: String? = null,
     val amount: Int = 1,
 ) : OpenPriceData() {
+    fun normalized(currentCrateId: String?, existingCrateIds: Set<String>): CrateKeyOpenPriceData {
+        val resolvedCurrent = currentCrateId?.trim()?.takeIf { it.isNotEmpty() }
+        val normalizedReference = crateId?.trim()?.takeIf { it.isNotEmpty() && it in existingCrateIds && it != resolvedCurrent }
+        return if (normalizedReference == crateId) this else copy(crateId = normalizedReference)
+    }
+
     override fun toHandle(crateId: String, keyItem: ItemStack): OpenPriceHandle {
-        val targetCrateId = this.crateId?.trim()?.takeIf { it.isNotEmpty() } ?: crateId
+        val targetCrateId = this.crateId?.trim()
+            ?.takeIf { it.isNotEmpty() && gg.aquatic.crates.crate.CrateHandler.crates.containsKey(it) }
+            ?: crateId
         return OpenPriceHandle(
             currency = CrateKeyCurrency(targetCrateId),
             price = BigDecimal.valueOf(amount.toLong())

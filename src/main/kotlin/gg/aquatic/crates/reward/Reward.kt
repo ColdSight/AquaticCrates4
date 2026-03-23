@@ -5,6 +5,7 @@ import gg.aquatic.execute.ActionHandle
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.execute.condition.ConditionHandle
 import gg.aquatic.execute.executeActions
+import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.ClickType
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
@@ -18,10 +19,10 @@ class Reward(
     val winActions: Collection<ActionHandle<Player>>,
     val conditions: Collection<ConditionHandle<Player>>,
     val purchaseManager: RewardPurchaseHandler?,
-    val clickHandler: suspend (player: Player, clickType: ClickType) -> Unit,
+    val clickHandler: suspend (reward: Reward, player: Player, clickType: ButtonType) -> Unit,
     val rarity: RewardRarity,
     override var chance: Double
-): Weightable {
+) : Weightable {
 
     val isPurchasable: Boolean = purchaseManager != null
 

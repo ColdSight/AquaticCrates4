@@ -15,6 +15,17 @@ data class OpenPriceGroupData(
     val failMessage: String = "<red>You do not have enough keys to open this crate.",
     val prices: List<@Polymorphic OpenPriceData> = listOf(CrateKeyOpenPriceData()),
 ) {
+    fun normalized(currentCrateId: String?, existingCrateIds: Set<String>): OpenPriceGroupData {
+        return copy(
+            prices = prices.map { price ->
+                when (price) {
+                    is CrateKeyOpenPriceData -> price.normalized(currentCrateId, existingCrateIds)
+                    else -> price
+                }
+            }
+        )
+    }
+
     fun toOpenPriceGroup(crateId: String, keyItem: ItemStack): OpenPriceGroup {
         return OpenPriceGroup(
             prices = prices.map { it.toHandle(crateId, keyItem) },
