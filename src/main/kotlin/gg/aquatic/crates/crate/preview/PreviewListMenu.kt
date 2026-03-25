@@ -28,7 +28,7 @@ class PreviewListMenu private constructor(
 
     companion object {
         suspend fun mappedEntries(crate: Crate, player: Player): List<Entry<Reward>> {
-            return crate.rewards.mapNotNull {
+            return crate.rewardProvider.getRewards(player).mapNotNull {
                 val context = PlaceholderContext.privateMenu()
 
                 val item = if (it.canWin(player)) {

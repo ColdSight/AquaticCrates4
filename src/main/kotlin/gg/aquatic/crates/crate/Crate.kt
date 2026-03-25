@@ -4,9 +4,8 @@ import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.data.interactable.CrateInteractableData
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
-import gg.aquatic.crates.reward.Reward
-import gg.aquatic.crates.util.randomItem
-import gg.aquatic.execute.executeActions
+import gg.aquatic.crates.reward.processor.RewardProcessor
+import gg.aquatic.crates.reward.provider.RewardProvider
 import gg.aquatic.kholograms.Hologram
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import gg.aquatic.stacked.stackedItem
@@ -25,7 +24,8 @@ class Crate(
     priceGroupsSupplier: () -> Collection<OpenPriceGroup>,
     openConditionsSupplier: () -> OpenConditions = { OpenConditions.DUMMY },
     val interactables: Collection<CrateInteractableData>,
-    rewardsSupplier: () -> Collection<Reward>,
+    rewardProviderSupplier: () -> RewardProvider,
+    rewardProcessorSupplier: () -> RewardProcessor,
     previewSupplier: () -> PreviewMenuSettings?,
 ) {
 
@@ -33,7 +33,8 @@ class Crate(
     val hologram: Hologram.Settings? by lazy(hologramSupplier)
     val priceGroups: Collection<OpenPriceGroup> by lazy(priceGroupsSupplier)
     val openConditions: OpenConditions by lazy(openConditionsSupplier)
-    val rewards: Collection<Reward> by lazy(rewardsSupplier)
+    val rewardProvider: RewardProvider by lazy(rewardProviderSupplier)
+    val rewardProcessor: RewardProcessor by lazy(rewardProcessorSupplier)
     val preview: PreviewMenuSettings? by lazy(previewSupplier)
 
     val crateItem by lazy {
@@ -91,13 +92,13 @@ class Crate(
     }
 
     suspend fun open(player: Player, amount: Int = 1) {
-        val filteredRewards = rewards.filter { it.canWin(player) }
-        if (filteredRewards.isEmpty()) {
+        val resolvedProvider = rewardProvider.resolve(player)
+        if (resolvedProvider.rewards.none { it.canWin(player) }) {
             return
         }
 
         repeat(amount) {
-            filteredRewards.randomItem().winActions.executeActions(player)
+            rewardProcessor.process(player, this, null, resolvedProvider)
         }
     }
 }

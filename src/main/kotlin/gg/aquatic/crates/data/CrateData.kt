@@ -5,6 +5,7 @@ import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.data.action.RewardActionTypes
 import gg.aquatic.crates.data.condition.*
 import gg.aquatic.crates.data.editor.CrateEditorValidators
+import gg.aquatic.crates.data.editor.PreviewSectionFieldAdapter
 import gg.aquatic.crates.data.hologram.CrateHologramLineTypes
 import gg.aquatic.crates.data.hologram.findHologramLineSubtypeId
 import gg.aquatic.crates.data.interactable.*
@@ -12,11 +13,22 @@ import gg.aquatic.crates.data.item.StackedItemData
 import gg.aquatic.crates.data.price.OpenPriceGroupData
 import gg.aquatic.crates.data.price.OpenPriceTypes
 import gg.aquatic.crates.data.price.findOpenPriceSubtypeId
+import gg.aquatic.crates.data.processor.*
+import gg.aquatic.crates.data.provider.ConditionalPoolsRewardProviderData
+import gg.aquatic.crates.data.provider.RewardProviderType
+import gg.aquatic.crates.data.provider.RewardProviderSectionFieldAdapter
+import gg.aquatic.crates.data.provider.SimpleRewardProviderData
 import gg.aquatic.crates.reward.RewardRarity
+import gg.aquatic.crates.reward.provider.ConditionalPoolsRewardProvider
+import gg.aquatic.crates.reward.provider.SimpleRewardProvider
+import gg.aquatic.crates.reward.processor.BasicRewardProcessor
+import gg.aquatic.crates.reward.processor.ChooseRewardProcessor
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.bukkit.Material
 
 @Serializable
@@ -29,13 +41,22 @@ data class CrateData(
     val interactables: List<@Polymorphic CrateInteractableData> = listOf(BlockCrateInteractableData()),
     val openConditions: List<@Polymorphic PlayerConditionData> = emptyList(),
     val priceGroups: List<OpenPriceGroupData> = listOf(OpenPriceGroupData()),
-    val rarities: Map<String, RewardRarityData> = mapOf(DEFAULT_RARITY_ID to RewardRarityData(displayName = "<gray>Default")),
+    val rarities: Map<String, RewardRarityData> = mapOf(
+        DEFAULT_RARITY_ID to RewardRarityData(displayName = "<gray>Default")
+    ),
+    val rewardProviderType: String = RewardProviderType.SIMPLE.id,
+    val simpleProvider: SimpleRewardProviderData = SimpleRewardProviderData(),
+    val conditionalPoolsProvider: ConditionalPoolsRewardProviderData = ConditionalPoolsRewardProviderData(),
+    val rewardProcessorType: String = RewardProcessorType.BASIC.id,
+    val basicProcessor: BasicRewardProcessorData = BasicRewardProcessorData(),
+    val chooseProcessor: ChooseRewardProcessorData = ChooseRewardProcessorData(),
     val hologram: CrateHologramData? = null,
     val preview: PreviewMenuData? = PreviewMenuData(),
     val rewards: Map<String, RewardData> = emptyMap(),
 ) {
 
     fun normalized(crateId: String? = null, existingCrateIds: Set<String> = emptySet()): CrateData {
+        val normalizedProviderType = RewardProviderType.of(rewardProviderType).id
         val normalizedRarities = rarities
             .mapNotNull { (rarityId, data) ->
                 rarityId.trim()
@@ -44,36 +65,23 @@ data class CrateData(
             }
             .toMap()
             .ifEmpty { mapOf(DEFAULT_RARITY_ID to RewardRarityData(displayName = "<gray>Default")) }
-
         val fallbackRarityId = normalizedRarities.keys.first()
         val availableRarityIds = normalizedRarities.keys
 
         return copy(
-            priceGroups = priceGroups.map { it.normalized(crateId, existingCrateIds) },
             rarities = normalizedRarities,
-            rewards = rewards.mapValues { (_, rewardData) ->
-                rewardData.normalized(availableRarityIds, fallbackRarityId, crateId, existingCrateIds)
-            }
+            rewardProviderType = normalizedProviderType,
+            simpleProvider = simpleProvider.normalized(availableRarityIds, fallbackRarityId, crateId, existingCrateIds),
+            conditionalPoolsProvider = conditionalPoolsProvider.normalized(availableRarityIds, fallbackRarityId, crateId, existingCrateIds),
+            rewardProcessorType = RewardProcessorType.of(rewardProcessorType).id,
+            chooseProcessor = chooseProcessor.normalized(),
+            priceGroups = priceGroups.map { it.normalized(crateId, existingCrateIds) },
         )
     }
 
     fun toCrate(id: String): Crate {
         val normalized = normalized(id)
         val crateKeyItem by lazy { normalized.keyItem.asStacked().getItem() }
-        val resolvedRarities by lazy {
-            normalized.rarities.mapValues { (rarityId, rarityData) ->
-                rarityData.toRewardRarity(rarityId)
-            }
-        }
-        val resolvedRewards by lazy {
-            val fallbackRarity = resolvedRarities.values.first()
-            normalized.rewards.entries.map { (rewardId, rewardData) ->
-                val rewardRarity = resolvedRarities[rewardData.rarity] ?: fallbackRarity
-                rewardData.toReward(rewardId, id, crateKeyItem, rewardRarity)
-            }.toMutableList().also { rewards ->
-                normalizeRewardChances(rewards, resolvedRarities)
-            }
-        }
 
         return Crate(
             id = id,
@@ -93,7 +101,42 @@ data class CrateData(
                     ?: gg.aquatic.crates.open.OpenConditions.DUMMY
             },
             interactables = normalized.interactables,
-            rewardsSupplier = { resolvedRewards },
+            rewardProviderSupplier = {
+                when (RewardProviderType.of(normalized.rewardProviderType)) {
+                    RewardProviderType.CONDITIONAL_POOLS -> ConditionalPoolsRewardProvider(
+                        selectionMode = gg.aquatic.crates.data.provider.PoolSelectionMode.of(normalized.conditionalPoolsProvider.poolSelectionMode),
+                        fallbackPoolId = normalized.conditionalPoolsProvider.fallbackPoolId,
+                        pools = normalized.conditionalPoolsProvider.pools.mapValues { (poolId, poolData) ->
+                            poolData.toRewardPool(poolId, id, crateKeyItem, normalized.rarities)
+                        },
+                        rewardCountRanges = normalized.conditionalPoolsProvider.rewardCountRanges.map { it.toRange() }
+                    )
+                    RewardProviderType.SIMPLE -> SimpleRewardProvider(
+                        buildRewards(
+                            rarities = normalized.rarities,
+                            rewards = normalized.simpleProvider.rewards,
+                            crateId = id,
+                            crateKeyItem = crateKeyItem
+                        ),
+                        rewardCountRanges = normalized.simpleProvider.rewardCountRanges.map { it.toRange() }
+                    )
+                }
+            },
+            rewardProcessorSupplier = {
+                when (RewardProcessorType.of(normalized.rewardProcessorType)) {
+                    RewardProcessorType.CHOOSE -> ChooseRewardProcessor(
+                        chooseCountRanges = normalized.chooseProcessor.chooseCountRanges.map { it.toRange() },
+                        uniqueRewards = normalized.chooseProcessor.uniqueRewards,
+                        hiddenRewards = normalized.chooseProcessor.hiddenRewards,
+                        onSelectActions = normalized.chooseProcessor.onSelectActions.map { it.toActionHandle() },
+                        hiddenItem = normalized.chooseProcessor.hiddenItem.asStacked().getItem(),
+                        menu = normalized.chooseProcessor.menu.toMenuSettings(),
+                    )
+                    RewardProcessorType.BASIC -> BasicRewardProcessor(
+                        resultMenu = normalized.basicProcessor.resultMenu?.toMenuSettings()
+                    )
+                }
+            },
             previewSupplier = { normalized.preview?.toPreviewSettings() }
         )
     }
@@ -125,7 +168,7 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
         context.pathSegments.contains("winActions") || context.pathSegments.contains("clickActions") ->
             context.findRewardActionType()?.let(RewardActionTypes::descriptor)
         context.pathSegments.contains("openConditions") || context.pathSegments.contains("conditions") ->
-            context.findConditionSubtypeId()?.let(PlayerConditionTypes::descriptor)
+        context.findConditionSubtypeId()?.let(PlayerConditionTypes::descriptor)
         else -> null
     }
 
@@ -145,6 +188,14 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
             description = listOf("Clientside objects players can click to open this crate."),
             newValueFactory = CrateInteractableSelectionMenu.entryFactory
         ) {
+            fieldPattern(
+                displayName = "Interactable",
+                adapter = CrateInteractableEntryFieldAdapter,
+                description = listOf(
+                    "Left click to edit this interactable.",
+                    "Right click to change its interactable type."
+                )
+            )
             include<BlockCrateInteractableData> {
                 with(BlockCrateInteractableData) {
                     defineEditor()
@@ -184,11 +235,11 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
                 "If one group can be paid in full, the crate opens."
             ),
             newValueFactory = OpenPriceGroupData.defaultEntryFactory
-        ) {
-            with(OpenPriceGroupData) {
-                defineEditor()
+            ) {
+                with(OpenPriceGroupData) {
+                    defineEditor()
+                }
             }
-        }
         map(
             CrateData::rarities,
             displayName = "Rarities",
@@ -203,6 +254,7 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
                 keyValidator = { if (CrateEditorValidators.crateIdRegex.matches(it)) null else "Use only letters, numbers, '_' or '-'." },
                 valueFactory = { rarityId ->
                     schemaJson.encodeToJsonElement(
+                    CrateDataFormats.json.encodeToJsonElement(
                         RewardRarityData.serializer(),
                         RewardRarityData(displayName = rarityId, chance = 1.0)
                     )
@@ -266,39 +318,57 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
     }
 }
 
-private fun normalizeRewardChances(
-    rewards: MutableList<gg.aquatic.crates.reward.Reward>,
-    rarities: Map<String, RewardRarity>
-) {
-    if (rewards.isEmpty() || rarities.isEmpty()) return
-
-    val groupedRewards = rewards.groupBy { it.rarity.id }
-    val activeRarities = rarities.filterKeys { groupedRewards.containsKey(it) }
-    if (activeRarities.isEmpty()) return
-
-    val totalRarityWeight = activeRarities.values.sumOf { it.chance.coerceAtLeast(0.0) }
-
-    activeRarities.forEach { (rarityId, rarity) ->
-        val rarityRewards = groupedRewards[rarityId].orEmpty()
-        if (rarityRewards.isEmpty()) return@forEach
-
-        val rarityFactor = when {
-            totalRarityWeight > 0.0 -> rarity.chance.coerceAtLeast(0.0) / totalRarityWeight
-            else -> 1.0 / activeRarities.size
-        }
-
-        val totalRewardWeight = rarityRewards.sumOf { it.chance.coerceAtLeast(0.0) }
-        if (totalRewardWeight > 0.0) {
-            rarityRewards.forEach { reward ->
-                reward.chance = rarityFactor * (reward.chance.coerceAtLeast(0.0) / totalRewardWeight)
-            }
-        } else {
-            val evenChance = rarityFactor / rarityRewards.size
-            rarityRewards.forEach { reward ->
-                reward.chance = evenChance
-            }
-        }
+private fun buildRewards(
+    rarities: Map<String, RewardRarityData>,
+    rewards: Map<String, RewardData>,
+    crateId: String,
+    crateKeyItem: org.bukkit.inventory.ItemStack,
+): Collection<gg.aquatic.crates.reward.Reward> {
+    val resolvedRarities = rarities.mapValues { (rarityId, rarityData) ->
+        rarityData.toRewardRarity(rarityId)
     }
+    val fallbackRarity = resolvedRarities.values.first()
+
+    return rewards.entries.map { (rewardId, rewardData) ->
+        val rewardRarity = resolvedRarities[rewardData.rarity] ?: fallbackRarity
+        rewardData.toReward(rewardId, crateId, crateKeyItem, rewardRarity)
+    }.toMutableList().also { builtRewards ->
+        normalizeRewardChances(builtRewards, resolvedRarities)
+    }
+}
+
+private fun EditorFieldContext.isRewardProviderType(type: RewardProviderType): Boolean {
+    val current = when (val currentValue = value as? JsonObject) {
+        null -> null
+        else -> (currentValue["rewardProviderType"] as? JsonPrimitive)?.content
+    }
+    if (current != null) {
+        return current.equals(type.id, true)
+    }
+
+    val rootType = (root as? JsonObject)
+        ?.get("rewardProviderType")
+        ?.let { it as? JsonPrimitive }
+        ?.content
+
+    return (rootType ?: RewardProviderType.SIMPLE.id).equals(type.id, true)
+}
+
+private fun EditorFieldContext.isRewardProcessorType(type: RewardProcessorType): Boolean {
+    val current = when (val currentValue = value as? JsonObject) {
+        null -> null
+        else -> (currentValue["rewardProcessorType"] as? JsonPrimitive)?.content
+    }
+    if (current != null) {
+        return current.equals(type.id, true)
+    }
+
+    val rootType = (root as? JsonObject)
+        ?.get("rewardProcessorType")
+        ?.let { it as? JsonPrimitive }
+        ?.content
+
+    return (rootType ?: RewardProcessorType.BASIC.id).equals(type.id, true)
 }
 
 private fun EditorFieldContext.findRewardActionType(): String? {
