@@ -221,15 +221,15 @@ data class StackedItemData(
             namePrompt: String,
             loreLabel: String,
             amountLabel: String,
-            materialPrompt: String = "Enter material or Factory:ItemId:",
+            materialPrompt: String = "Enter material, Factory:ItemId or 'hand':",
         ) {
             field(
                 StackedItemData::material,
                 MaterialLikeFieldAdapter,
-                MaterialLikeFieldConfig(prompt = materialPrompt),
+                MaterialLikeFieldConfig(prompt = materialPrompt, allowHandShortcut = true),
                 displayName = materialLabel,
                 iconMaterial = Material.BRICKS,
-                description = listOf("Base item material or Factory:ItemId used for this item.")
+                description = listOf("Base item material or Factory:ItemId used for this item.", "Type 'hand' to copy the item currently held in your main hand as a base64 item.")
             )
             field(
                 StackedItemData::displayName,

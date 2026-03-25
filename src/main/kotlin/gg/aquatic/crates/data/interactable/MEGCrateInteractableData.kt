@@ -1,6 +1,7 @@
 package gg.aquatic.crates.data.interactable
 
 import gg.aquatic.clientside.serialize.ClientsideMEGSettings
+import gg.aquatic.crates.data.editor.CrateEditorValidators
 import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,7 +23,10 @@ data class MEGCrateInteractableData(
             field(
                 MEGCrateInteractableData::modelId,
                 TextFieldAdapter,
-                TextFieldConfig(prompt = "Enter MEG model id:"),
+                TextFieldConfig(
+                    prompt = "Enter MEG model id:",
+                    validator = CrateEditorValidators::validateModelEngineModel
+                ),
                 displayName = "Model Id",
                 description = listOf("ModelEngine model id used for this clientside interactable.")
             )

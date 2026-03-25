@@ -1,6 +1,7 @@
 package gg.aquatic.crates
 
 import gg.aquatic.common.coroutine.VirtualsCtx
+import gg.aquatic.crates.await.awaitStartupDependencies
 import gg.aquatic.crates.command.initializeCommands
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.data.CrateStorage
@@ -31,7 +32,9 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
 
     override fun onEnable() {
         initializeCommands()
+
         VirtualsCtx {
+            awaitStartupDependencies()
             CrateHandler.loadPlacedCrates()
         }
     }

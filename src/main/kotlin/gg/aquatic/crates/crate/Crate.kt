@@ -19,15 +19,22 @@ import org.bukkit.inventory.ItemStack
 
 class Crate(
     val id: String,
-    val keyItem: ItemStack,
+    keyItemSupplier: () -> ItemStack,
     val displayName: Component,
-    val hologram: Hologram.Settings?,
-    val priceGroups: Collection<OpenPriceGroup>,
-    val openConditions: OpenConditions = OpenConditions.DUMMY,
+    hologramSupplier: () -> Hologram.Settings?,
+    priceGroupsSupplier: () -> Collection<OpenPriceGroup>,
+    openConditionsSupplier: () -> OpenConditions = { OpenConditions.DUMMY },
     val interactables: Collection<CrateInteractableData>,
-    val rewards: Collection<Reward>,
-    val preview: PreviewMenuSettings?,
+    rewardsSupplier: () -> Collection<Reward>,
+    previewSupplier: () -> PreviewMenuSettings?,
 ) {
+
+    val keyItem: ItemStack by lazy(keyItemSupplier)
+    val hologram: Hologram.Settings? by lazy(hologramSupplier)
+    val priceGroups: Collection<OpenPriceGroup> by lazy(priceGroupsSupplier)
+    val openConditions: OpenConditions by lazy(openConditionsSupplier)
+    val rewards: Collection<Reward> by lazy(rewardsSupplier)
+    val preview: PreviewMenuSettings? by lazy(previewSupplier)
 
     val crateItem by lazy {
         stackedItem(Material.CHEST) {

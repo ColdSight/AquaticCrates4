@@ -59,35 +59,42 @@ data class CrateData(
 
     fun toCrate(id: String): Crate {
         val normalized = normalized(id)
-        val crateKeyItem = normalized.keyItem.asStacked().getItem()
-        val resolvedRarities = normalized.rarities.mapValues { (rarityId, rarityData) ->
-            rarityData.toRewardRarity(rarityId)
+        val crateKeyItem by lazy { normalized.keyItem.asStacked().getItem() }
+        val resolvedRarities by lazy {
+            normalized.rarities.mapValues { (rarityId, rarityData) ->
+                rarityData.toRewardRarity(rarityId)
+            }
         }
-        val fallbackRarity = resolvedRarities.values.first()
-        val resolvedRewards = normalized.rewards.entries.map { (rewardId, rewardData) ->
-            val rewardRarity = resolvedRarities[rewardData.rarity] ?: fallbackRarity
-            rewardData.toReward(rewardId, id, crateKeyItem, rewardRarity)
-        }.toMutableList()
-        normalizeRewardChances(resolvedRewards, resolvedRarities)
+        val resolvedRewards by lazy {
+            val fallbackRarity = resolvedRarities.values.first()
+            normalized.rewards.entries.map { (rewardId, rewardData) ->
+                val rewardRarity = resolvedRarities[rewardData.rarity] ?: fallbackRarity
+                rewardData.toReward(rewardId, id, crateKeyItem, rewardRarity)
+            }.toMutableList().also { rewards ->
+                normalizeRewardChances(rewards, resolvedRarities)
+            }
+        }
 
         return Crate(
             id = id,
-            keyItem = crateKeyItem,
+            keyItemSupplier = { crateKeyItem },
             displayName = normalized.displayName.toMMComponent(),
-            hologram = normalized.hologram?.toSettings(),
-            priceGroups = normalized.priceGroups.map { it.toOpenPriceGroup(id, crateKeyItem) },
-            openConditions = normalized.openConditions
-                .map { it.toConditionHandle() }
-                .takeIf { it.isNotEmpty() }
-                ?.let { conditions ->
-                    gg.aquatic.crates.open.OpenConditions { player, _, _ ->
-                        conditions.checkConditions(player)
+            hologramSupplier = { normalized.hologram?.toSettings() },
+            priceGroupsSupplier = { normalized.priceGroups.map { it.toOpenPriceGroup(id, crateKeyItem) } },
+            openConditionsSupplier = {
+                normalized.openConditions
+                    .map { it.toConditionHandle() }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { conditions ->
+                        gg.aquatic.crates.open.OpenConditions { player, _, _ ->
+                            conditions.checkConditions(player)
+                        }
                     }
-                }
-                ?: gg.aquatic.crates.open.OpenConditions.DUMMY,
+                    ?: gg.aquatic.crates.open.OpenConditions.DUMMY
+            },
             interactables = normalized.interactables,
-            rewards = resolvedRewards,
-            preview = normalized.preview?.toPreviewSettings()
+            rewardsSupplier = { resolvedRewards },
+            previewSupplier = { normalized.preview?.toPreviewSettings() }
         )
     }
 

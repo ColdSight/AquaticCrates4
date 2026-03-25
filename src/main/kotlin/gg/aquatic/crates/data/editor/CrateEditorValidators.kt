@@ -1,9 +1,12 @@
 package gg.aquatic.crates.data.editor
 
 import gg.aquatic.blokk.factory.BlockFactory
+import com.ticxo.modelengine.api.ModelEngineAPI
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.MemoryConfiguration
+import java.util.Locale
 
 object CrateEditorValidators {
 
@@ -42,7 +45,12 @@ object CrateEditorValidators {
 
         val factoryId = value.substring(0, split)
         val blockId = value.substring(split + 1)
-        val factory = BlockFactory.REGISTRY[factoryId] ?: return "Unknown block factory '$factoryId'."
+        val factory = sequenceOf(
+            factoryId,
+            factoryId.lowercase(Locale.ROOT),
+            factoryId.uppercase(Locale.ROOT)
+        ).mapNotNull { BlockFactory.REGISTRY[it] }.firstOrNull()
+            ?: return "Unknown block factory '$factoryId'."
         val probe = MemoryConfiguration().apply {
             set("material", value)
         }
@@ -53,6 +61,18 @@ object CrateEditorValidators {
         return runCatching {
             BlockFace.valueOf(raw.trim().uppercase())
         }.exceptionOrNull()?.let { "Invalid block face." }
+    }
+
+    fun validateModelEngineModel(raw: String): String? {
+        val value = raw.trim()
+        if (value.isEmpty()) return "Model id cannot be empty."
+
+        if (Bukkit.getPluginManager().getPlugin("ModelEngine") == null) {
+            return "ModelEngine is not installed."
+        }
+
+        val blueprint = runCatching { ModelEngineAPI.getBlueprint(value) }.getOrNull()
+        return if (blueprint != null) null else "Unknown ModelEngine model '$value'."
     }
 
     fun isValidColor(raw: String): Boolean {

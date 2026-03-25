@@ -51,6 +51,10 @@ repositories {
         name = "aquatic-releases"
         url = uri("https://repo.nekroplex.com/releases")
     }
+    maven("https://mvn.lumine.io/repository/maven-public/")
+    maven("https://jitpack.io")
+    maven("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://repo.codemc.io/repository/maven-snapshots/")
     maven("https://libraries.minecraft.net")
 }
 
@@ -58,6 +62,8 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":api"))
     compileOnly("gg.aquatic:Waves:26.0.48-SNAPSHOT")
+    compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
+    compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("com.charleskorn.kaml:kaml:0.104.0")
