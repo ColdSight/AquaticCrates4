@@ -1,4 +1,4 @@
-package gg.aquatic.crates.data.editor
+package gg.aquatic.crates.data.provider
 
 import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
@@ -12,22 +12,22 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-object PreviewTypeFieldAdapter : EditorFieldAdapter {
+object PoolSelectionModeFieldAdapter : EditorFieldAdapter {
     override fun createItem(context: EditorFieldContext, defaultItem: () -> ItemStack): ItemStack {
         val current = context.value.toString().trim('"')
-        return stackedItem(Material.CRAFTER) {
+        return stackedItem(Material.COMPARATOR) {
             displayName = text(context.label, NamedTextColor.AQUA)
             if (context.description.isNotEmpty()) {
                 lore += text("Description", NamedTextColor.DARK_AQUA)
                 lore += context.description.map { text(it, NamedTextColor.GRAY) }
             }
             lore += text("Selected: $current", NamedTextColor.WHITE)
-            lore += text("Click to choose how preview pages work.", NamedTextColor.GRAY)
+            lore += text("Click to select the pool resolution mode.", NamedTextColor.GRAY)
         }.getItem()
     }
 
     override suspend fun edit(player: Player, context: EditorFieldContext): FieldEditResult {
-        val selected = PreviewTypeSelectionMenu.select(player) ?: return FieldEditResult.NoChange
+        val selected = PoolSelectionModeSelectionMenu.select(player) ?: return FieldEditResult.NoChange
         return FieldEditResult.Updated(JsonPrimitive(selected))
     }
 
