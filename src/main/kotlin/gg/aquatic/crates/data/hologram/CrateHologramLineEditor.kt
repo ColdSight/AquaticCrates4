@@ -5,6 +5,14 @@ import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.json.*
 
 fun TypedNestedSchemaBuilder<CrateHologramLineData>.defineHologramLineEditor() {
+    fieldPattern(
+        displayName = "Hologram Line",
+        adapter = HologramLineEntryFieldAdapter,
+        description = listOf(
+            "Left click to edit this hologram line.",
+            "Right click to change its line type."
+        )
+    )
     include<TextCrateHologramLineData>(visibleWhen = { it.matchesHologramLineSubtype("text") }) {
         with(TextCrateHologramLineData) {
             defineEditor()
@@ -23,6 +31,15 @@ fun TypedNestedSchemaBuilder<CrateHologramLineData>.defineHologramLineEditor() {
 }
 
 fun TypedNestedSchemaBuilder<AnimatedHologramFrameData>.defineHologramFrameLineEditor() {
+    fieldPattern(
+        "line",
+        displayName = "Animation Frame",
+        adapter = HologramFrameLineEntryFieldAdapter,
+        description = listOf(
+            "Left click to edit this animation frame.",
+            "Right click to change its frame line type."
+        )
+    )
     include<TextCrateHologramLineData>(visibleWhen = { it.matchesHologramLineSubtype("text") }) {
         group(AnimatedHologramFrameData::line) {
             with(TextCrateHologramLineData) { defineEditor() }

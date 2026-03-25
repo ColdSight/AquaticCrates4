@@ -3,42 +3,50 @@ package gg.aquatic.crates.data.action
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 
 fun TypedNestedSchemaBuilder<RewardActionData>.defineRewardActionEditor() {
-    include<GiveItemRewardActionData>(visibleWhen = { it.matchesSubtype("give-item") }) {
+    fieldPattern(
+        displayName = "Action",
+        adapter = RewardActionEntryFieldAdapter,
+        description = listOf(
+            "Left click to edit this action.",
+            "Right click to change its action type."
+        )
+    )
+    include(visibleWhen = { it.matchesSubtype("give-item") }) {
         with(GiveItemRewardActionData) {
             defineEditor()
         }
     }
-    include<MessageRewardActionData>(visibleWhen = { it.matchesSubtype("message") }) {
+    include(visibleWhen = { it.matchesSubtype("message") }) {
         with(MessageRewardActionData) {
             defineEditor()
         }
     }
-    include<ActionbarRewardActionData>(visibleWhen = { it.matchesSubtype("actionbar") }) {
+    include(visibleWhen = { it.matchesSubtype("actionbar") }) {
         with(ActionbarRewardActionData) {
             defineEditor()
         }
     }
-    include<CommandRewardActionData>(visibleWhen = { it.matchesSubtype("command") }) {
+    include(visibleWhen = { it.matchesSubtype("command") }) {
         with(CommandRewardActionData) {
             defineEditor()
         }
     }
-    include<SoundRewardActionData>(visibleWhen = { it.matchesSubtype("sound") }) {
+    include(visibleWhen = { it.matchesSubtype("sound") }) {
         with(SoundRewardActionData) {
             defineEditor()
         }
     }
-    include<StopSoundRewardActionData>(visibleWhen = { it.matchesSubtype("stop-sound") }) {
+    include(visibleWhen = { it.matchesSubtype("stop-sound") }) {
         with(StopSoundRewardActionData) {
             defineEditor()
         }
     }
-    include<TitleRewardActionData>(visibleWhen = { it.matchesSubtype("title") }) {
+    include(visibleWhen = { it.matchesSubtype("title") }) {
         with(TitleRewardActionData) {
             defineEditor()
         }
     }
-    include<CloseInventoryRewardActionData>(visibleWhen = { it.matchesSubtype("close-inventory") }) {
+    include(visibleWhen = { it.matchesSubtype("close-inventory") }) {
         with(CloseInventoryRewardActionData) {
             defineEditor()
         }

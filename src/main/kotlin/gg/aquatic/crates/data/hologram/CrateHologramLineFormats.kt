@@ -94,24 +94,48 @@ object CrateHologramLineTypes {
 
 object HologramLineSelectionMenu {
     private val entrySlots = listOf(11, 13, 15)
+    private val definitions = CrateHologramLineTypes.definitions.map {
+        PolymorphicSelectionMenu.Definition(it.id, it.displayName, it.description, it.icon)
+    }
+    private val frameDefinitions = CrateHologramLineTypes.definitions
+        .filterNot { it.id == "animated" }
+        .map {
+            PolymorphicSelectionMenu.Definition(it.id, it.displayName, it.description, it.icon)
+        }
 
     val entryFactory: EntryFactory = PolymorphicSelectionMenu.entryFactory(
         title = "Select Hologram Line",
         entrySlots = entrySlots,
-        definitions = CrateHologramLineTypes.definitions.map {
-            PolymorphicSelectionMenu.Definition(it.id, it.displayName, it.description, it.icon)
-        },
+        definitions = definitions,
         elementFactory = CrateHologramLineTypes::defaultElement
     )
 
     val frameEntryFactory: EntryFactory = PolymorphicSelectionMenu.entryFactory(
         title = "Select Animation Frame",
         entrySlots = entrySlots,
-        definitions = CrateHologramLineTypes.definitions
-            .filterNot { it.id == "animated" }
-            .map {
-                PolymorphicSelectionMenu.Definition(it.id, it.displayName, it.description, it.icon)
-            },
+        definitions = frameDefinitions,
         elementFactory = CrateHologramLineTypes::defaultFrameElement
     )
+
+    suspend fun select(player: org.bukkit.entity.Player): String? {
+        return PolymorphicSelectionMenu.selectType(
+            player = player,
+            title = "Select Hologram Line",
+            inventoryType = gg.aquatic.kmenu.inventory.InventoryType.GENERIC9X3,
+            entrySlots = entrySlots,
+            cancelSlot = 22,
+            definitions = definitions
+        )
+    }
+
+    suspend fun selectFrame(player: org.bukkit.entity.Player): String? {
+        return PolymorphicSelectionMenu.selectType(
+            player = player,
+            title = "Select Animation Frame",
+            inventoryType = gg.aquatic.kmenu.inventory.InventoryType.GENERIC9X3,
+            entrySlots = entrySlots,
+            cancelSlot = 22,
+            definitions = frameDefinitions
+        )
+    }
 }

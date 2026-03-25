@@ -6,11 +6,11 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 internal fun EditorFieldContext.matchesSubtype(id: String): Boolean {
-    val currentType = findSubtypeId() ?: return false
+    val currentType = findRewardActionSubtypeId() ?: return false
     return currentType.equals(id, ignoreCase = true)
 }
 
-private fun EditorFieldContext.findSubtypeId(): String? {
+internal fun EditorFieldContext.findRewardActionSubtypeId(): String? {
     val direct = (value as? JsonObject)
         ?.get("type")
         ?.let { it as? JsonPrimitive }

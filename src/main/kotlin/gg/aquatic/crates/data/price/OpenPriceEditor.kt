@@ -3,12 +3,20 @@ package gg.aquatic.crates.data.price
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 
 fun TypedNestedSchemaBuilder<OpenPriceData>.defineOpenPriceEditor() {
-    include<CrateKeyOpenPriceData>(visibleWhen = { it.matchesSubtype("crate-key") }) {
+    fieldPattern(
+        displayName = "Price",
+        adapter = OpenPriceEntryFieldAdapter,
+        description = listOf(
+            "Left click to edit this price.",
+            "Right click to change its price type."
+        )
+    )
+    include(visibleWhen = { it.matchesSubtype("crate-key") }) {
         with(CrateKeyOpenPriceData) {
             defineEditor()
         }
     }
-    include<VaultOpenPriceData>(visibleWhen = { it.matchesSubtype("vault") }) {
+    include(visibleWhen = { it.matchesSubtype("vault") }) {
         with(VaultOpenPriceData) {
             defineEditor()
         }
