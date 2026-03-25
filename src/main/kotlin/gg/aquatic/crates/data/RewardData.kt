@@ -10,15 +10,13 @@ import gg.aquatic.crates.data.condition.definePlayerConditionEditor
 import gg.aquatic.crates.data.editor.RewardRarityFieldAdapter
 import gg.aquatic.crates.data.item.StackedItemData
 import gg.aquatic.crates.data.price.OpenPriceGroupData
+import gg.aquatic.crates.data.range.RewardAmountRangeData
 import gg.aquatic.crates.reward.Reward
 import gg.aquatic.crates.reward.RewardPurchaseHandler
-import gg.aquatic.execute.executeActions
 import gg.aquatic.kmenu.inventory.ButtonType
-import gg.aquatic.kmenu.inventory.ClickType
 import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
-import org.bukkit.inventory.ItemStack
 import org.bukkit.Material
 
 @Serializable
@@ -30,6 +28,7 @@ data class RewardData(
     val rarity: String = CrateData.DEFAULT_RARITY_ID,
     val chance: Double = 1.0,
     val cost: List<OpenPriceGroupData> = emptyList(),
+    val amountRanges: List<RewardAmountRangeData> = emptyList(),
     val winActions: List<@Polymorphic RewardActionData> = emptyList(),
 ) {
 
@@ -42,16 +41,14 @@ data class RewardData(
         val resolvedRarity = rarity.takeIf { it in availableRarities } ?: fallbackRarityId
         return copy(
             rarity = resolvedRarity,
-            cost = cost.map { it.normalized(currentCrateId, existingCrateIds) }
+            cost = cost.map { it.normalized(currentCrateId, existingCrateIds) },
+            amountRanges = amountRanges.map { it.normalized() }
         )
     }
 
-    fun toReward(id: String, crateId: String, crateKeyItem: ItemStack, rarity: gg.aquatic.crates.reward.RewardRarity): Reward {
+    fun toReward(id: String, crateId: String, crateKeyItem: org.bukkit.inventory.ItemStack, rarity: gg.aquatic.crates.reward.RewardRarity): Reward {
         val previewItemStack = previewItem.asStacked().getItem()
         val fallbackItemStack = fallbackPreviewItem?.asStacked()?.getItem()
-        val resolvedActions = winActions.ifEmpty {
-            listOf(RewardActionData.fromRewardItem(previewItem))
-        }
         val purchaseManager = cost.firstOrNull { it.prices.isNotEmpty() }?.toOpenPriceGroup(crateId, crateKeyItem)?.let { priceGroup ->
             RewardPurchaseHandler(
                 price = priceGroup,
@@ -64,9 +61,10 @@ data class RewardData(
             displayName = displayName?.toMMComponent(),
             previewItem = { previewItemStack.clone() },
             fallbackItem = fallbackItemStack?.let { built -> { built.clone() } },
-            winActions = resolvedActions.map { it.toActionHandle() },
+            winActions = winActions.map { it.toActionHandle() },
             conditions = conditions.map { it.toConditionHandle() },
             purchaseManager = purchaseManager,
+            amountRanges = amountRanges.map { it.toRange() },
             clickHandler = { reward, player, clickType: ButtonType ->
                 when (clickType) {
                     ButtonType.LEFT -> {
@@ -76,7 +74,7 @@ data class RewardData(
                     }
                     ButtonType.SHIFT_LEFT -> {
                         if (player.hasPermission("aquaticcrates.admin")) {
-                            reward.winActions.executeActions(player)
+                            reward.win(player)
                         }
                     }
                     else -> {}
@@ -114,6 +112,24 @@ data class RewardData(
                 iconMaterial = Material.EMERALD,
                 description = listOf("Relative weight used inside the selected rarity.")
             )
+            list(
+                RewardData::amountRanges,
+                displayName = "Amount Ranges",
+                iconMaterial = Material.COPPER_INGOT,
+                description = listOf(
+                    "Weighted random amount multiplier for this reward.",
+                    "If empty, the reward uses amount 1.",
+                    "The rolled value is available in win actions as %random-amount%."
+                )
+            ) {
+                with(RewardAmountRangeData) {
+                    defineEditor(
+                        minLabel = "Min Amount",
+                        maxLabel = "Max Amount",
+                        chanceLabel = "Range Weight"
+                    )
+                }
+            }
             list(
                 RewardData::cost,
                 displayName = "Cost",
