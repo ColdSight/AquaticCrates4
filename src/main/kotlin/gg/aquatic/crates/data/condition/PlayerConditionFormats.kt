@@ -14,7 +14,18 @@ import org.bukkit.Material
 object PlayerConditionFormats {
     val module = SerializersModule {
         polymorphic(PlayerConditionData::class) {
+            subclass(BiomePlayerConditionData::class)
+            subclass(DateRangePlayerConditionData::class)
+            subclass(DayOfMonthPlayerConditionData::class)
+            subclass(DayOfWeekPlayerConditionData::class)
+            subclass(HasEmptyInventorySlotPlayerConditionData::class)
+            subclass(MonthPlayerConditionData::class)
+            subclass(OnlinePlayerCountPlayerConditionData::class)
             subclass(PermissionPlayerConditionData::class)
+            subclass(TimeRangePlayerConditionData::class)
+            subclass(WeekParityPlayerConditionData::class)
+            subclass(WeekOfYearModuloPlayerConditionData::class)
+            subclass(WorldPlayerConditionData::class)
         }
     }
 
@@ -40,6 +51,83 @@ object PlayerConditionTypes {
 
     val definitions: List<Definition> = listOf(
         Definition(
+            id = "biome",
+            displayName = "Biome",
+            description = listOf(
+                "Checks whether the player is inside",
+                "one of the selected biomes."
+            ),
+            icon = Material.MOSS_BLOCK,
+            factory = { BiomePlayerConditionData() },
+            descriptorFactory = { BiomePlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "date-range",
+            displayName = "Date Range",
+            description = listOf(
+                "Checks whether today is inside",
+                "the configured date range."
+            ),
+            icon = Material.CLOCK,
+            factory = { DateRangePlayerConditionData() },
+            descriptorFactory = { DateRangePlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "day-of-month",
+            displayName = "Day Of Month",
+            description = listOf(
+                "Checks whether today's day of month",
+                "matches one of the configured values."
+            ),
+            icon = Material.CLOCK,
+            factory = { DayOfMonthPlayerConditionData() },
+            descriptorFactory = { DayOfMonthPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "day-of-week",
+            displayName = "Day Of Week",
+            description = listOf(
+                "Checks whether today is one",
+                "of the selected weekdays."
+            ),
+            icon = Material.CLOCK,
+            factory = { DayOfWeekPlayerConditionData() },
+            descriptorFactory = { DayOfWeekPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "month",
+            displayName = "Month",
+            description = listOf(
+                "Checks whether the current month",
+                "matches one of the configured values."
+            ),
+            icon = Material.CLOCK,
+            factory = { MonthPlayerConditionData() },
+            descriptorFactory = { MonthPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "has-empty-inventory-slot",
+            displayName = "Has Empty Inventory Slot",
+            description = listOf(
+                "Checks whether the player has enough",
+                "empty inventory slots."
+            ),
+            icon = Material.HOPPER,
+            factory = { HasEmptyInventorySlotPlayerConditionData() },
+            descriptorFactory = { HasEmptyInventorySlotPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "online-player-count",
+            displayName = "Online Player Count",
+            description = listOf(
+                "Checks whether the number of online players",
+                "is inside the configured range."
+            ),
+            icon = Material.PLAYER_HEAD,
+            factory = { OnlinePlayerCountPlayerConditionData() },
+            descriptorFactory = { OnlinePlayerCountPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
             id = "permission",
             displayName = "Permission",
             description = listOf(
@@ -49,6 +137,50 @@ object PlayerConditionTypes {
             icon = Material.TRIPWIRE_HOOK,
             factory = { PermissionPlayerConditionData() },
             descriptorFactory = { PermissionPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "week-of-year-mod",
+            displayName = "Week Of Year Mod",
+            description = listOf(
+                "Checks ISO week number modulo a value.",
+                "Useful for rotating weekly reward pools."
+            ),
+            icon = Material.CLOCK,
+            factory = { WeekOfYearModuloPlayerConditionData() },
+            descriptorFactory = { WeekOfYearModuloPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "week-parity",
+            displayName = "Week Parity",
+            description = listOf(
+                "Checks whether the current ISO week",
+                "is odd or even."
+            ),
+            icon = Material.COMPARATOR,
+            factory = { WeekParityPlayerConditionData() },
+            descriptorFactory = { WeekParityPlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "time-range",
+            displayName = "Time Range",
+            description = listOf(
+                "Checks whether the current local time",
+                "is inside the configured range."
+            ),
+            icon = Material.CLOCK,
+            factory = { TimeRangePlayerConditionData() },
+            descriptorFactory = { TimeRangePlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "world",
+            displayName = "World",
+            description = listOf(
+                "Checks whether the player is in",
+                "one of the selected worlds."
+            ),
+            icon = Material.GRASS_BLOCK,
+            factory = { WorldPlayerConditionData() },
+            descriptorFactory = { WorldPlayerConditionData.serializer().descriptor }
         )
     )
 
