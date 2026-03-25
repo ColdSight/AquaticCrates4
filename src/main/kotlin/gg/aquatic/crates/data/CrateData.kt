@@ -52,7 +52,6 @@ data class CrateData(
     val chooseProcessor: ChooseRewardProcessorData = ChooseRewardProcessorData(),
     val hologram: CrateHologramData? = null,
     val preview: PreviewMenuData? = PreviewMenuData(),
-    val rewards: Map<String, RewardData> = emptyMap(),
 ) {
 
     fun normalized(crateId: String? = null, existingCrateIds: Set<String> = emptySet()): CrateData {
@@ -173,6 +172,8 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
     }
 
     override fun TypedEditorSchemaBuilder<CrateData>.define() {
+        field(CrateData::rewardProviderType, visibleWhen = { false })
+        field(CrateData::rewardProcessorType, visibleWhen = { false })
         field(
             CrateData::displayName,
             TextFieldAdapter,
@@ -246,14 +247,13 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
             iconMaterial = Material.NETHER_STAR,
             description = listOf(
                 "All rarity groups available in this crate.",
-                "Each reward must belong to one of these rarities."
+                "Rewards from any provider reference these crate-level rarities."
             ),
             mapKeyPrompt = "Enter rarity ID:",
             newMapEntryFactory = EditorEntryFactories.map(
                 keyPrompt = "Enter rarity ID:",
                 keyValidator = { if (CrateEditorValidators.crateIdRegex.matches(it)) null else "Use only letters, numbers, '_' or '-'." },
                 valueFactory = { rarityId ->
-                    schemaJson.encodeToJsonElement(
                     CrateDataFormats.json.encodeToJsonElement(
                         RewardRarityData.serializer(),
                         RewardRarityData(displayName = rarityId, chance = 1.0)
@@ -263,6 +263,82 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
         ) {
             with(RewardRarityData) {
                 defineEditor()
+            }
+        }
+        field(
+            CrateData::simpleProvider,
+            adapter = RewardProviderSectionFieldAdapter,
+            displayName = "Rewards",
+            iconMaterial = Material.CHEST_MINECART,
+            description = listOf(
+                "Active reward provider for this crate.",
+                "Left click to edit its settings.",
+                "Right click to change the reward provider type."
+            ),
+            visibleWhen = { it.isRewardProviderType(RewardProviderType.SIMPLE) }
+        )
+        include<CrateData>(visibleWhen = { it.isRewardProviderType(RewardProviderType.SIMPLE) }) {
+            group(CrateData::simpleProvider) {
+                with(SimpleRewardProviderData) {
+                    defineEditor()
+                }
+            }
+        }
+        field(
+            CrateData::conditionalPoolsProvider,
+            adapter = RewardProviderSectionFieldAdapter,
+            displayName = "Rewards",
+            iconMaterial = Material.CHEST_MINECART,
+            description = listOf(
+                "Active reward provider for this crate.",
+                "Left click to edit its settings.",
+                "Right click to change the reward provider type."
+            ),
+            visibleWhen = { it.isRewardProviderType(RewardProviderType.CONDITIONAL_POOLS) }
+        )
+        include<CrateData>(visibleWhen = { it.isRewardProviderType(RewardProviderType.CONDITIONAL_POOLS) }) {
+            group(CrateData::conditionalPoolsProvider) {
+                with(ConditionalPoolsRewardProviderData) {
+                    defineEditor()
+                }
+            }
+        }
+        field(
+            CrateData::basicProcessor,
+            adapter = RewardProcessorSectionFieldAdapter,
+            displayName = "Reward Processor",
+            iconMaterial = Material.HOPPER_MINECART,
+            description = listOf(
+                "Controls what happens after rewards are rolled.",
+                "Left click to edit its settings.",
+                "Right click to change the processor type."
+            ),
+            visibleWhen = { it.isRewardProcessorType(RewardProcessorType.BASIC) }
+        )
+        include<CrateData>(visibleWhen = { it.isRewardProcessorType(RewardProcessorType.BASIC) }) {
+            group(CrateData::basicProcessor) {
+                with(BasicRewardProcessorData) {
+                    defineEditor()
+                }
+            }
+        }
+        field(
+            CrateData::chooseProcessor,
+            adapter = RewardProcessorSectionFieldAdapter,
+            displayName = "Reward Processor",
+            iconMaterial = Material.HOPPER_MINECART,
+            description = listOf(
+                "Controls what happens after rewards are rolled.",
+                "Left click to edit its settings.",
+                "Right click to change the processor type."
+            ),
+            visibleWhen = { it.isRewardProcessorType(RewardProcessorType.CHOOSE) }
+        )
+        include<CrateData>(visibleWhen = { it.isRewardProcessorType(RewardProcessorType.CHOOSE) }) {
+            group(CrateData::chooseProcessor) {
+                with(ChooseRewardProcessorData) {
+                    defineEditor()
+                }
             }
         }
 
@@ -284,34 +360,19 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
             }
         }
 
+        field(
+            CrateData::preview,
+            adapter = PreviewSectionFieldAdapter,
+            displayName = "Preview",
+            iconMaterial = Material.ENDER_EYE,
+            description = listOf(
+                "Preview menu configuration for this crate.",
+                "Left click to edit it.",
+                "Right click to change the preview type."
+            )
+        )
         optionalGroup(CrateData::preview) {
             with(PreviewMenuData) {
-                defineEditor()
-            }
-        }
-
-        map(
-            CrateData::rewards,
-            displayName = "Rewards",
-            iconMaterial = Material.CHEST_MINECART,
-            description = listOf("All rewards that can be won from this crate."),
-            mapKeyPrompt = "Enter reward ID:",
-            newMapEntryFactory = EditorEntryFactories.map(
-                keyPrompt = "Enter reward ID:",
-                keyValidator = { if (CrateEditorValidators.crateIdRegex.matches(it)) null else "Use only letters, numbers, '_' or '-'." },
-                valueFactory = { rewardId ->
-                    schemaJson.encodeToJsonElement(
-                        RewardData.serializer(),
-                        RewardData(
-                            displayName = rewardId,
-                            previewItem = StackedItemData(material = "CHEST", displayName = rewardId),
-                            rarity = CrateData.DEFAULT_RARITY_ID
-                        )
-                    )
-                }
-            )
-        ) {
-            with(RewardData) {
                 defineEditor()
             }
         }

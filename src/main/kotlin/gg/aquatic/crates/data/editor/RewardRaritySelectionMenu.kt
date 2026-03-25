@@ -5,6 +5,7 @@ import gg.aquatic.kmenu.KMenu
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.createMenu
 import gg.aquatic.stacked.stackedItem
+import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -36,8 +37,8 @@ object RewardRaritySelectionMenu {
         val chance: String?,
     )
 
-    suspend fun select(player: Player, root: kotlinx.serialization.json.JsonElement, currentValue: String?): SelectionResult {
-        return openPage(player, parseRarities(root), currentValue, 0)
+    suspend fun select(player: Player, context: EditorFieldContext, currentValue: String?): SelectionResult {
+        return openPage(player, parseRarities(context), currentValue, 0)
     }
 
     private suspend fun openPage(
@@ -105,8 +106,9 @@ object RewardRaritySelectionMenu {
         }
     }
 
-    private fun parseRarities(root: kotlinx.serialization.json.JsonElement): List<RarityOption> {
-        val rarityRoot = (root as? JsonObject)?.get("rarities") as? JsonObject ?: return emptyList()
+    private fun parseRarities(context: EditorFieldContext): List<RarityOption> {
+        val root = context.root as? JsonObject ?: return emptyList()
+        val rarityRoot = root["rarities"] as? JsonObject ?: return emptyList()
         return rarityRoot.entries.sortedBy { it.key }.map { (id, node) ->
             val objectNode = node as? JsonObject
             val displayName = (objectNode?.get("displayName") as? JsonPrimitive)?.contentOrNull

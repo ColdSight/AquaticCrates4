@@ -4,11 +4,8 @@ import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.data.editor.CrateEditorValidators
 import gg.aquatic.crates.data.editor.InventoryTypeFieldAdapter
-import gg.aquatic.crates.data.editor.PreviewTypeFieldAdapter
 import gg.aquatic.kmenu.inventory.InventoryType
-import gg.aquatic.kmenu.menu.settings.ButtonSettings
 import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
-import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.EntryFactory
@@ -66,16 +63,7 @@ data class PreviewMenuData(
         private val schemaJson = Json { encodeDefaults = true }
 
         fun TypedNestedSchemaBuilder<PreviewMenuData>.defineEditor() {
-            field(
-                PreviewMenuData::previewType,
-                adapter = PreviewTypeFieldAdapter,
-                displayName = "Preview Type",
-                iconMaterial = Material.CRAFTER,
-                description = listOf(
-                    "Automatic uses a single layout with built-in pagination.",
-                    "Custom Pages lets you define each page layout manually."
-                )
-            )
+            field(PreviewMenuData::previewType, visibleWhen = { false })
             field(
                 PreviewMenuData::inventoryType,
                 adapter = InventoryTypeFieldAdapter,

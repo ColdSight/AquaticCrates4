@@ -26,7 +26,7 @@ object RewardRarityFieldAdapter : EditorFieldAdapter {
     }
 
     override suspend fun edit(player: Player, context: EditorFieldContext): FieldEditResult {
-        return when (val result = RewardRaritySelectionMenu.select(player, context.root, currentValue(context))) {
+        return when (val result = RewardRaritySelectionMenu.select(player, context, currentValue(context))) {
             RewardRaritySelectionMenu.SelectionResult.Cancelled -> FieldEditResult.NoChange
             is RewardRaritySelectionMenu.SelectionResult.Selected -> FieldEditResult.Updated(JsonPrimitive(result.rarityId))
             RewardRaritySelectionMenu.SelectionResult.NextPage,
