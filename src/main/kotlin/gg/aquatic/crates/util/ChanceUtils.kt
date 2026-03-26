@@ -88,7 +88,7 @@ fun <T : Weightable> Collection<T>.realChanceFormatted(item: T): HashMap<T, Doub
     }
     val realChance = HashMap<T, Double>()
     for (chance in this) {
-        realChance[chance] = ((chance.chance / total) * 100.0).decimals(2).toDouble()
+        realChance[chance] = (chance.chance / total * 100.0).decimals(2).toDouble()
     }
     return realChance
 }
