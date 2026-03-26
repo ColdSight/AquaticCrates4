@@ -17,9 +17,7 @@ data class RolledReward(
         completed: Boolean = false,
     ): ItemStack {
         if (hidden) {
-            val item = hiddenItem?.clone() ?: reward.previewItem().clone().apply {
-                type = org.bukkit.Material.GRAY_STAINED_GLASS_PANE
-            }
+            val item = hiddenItem?.clone() ?: ItemStack(org.bukkit.Material.GRAY_STAINED_GLASS_PANE)
 
             val meta = item.itemMeta
             if (hiddenItem == null) {

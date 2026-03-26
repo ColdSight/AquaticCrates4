@@ -114,7 +114,7 @@ object CrateManagementMenu {
         }
 
         CrateStorage.save(id, CrateData.createDefault(displayName = "<yellow>$id Crate"))
-        VirtualsCtx {
+        withContext(VirtualsCtx) {
             CratesPlugin.reload()
         }
         openEditor(player, id)
