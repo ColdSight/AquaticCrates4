@@ -7,5 +7,4 @@ class RewardRarity(
     val id: String,
     val displayName: Component,
     override val chance: Double,
-): Weightable {
-}
+): Weightable
