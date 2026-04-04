@@ -1,8 +1,8 @@
 package gg.aquatic.crates.reward.processor
 
-import gg.aquatic.crates.reward.Reward
 import gg.aquatic.crates.reward.provider.ResolvedRewardProvider
 import gg.aquatic.crates.util.randomItem
+import gg.aquatic.crates.util.randomItemIndex
 import org.bukkit.entity.Player
 
 internal suspend fun ResolvedRewardProvider.rollRewards(
@@ -23,9 +23,9 @@ internal suspend fun ResolvedRewardProvider.rollRewards(
         val pool = availableRewards.toMutableList()
         repeat(targetCount.coerceAtMost(pool.size)) {
             if (pool.isEmpty()) return@repeat
-            val picked = pool.randomItem()
-            pool.remove(picked)
-            rolledRewards += RolledReward(picked, picked.rollAmount())
+            val picked = pool.randomItemIndex()
+            val reward = pool.removeAt(picked)
+            rolledRewards += RolledReward(reward, reward.rollAmount())
         }
         return rolledRewards
     }

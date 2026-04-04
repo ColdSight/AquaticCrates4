@@ -6,22 +6,22 @@ import kotlin.math.round
 
 class ChanceUtils {
     companion object {
-        fun getRandomChanceIndex(
-            chances: DoubleArray,
+        fun <T : Weightable> getRandomChanceIndex(
+            items: Collection<T>,
             random: ThreadLocalRandom = ThreadLocalRandom.current(),
         ): Int {
-            if (chances.isEmpty()) return -1
+            if (items.isEmpty()) return -1
 
             var totalWeight = 0.0
-            for (chance in chances) {
-                if (chance > 0) totalWeight += chance
+            for (chance in items) {
+                if (chance.chance > 0) totalWeight += chance.chance
             }
 
             if (totalWeight <= 0) return -1
 
             var random = random.nextDouble() * totalWeight
-            for (i in chances.indices) {
-                val chance = chances[i]
+            for (i in items.indices) {
+                val chance = items.elementAt(i).chance
                 if (chance <= 0) continue
                 random -= chance
                 if (random <= 0.0) return i
@@ -58,6 +58,7 @@ class ChanceUtils {
 }
 
 fun <T : Weightable> Collection<T>.randomItem(): T = ChanceUtils.getRandomItem(this)
+fun <T : Weightable> Collection<T>.randomItemIndex(): Int = ChanceUtils.getRandomChanceIndex(this)
 
 fun Collection<Weightable>.realChance(item: Weightable): Double {
     val total = this.sumOf { it.chance }

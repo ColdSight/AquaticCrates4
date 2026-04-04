@@ -1,8 +1,11 @@
 package gg.aquatic.crates.open.currency
 
 import gg.aquatic.common.coroutine.BukkitCtx
+import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.kurrency.Currency
+import gg.aquatic.kurrency.impl.VirtualCurrency
 import kotlinx.coroutines.withContext
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -10,46 +13,82 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 class CrateKeyCurrency(
+    @Suppress("unused")
     private val crateId: String,
+    private val crateResolver: () -> Crate?,
+    private val backingCurrency: VirtualCurrency,
 ) : Currency {
     override val id: String = "aqcrates:key:$crateId"
     override val prefix: String = ""
     override val suffix: String = ""
 
+    constructor(crateId: String) : this(
+        crateId,
+        { CrateHandler.crates[crateId] },
+        CratesPlugin.crateKeyVirtualCurrency(crateId)
+    )
+
     private fun resolveKeyItem(): ItemStack? {
-        return CrateHandler.crates[crateId]?.keyItem?.clone()
+        return crateResolver()?.keyItem?.clone()
     }
 
-    override suspend fun give(player: Player, amount: BigDecimal) = withContext(BukkitCtx.ofEntity(player)) {
-        val toAddCount = amount.toInt()
-        if (toAddCount < 1) return@withContext
+    private fun countPhysicalKeys(player: Player, keyItem: ItemStack): Int {
+        var total = 0
+        for (content in player.inventory.contents) {
+            if (content?.isSimilar(keyItem) == true) {
+                total += content.amount
+            }
+        }
+        return total
+    }
 
-        val keyItem = resolveKeyItem() ?: return@withContext
-        val stack = keyItem.clone()
-        var remaining = toAddCount
+    private fun removePhysicalKeys(player: Player, keyItem: ItemStack, amount: Int) {
+        if (amount <= 0) return
 
-        while (remaining > 0) {
-            val batchSize = remaining.coerceAtMost(stack.maxStackSize)
-            stack.amount = batchSize
-            val leftover = player.inventory.addItem(stack)
+        var remaining = amount
+        for (slot in player.inventory.contents.indices) {
+            val content = player.inventory.getItem(slot) ?: continue
+            if (!content.isSimilar(keyItem)) continue
 
-            if (leftover.isNotEmpty()) {
-                leftover.values.forEach { player.world.dropItemNaturally(player.location, it) }
-                break
+            if (content.amount <= remaining) {
+                remaining -= content.amount
+                player.inventory.setItem(slot, null)
+            } else {
+                content.amount -= remaining
+                player.inventory.setItem(slot, content)
+                return
             }
 
-            remaining -= batchSize
+            if (remaining == 0) {
+                return
+            }
         }
     }
 
+    override suspend fun give(player: Player, amount: BigDecimal) = withContext(BukkitCtx.ofEntity(player)) {
+        val toAddCount = amount.setScale(0, RoundingMode.DOWN).toInt()
+        if (toAddCount < 1) return@withContext
+
+        backingCurrency.give(player, BigDecimal.valueOf(toAddCount.toLong()).setScale(2, RoundingMode.HALF_DOWN))
+    }
+
     override suspend fun take(player: Player, amount: BigDecimal) = withContext(BukkitCtx.ofEntity(player)) {
-        val toRemoveCount = amount.toInt()
+        val toRemoveCount = amount.setScale(0, RoundingMode.DOWN).toInt()
         if (toRemoveCount < 1) return@withContext
 
-        val keyItem = resolveKeyItem() ?: return@withContext
-        val toRemove = keyItem.clone()
-        toRemove.amount = toRemoveCount
-        player.inventory.removeItem(toRemove)
+        val keyItem = resolveKeyItem()
+        val physicalToTake = keyItem?.let { countPhysicalKeys(player, it).coerceAtMost(toRemoveCount) } ?: 0
+        if (physicalToTake > 0 && keyItem != null) {
+            removePhysicalKeys(player, keyItem, physicalToTake)
+        }
+
+        val remaining = toRemoveCount - physicalToTake
+        if (remaining > 0) {
+            backingCurrency.take(
+                player,
+                BigDecimal.valueOf(remaining.toLong()).setScale(2, RoundingMode.HALF_DOWN)
+            )
+        }
     }
 
     override suspend fun set(player: Player, amount: BigDecimal) = withContext(BukkitCtx.ofEntity(player)) {
@@ -64,23 +103,41 @@ class CrateKeyCurrency(
     }
 
     override suspend fun getBalance(player: Player): BigDecimal = withContext(BukkitCtx.ofEntity(player)) {
-        val keyItem = resolveKeyItem() ?: return@withContext BigDecimal.ZERO.setScale(2, RoundingMode.HALF_DOWN)
-        var total = 0L
-        for (content in player.inventory.contents) {
-            if (content?.isSimilar(keyItem) == true) {
-                total += content.amount
-            }
-        }
-
-        BigDecimal.valueOf(total).setScale(2, RoundingMode.HALF_DOWN)
+        val physical = resolveKeyItem()?.let { countPhysicalKeys(player, it).toLong() } ?: 0L
+        val virtual = backingCurrency.getBalance(player).setScale(0, RoundingMode.DOWN).toLong()
+        BigDecimal.valueOf(physical + virtual).setScale(2, RoundingMode.HALF_DOWN)
     }
 
     override suspend fun tryTake(player: Player, amount: BigDecimal): Boolean = withContext(BukkitCtx.ofEntity(player)) {
         if (getBalance(player) < amount) {
             return@withContext false
         }
+        val toTake = amount.setScale(0, RoundingMode.DOWN).toInt()
+        if (toTake < 1) return@withContext true
 
-        take(player, amount)
+        val keyItem = resolveKeyItem()
+        val physicalAvailable = keyItem?.let { countPhysicalKeys(player, it) } ?: 0
+        val physicalToTake = physicalAvailable.coerceAtMost(toTake)
+        if (physicalToTake > 0 && keyItem != null) {
+            removePhysicalKeys(player, keyItem, physicalToTake)
+        }
+
+        val remaining = toTake - physicalToTake
+        if (remaining > 0) {
+            if (!backingCurrency.tryTake(
+                    player,
+                    BigDecimal.valueOf(remaining.toLong()).setScale(2, RoundingMode.HALF_DOWN)
+                )) {
+                if (physicalToTake > 0) {
+                    val refundItem = keyItem ?: return@withContext false
+                    val stack = refundItem.clone()
+                    stack.amount = physicalToTake
+                    player.inventory.addItem(stack)
+                }
+                return@withContext false
+            }
+        }
+
         true
     }
 }

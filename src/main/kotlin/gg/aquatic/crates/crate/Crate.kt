@@ -16,6 +16,16 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
+/**
+ * Rewards Table
+ * ID | Name (crate:name)
+ *
+ * Openings
+ * ID | Crate Name - indexed | Timestamp | PlayerUUID | Amount
+ *
+ * Opened Rewards
+ * Name (crate:name - Indexed) | Timestamp | PlayerUUID - indexed | cratename - indexed | Amount | Opening ID
+ */
 class Crate(
     val id: String,
     keyItemSupplier: () -> ItemStack,
