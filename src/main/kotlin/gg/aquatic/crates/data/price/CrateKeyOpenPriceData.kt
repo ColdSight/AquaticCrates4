@@ -27,7 +27,7 @@ data class CrateKeyOpenPriceData(
             ?.takeIf { it.isNotEmpty() && gg.aquatic.crates.crate.CrateHandler.crates.containsKey(it) }
             ?: crateId
         return OpenPriceHandle(
-            currency = CratesPlugin.crateKeyCurrency(targetCrateId),
+            currencyResolver = { CratesPlugin.crateKeyCurrency(targetCrateId) },
             price = BigDecimal.valueOf(amount.toLong())
         )
     }

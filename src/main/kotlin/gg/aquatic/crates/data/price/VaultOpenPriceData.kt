@@ -17,7 +17,7 @@ data class VaultOpenPriceData(
 ) : OpenPriceData() {
     override fun toHandle(crateId: String, keyItem: ItemStack): OpenPriceHandle {
         return OpenPriceHandle(
-            currency = VaultCurrency(),
+            currencyResolver = { VaultCurrency() },
             price = BigDecimal.valueOf(amount)
         )
     }

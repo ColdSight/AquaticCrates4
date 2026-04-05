@@ -5,9 +5,10 @@ import org.bukkit.entity.Player
 import java.math.BigDecimal
 
 class OpenPriceHandle(
-    val currency: Currency,
+    currencyResolver: () -> Currency,
     val price: BigDecimal
 ) {
+    val currency: Currency by lazy(currencyResolver)
 
     suspend fun has(player: Player, amount: Int): Boolean {
         return currency.getBalance(player) >= price * amount.toBigDecimal()
