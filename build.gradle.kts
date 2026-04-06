@@ -55,19 +55,29 @@ repositories {
     maven("https://jitpack.io")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo.codemc.io/repository/maven-snapshots/")
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://libraries.minecraft.net")
 }
 
 dependencies {
+    val exposedVersion = "1.2.0"
+
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":api"))
-    compileOnly("gg.aquatic:Waves:26.0.52")
+    compileOnly("gg.aquatic:Common:26.0.17")
+    compileOnly("gg.aquatic:Waves:26.0.54")
     compileOnly("gg.aquatic.execute:Execute:26.0.2")
+    compileOnly("me.clip:placeholderapi:2.12.2")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("com.charleskorn.kaml:kaml:0.104.0")
+    compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("com.zaxxer:HikariCP:7.0.2")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.6")
+    implementation("org.xerial:sqlite-jdbc:3.51.0.0")
 
     implementation("org.reflections:reflections:0.10.2")
 
@@ -107,12 +117,13 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
 
     exclude("kotlin/**")
     exclude("org/intellij/**")
-    exclude("org/jetbrains/**")
+    exclude("org/jetbrains/annotations/**")
 
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("org.bstats", "gg.aquatic.waves.libs.bstats")
 
-    relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
+    relocate("com.zaxxer.hikari", "gg.aquatic.aquaticcrates.libs.hikari")
+    relocate("org.jetbrains.exposed", "gg.aquatic.waves.libs.exposed")
 }

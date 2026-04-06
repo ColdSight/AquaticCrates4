@@ -6,6 +6,7 @@ import gg.aquatic.crates.command.impl.crateCommand
 import gg.aquatic.crates.command.impl.keyCommand
 import gg.aquatic.crates.command.impl.messagesCommand
 import gg.aquatic.crates.command.impl.reloadCommand
+import gg.aquatic.crates.command.impl.statsCommand
 import gg.aquatic.kommand.command
 import org.bukkit.command.CommandSender
 
@@ -26,6 +27,7 @@ internal fun CratesPlugin.initializeCommands() {
         crateCommand()
         keyCommand()
         messagesCommand()
+        statsCommand()
         reloadCommand()
 
         execute<CommandSender>(inheritToChildren = false) {

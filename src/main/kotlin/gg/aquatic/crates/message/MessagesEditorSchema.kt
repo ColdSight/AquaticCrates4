@@ -17,6 +17,7 @@ object MessagesLocaleEditorSchema : EditableModel<MessagesFileData>(MessagesFile
         messageField(MessagesFileData::noPermission, Messages.NO_PERMISSION)
         messageField(MessagesFileData::pluginReloading, Messages.PLUGIN_RELOADING)
         messageField(MessagesFileData::pluginReloaded, Messages.PLUGIN_RELOADED)
+        messageField(MessagesFileData::statsInvalidated, Messages.STATS_INVALIDATED)
         messageField(MessagesFileData::cratePlaced, Messages.CRATE_PLACED)
         messageField(MessagesFileData::crateDestroyed, Messages.CRATE_DESTROYED)
         messageField(MessagesFileData::crateSaved, Messages.CRATE_SAVED)

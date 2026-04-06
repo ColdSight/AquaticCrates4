@@ -17,6 +17,7 @@ data class MessagesFileData(
     val noPermission: EditableMessageData = EditableMessageData.lines("<red>You do not have permission to do that."),
     val pluginReloading: EditableMessageData = EditableMessageData.lines("<yellow>Reloading..."),
     val pluginReloaded: EditableMessageData = EditableMessageData.lines("<green>Reloaded!"),
+    val statsInvalidated: EditableMessageData = EditableMessageData.lines("<green>Stats invalidation finished."),
     val cratePlaced: EditableMessageData = EditableMessageData.lines("<green>You have placed the crate!"),
     val crateDestroyed: EditableMessageData = EditableMessageData.lines("<red>Crate destroyed!"),
     val crateSaved: EditableMessageData = EditableMessageData.lines("<green>Saved crate '<yellow>%crate_id%</yellow>'."),

@@ -25,6 +25,7 @@ data class RewardData(
     val previewItem: StackedItemData = StackedItemData(material = Material.CHEST.name),
     val fallbackPreviewItem: StackedItemData? = null,
     val conditions: List<@Polymorphic PlayerConditionData> = emptyList(),
+    val limits: List<LimitData> = emptyList(),
     val rarity: String = CrateData.DEFAULT_RARITY_ID,
     val chance: Double = 1.0,
     val cost: List<OpenPriceGroupData> = emptyList(),
@@ -41,6 +42,7 @@ data class RewardData(
         val resolvedRarity = rarity.takeIf { it in availableRarities } ?: fallbackRarityId
         return copy(
             rarity = resolvedRarity,
+            limits = limits.map { it.normalized() }.distinctBy { it.timeframe },
             cost = cost.map { it.normalized(currentCrateId, existingCrateIds) },
             amountRanges = amountRanges.map { it.normalized() }
         )
@@ -58,6 +60,7 @@ data class RewardData(
 
         return Reward(
             id = id,
+            crateId = crateId,
             displayName = displayName?.toMMComponent(),
             previewItem = { previewItemStack.clone() },
             fallbackItem = fallbackItemStack?.let { built -> { built.clone() } },
@@ -81,6 +84,7 @@ data class RewardData(
                 }
             },
             rarity = rarity,
+            limits = limits.map { it.toHandle() },
             chance = chance
         )
     }
@@ -103,6 +107,16 @@ data class RewardData(
                 newValueFactory = PlayerConditionSelectionMenu.entryFactory
             ) {
                 definePlayerConditionEditor()
+            }
+            list(
+                RewardData::limits,
+                displayName = "Limits",
+                iconMaterial = Material.CLOCK,
+                description = listOf("Per-player rolling limits for how often this reward can be won.")
+            ) {
+                with(LimitData) {
+                    defineEditor()
+                }
             }
             field(
                 RewardData::chance,

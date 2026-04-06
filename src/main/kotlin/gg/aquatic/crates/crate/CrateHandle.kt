@@ -3,6 +3,7 @@ package gg.aquatic.crates.crate
 import gg.aquatic.common.audience.GlobalAudience
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.crates.Messages
+import gg.aquatic.crates.crate.opening.CrateOpeningService
 import gg.aquatic.crates.debug.CratesDebug
 import gg.aquatic.replace.PlaceholderContext
 import org.bukkit.Location
@@ -31,9 +32,11 @@ class CrateHandle(
                 return@create
             }
 
+            val session = CrateOpeningService.tryStart(player, crate) ?: return@create
+
             VirtualsCtx {
                 CratesDebug.message(player, 1, "Opening the crate!")
-                if (crate.tryOpen(player, this@CrateHandle)) {
+                if (CrateOpeningService.tryOpen(session, this@CrateHandle)) {
                     CratesDebug.message(player, 1, "Crate opened!")
                 }
             }

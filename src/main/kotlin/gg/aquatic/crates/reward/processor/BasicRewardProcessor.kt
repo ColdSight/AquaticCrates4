@@ -9,18 +9,29 @@ import org.bukkit.entity.Player
 class BasicRewardProcessor(
     private val resultMenu: RewardDisplayMenuSettings?,
 ) : RewardProcessor {
-    override suspend fun process(player: Player, crate: Crate, crateHandle: CrateHandle?, provider: ResolvedRewardProvider) {
+    override suspend fun process(
+        player: Player,
+        crate: Crate,
+        crateHandle: CrateHandle?,
+        provider: ResolvedRewardProvider,
+    ): List<RolledReward> {
         val rolledRewards = provider.rollRewards(player)
         if (rolledRewards.isEmpty()) {
-            return
+            return emptyList()
         }
 
-        rolledRewards.forEach { rolled ->
-            rolled.reward.win(player, rolled.amount)
+        val grantedRewards = buildList {
+            for (rolled in rolledRewards) {
+                if (rolled.reward.tryWin(player, rolled.amount)) {
+                    add(rolled)
+                }
+            }
         }
 
         resultMenu?.let { menuSettings ->
             RewardShowcaseMenu.create(player, rolledRewards, menuSettings).open()
         }
+
+        return grantedRewards
     }
 }

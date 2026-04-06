@@ -2,7 +2,9 @@ package gg.aquatic.crates.crate
 
 import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
+import gg.aquatic.crates.crate.opening.CrateOpeningService
 import gg.aquatic.crates.data.interactable.CrateInteractableData
+import gg.aquatic.crates.limit.LimitHandle
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
 import gg.aquatic.crates.open.currency.CrateKeyCurrency
@@ -37,6 +39,7 @@ class Crate(
     priceGroupsSupplier: () -> Collection<OpenPriceGroup>,
     openConditionsSupplier: () -> OpenConditions = { OpenConditions.DUMMY },
     val interactables: Collection<CrateInteractableData>,
+    val limits: Collection<LimitHandle>,
     rewardProviderSupplier: () -> RewardProvider,
     rewardProcessorSupplier: () -> RewardProcessor,
     previewSupplier: () -> PreviewMenuSettings?,
@@ -91,33 +94,10 @@ class Crate(
     val crateItemStack by lazy { crateItem.getItem() }
 
     suspend fun tryOpen(player: Player, crateHandle: CrateHandle? = null): Boolean {
-        if (!openConditions.check(player, this, crateHandle)) {
-            return false
-        }
-
-        if (priceGroups.isEmpty()) {
-            open(player)
-            return true
-        }
-
-        for (group in priceGroups) {
-            if (group.tryTake(player, 1)) {
-                open(player)
-                return true
-            }
-        }
-
-        return false
+        return CrateOpeningService.tryOpen(player, this, crateHandle)
     }
 
     suspend fun open(player: Player, amount: Int = 1) {
-        val resolvedProvider = rewardProvider.resolve(player)
-        if (resolvedProvider.rewards.none { it.canWin(player) }) {
-            return
-        }
-
-        repeat(amount) {
-            rewardProcessor.process(player, this, null, resolvedProvider)
-        }
+        CrateOpeningService.tryOpen(player, this, null, amount)
     }
 }

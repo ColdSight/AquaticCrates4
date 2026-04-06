@@ -156,6 +156,17 @@ help:
           click:
             type: RUN_COMMAND
             value: "/aqcrates reload"
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates stats invalidate"
+          hover:
+            - "<white>Delete obsolete stats rows for removed crates."
+            - "<white>Also removes hourly buckets older than 31 days."
+            - ""
+            - "<gray>Click to run this command."
+          click:
+            type: RUN_COMMAND
+            value: "/aqcrates stats invalidate"
   actions: []
 
 crate-given:
@@ -245,6 +256,20 @@ plugin-reloaded:
   lines:
     - components:
         - text: "<green>Reloaded!"
+  actions: []
+
+stats-invalidated:
+  lines:
+    - components:
+        - text: "<green>Stats invalidation finished. Deleted <yellow>%total_deleted%</yellow> rows in total."
+    - components:
+        - text: "<gray>Openings: <white>%deleted_openings%</white>, opening rewards: <white>%deleted_opening_rewards%</white>"
+    - components:
+        - text: "<gray>Hourly crate buckets: <white>%deleted_hourly_crate_buckets%</white>, hourly reward buckets: <white>%deleted_hourly_reward_buckets%</white>"
+    - components:
+        - text: "<gray>Alltime crate rows: <white>%deleted_alltime_crate_rows%</white>, alltime reward rows: <white>%deleted_alltime_reward_rows%</white>"
+    - components:
+        - text: "<gray>Expired hourly crate buckets: <white>%deleted_expired_hourly_crate_buckets%</white>, expired hourly reward buckets: <white>%deleted_expired_hourly_reward_buckets%</white>"
   actions: []
 
 crate-placed:

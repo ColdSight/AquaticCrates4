@@ -86,6 +86,23 @@ enum class Messages(
         description = listOf("Shown when `/acrates reload` finishes."),
         icon = Material.EMERALD
     ),
+    STATS_INVALIDATED(
+        path = "stats-invalidated",
+        displayName = "Stats Invalidated",
+        description = listOf("Shown after invalidating obsolete crate stats rows and expired hourly buckets."),
+        placeholders = listOf(
+            "%total_deleted%",
+            "%deleted_openings%",
+            "%deleted_opening_rewards%",
+            "%deleted_hourly_crate_buckets%",
+            "%deleted_hourly_reward_buckets%",
+            "%deleted_alltime_crate_rows%",
+            "%deleted_alltime_reward_rows%",
+            "%deleted_expired_hourly_crate_buckets%",
+            "%deleted_expired_hourly_reward_buckets%",
+        ),
+        icon = Material.COMMAND_BLOCK
+    ),
     CRATE_PLACED(
         path = "crate-placed",
         displayName = "Crate Placed",

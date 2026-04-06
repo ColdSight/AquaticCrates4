@@ -11,6 +11,10 @@ class ConditionalPoolsRewardProvider(
     private val pools: Map<String, RewardPool>,
     private val rewardCountRanges: Collection<RewardAmountRange>,
 ) : RewardProvider {
+    override fun allRewards(): Collection<Reward> {
+        return pools.values.flatMap { it.rewards }
+    }
+
     override suspend fun resolve(player: Player): ResolvedRewardProvider {
         val matchingPools = pools.values.filter { it.matches(player) }
         val selectedPools = when {

@@ -43,6 +43,7 @@ data class CrateData(
     ),
     val interactables: List<@Polymorphic CrateInteractableData> = listOf(BlockCrateInteractableData()),
     val openConditions: List<@Polymorphic PlayerConditionData> = emptyList(),
+    val limits: List<LimitData> = emptyList(),
     val priceGroups: List<OpenPriceGroupData> = listOf(OpenPriceGroupData()),
     val rarities: Map<String, RewardRarityData> = mapOf(
         DEFAULT_RARITY_ID to RewardRarityData(displayName = "<gray>Default")
@@ -77,6 +78,7 @@ data class CrateData(
             conditionalPoolsProvider = conditionalPoolsProvider.normalized(availableRarityIds, fallbackRarityId, crateId, existingCrateIds),
             rewardProcessorType = RewardProcessorType.of(rewardProcessorType).id,
             chooseProcessor = chooseProcessor.normalized(),
+            limits = limits.map { it.normalized() }.distinctBy { it.timeframe },
             priceGroups = priceGroups.map { it.normalized(crateId, existingCrateIds) },
         )
     }
@@ -104,6 +106,7 @@ data class CrateData(
                     ?: gg.aquatic.crates.open.OpenConditions.DUMMY
             },
             interactables = normalized.interactables,
+            limits = normalized.limits.map { it.toHandle() },
             rewardProviderSupplier = {
                 when (RewardProviderType.of(normalized.rewardProviderType)) {
                     RewardProviderType.CONDITIONAL_POOLS -> ConditionalPoolsRewardProvider(
@@ -230,6 +233,16 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
             newValueFactory = PlayerConditionSelectionMenu.entryFactory
         ) {
             definePlayerConditionEditor()
+        }
+        list(
+            CrateData::limits,
+            displayName = "Limits",
+            iconMaterial = Material.CLOCK,
+            description = listOf("Per-player rolling limits for how often this crate can be opened.")
+        ) {
+            with(LimitData) {
+                defineEditor()
+            }
         }
         list(
             CrateData::priceGroups,

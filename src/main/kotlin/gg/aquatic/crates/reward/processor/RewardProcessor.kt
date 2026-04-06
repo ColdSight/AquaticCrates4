@@ -11,5 +11,5 @@ interface RewardProcessor {
         crate: Crate,
         crateHandle: CrateHandle?,
         provider: ResolvedRewardProvider,
-    )
+    ): List<RolledReward>
 }

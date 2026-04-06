@@ -1,4 +1,6 @@
 package gg.aquatic.crates.reward
+import gg.aquatic.crates.limit.LimitHandle
+import gg.aquatic.crates.limit.LimitService
 import gg.aquatic.crates.util.Weightable
 import gg.aquatic.crates.util.randomItem
 import gg.aquatic.execute.ActionHandle
@@ -13,6 +15,7 @@ import org.bukkit.inventory.ItemStack
 
 class Reward(
     val id: String,
+    val crateId: String,
     displayName: Component?,
     val previewItem: () -> ItemStack,
     val fallbackItem: (() -> ItemStack)?,
@@ -22,13 +25,14 @@ class Reward(
     val amountRanges: Collection<RewardAmountRange>,
     val clickHandler: suspend (reward: Reward, player: Player, clickType: ButtonType) -> Unit,
     val rarity: RewardRarity,
+    val limits: Collection<LimitHandle>,
     override var chance: Double
 ) : Weightable {
 
     val isPurchasable: Boolean = purchaseManager != null
 
     suspend fun canWin(player: Player): Boolean {
-        return conditions.checkConditions(player)
+        return conditions.checkConditions(player) && LimitService.canWinReward(player, crateId, id, limits)
     }
 
     fun rollAmount(): Int {
@@ -44,6 +48,15 @@ class Reward(
         winActions.executeActions(player) { _, str ->
             updatePlaceholders(str, randomAmount)
         }
+    }
+
+    suspend fun tryWin(player: Player, randomAmount: Int = rollAmount()): Boolean {
+        if (!canWin(player)) {
+            return false
+        }
+
+        win(player, randomAmount)
+        return true
     }
 
     suspend fun tryPurchase(player: Player): Boolean {

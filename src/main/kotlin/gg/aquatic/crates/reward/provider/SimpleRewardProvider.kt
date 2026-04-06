@@ -8,6 +8,8 @@ class SimpleRewardProvider(
     private val rewards: Collection<Reward>,
     private val rewardCountRanges: Collection<RewardAmountRange>,
 ) : RewardProvider {
+    override fun allRewards(): Collection<Reward> = rewards
+
     override suspend fun resolve(player: Player): ResolvedRewardProvider {
         return ResolvedRewardProvider(
             rewards = rewards,

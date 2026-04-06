@@ -1,10 +1,14 @@
 package gg.aquatic.crates
 
+import gg.aquatic.common.Config
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.crates.await.awaitStartupDependencies
 import gg.aquatic.crates.command.initializeCommands
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.data.CrateStorage
+import gg.aquatic.crates.debug.CratesLogger
+import gg.aquatic.crates.stats.CrateStats
+import gg.aquatic.crates.stats.CrateStatsPlaceholders
 import gg.aquatic.kregistry.bootstrap.RegistryHolder
 import gg.aquatic.kurrency.Currency
 import gg.aquatic.kurrency.impl.VirtualCurrency
@@ -17,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin
 object CratesPlugin : JavaPlugin(), RegistryHolder {
     var debugLevel: Int = 0
         private set
+    private lateinit var pluginConfig: Config
 
     override fun onLoad() {
         registryBootstrap(Waves) {
@@ -48,10 +53,13 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
     }
 
     override fun onEnable() {
-        saveDefaultConfig()
+        pluginConfig = Config("config.yml", this).also { it.loadSync() }
         saveResource("messages.yml", false)
-        reloadConfig()
-        debugLevel = config.getInt("debug.level", 0).coerceAtLeast(0)
+        debugLevel = pluginConfig.configuration.getInt("debug.level", 0).coerceAtLeast(0)
+        CrateStats.initialize(pluginConfig.configuration)
+        CrateStatsPlaceholders.configure(pluginConfig.configuration)
+        CratesLogger.info("Crate stats enabled after init: ${CrateStats.enabled}")
+        CrateStatsPlaceholders.register()
 
         initializeCommands()
 
@@ -66,11 +74,14 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
         runBlocking(VirtualsCtx) {
             CrateHandler.shutdown()
         }
+        CrateStats.shutdown()
     }
 
     suspend fun reload() {
-        reloadConfig()
-        debugLevel = config.getInt("debug.level", 0).coerceAtLeast(0)
+        pluginConfig.load()
+        debugLevel = pluginConfig.configuration.getInt("debug.level", 0).coerceAtLeast(0)
+        CrateStats.initialize(pluginConfig.configuration)
+        CrateStatsPlaceholders.configure(pluginConfig.configuration)
         Messages.load()
         CrateHandler.reloadPlacedCrates {
             CrateHandler.crates.clear()

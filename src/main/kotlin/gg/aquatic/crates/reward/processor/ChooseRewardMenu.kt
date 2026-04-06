@@ -18,6 +18,7 @@ class ChooseRewardMenu private constructor(
     private val onSelectActions: Collection<ActionHandle<Player>>,
     private val hiddenItem: ItemStack?,
     private val settings: RewardDisplayMenuSettings,
+    private val onCompleted: suspend (List<RolledReward>) -> Unit,
 ) : PrivateMenu(settings.invSettings.title, settings.invSettings.type, player, true) {
 
     companion object {
@@ -29,6 +30,7 @@ class ChooseRewardMenu private constructor(
             onSelectActions: Collection<ActionHandle<Player>>,
             hiddenItem: ItemStack?,
             settings: RewardDisplayMenuSettings,
+            onCompleted: suspend (List<RolledReward>) -> Unit,
         ): ChooseRewardMenu {
             return ChooseRewardMenu(
                 player = player,
@@ -37,7 +39,8 @@ class ChooseRewardMenu private constructor(
                 hiddenRewards = hiddenRewards,
                 onSelectActions = onSelectActions,
                 hiddenItem = hiddenItem,
-                settings = settings
+                settings = settings,
+                onCompleted = onCompleted,
             ).apply {
                 addButtons()
                 addRewardButtons()
@@ -92,21 +95,44 @@ class ChooseRewardMenu private constructor(
             }
         }
         if (selectedIndices.size >= chooseCount) {
-            completeSelection()
+            completeSelection(closeMenu = true)
             return
         }
 
         refreshRewardButtons()
     }
 
-    private suspend fun completeSelection() {
+    private suspend fun completeSelection(closeMenu: Boolean) {
         completed = true
         refreshRewardButtons()
 
-        selectedIndices.forEach { index ->
-            val rolled = rewards.getOrNull(index) ?: return@forEach
-            rolled.reward.win(player, rolled.amount)
+        val selectedRewards = buildList {
+            selectedIndices.forEach { index ->
+                val rolled = rewards.getOrNull(index) ?: return@forEach
+                if (rolled.reward.tryWin(player, rolled.amount)) {
+                    add(rolled)
+                }
+            }
         }
+        onCompleted(selectedRewards)
+        if (closeMenu) {
+            close()
+        }
+    }
+
+    private suspend fun completeSelectionWithRandomChoices(closeMenu: Boolean) {
+        if (completed) return
+
+        val missingChoices = (chooseCount - selectedIndices.size).coerceAtLeast(0)
+        if (missingChoices > 0) {
+            rewards.indices
+                .filter { it !in selectedIndices }
+                .shuffled()
+                .take(missingChoices)
+                .forEach { selectedIndices += it }
+        }
+
+        completeSelection(closeMenu)
     }
 
     private suspend fun refreshRewardButtons() {
@@ -114,6 +140,14 @@ class ChooseRewardMenu private constructor(
             button.itemStack = displayItem(index)
             updateComponent(button)
         }
+    }
+
+    override suspend fun onClosed(player: Player) {
+        if (completed) {
+            return
+        }
+
+        completeSelectionWithRandomChoices(closeMenu = false)
     }
 
     private fun displayItem(index: Int): ItemStack {

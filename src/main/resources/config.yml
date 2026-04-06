@@ -1,2 +1,11 @@
 debug:
   level: 0
+
+stats:
+  enabled: false
+  timestamp-format: "yyyy-MM-dd HH:mm:ss"
+  database:
+    url: "jdbc:sqlite:plugins/AqCrates/stats.db"
+    driver: "org.sqlite.JDBC"
+    user: ""
+    password: ""
