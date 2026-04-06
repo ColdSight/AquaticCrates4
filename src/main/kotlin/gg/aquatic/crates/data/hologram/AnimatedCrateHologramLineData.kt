@@ -15,13 +15,15 @@ data class AnimatedCrateHologramLineData(
         AnimatedHologramFrameData(20, TextCrateHologramLineData("<gold>Frame 2"))
     ),
 ) : CrateHologramLineData() {
-    override fun toSettings(): AnimatedHologramLine.Settings {
-        return AnimatedHologramLine.Settings(
-            frames = frames.map { it.stayTicks to it.line.toSettings() }.toMutableList(),
+    override fun toSettings(rewardEntries: List<RewardHologramEntry>): List<AnimatedHologramLine.Settings> {
+        return listOf(AnimatedHologramLine.Settings(
+            frames = frames.map { frame ->
+                frame.stayTicks to frame.line.toSettings(rewardEntries).first()
+            }.toMutableList(),
             height = height,
             filter = { true },
             failLine = null
-        )
+        ))
     }
 
     companion object {

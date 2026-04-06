@@ -3,9 +3,11 @@ package gg.aquatic.crates.data.editor
 import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.data.CrateData
 import gg.aquatic.crates.data.CrateStorage
+import gg.aquatic.crates.message.replacePlaceholder
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.createMenu
@@ -94,7 +96,7 @@ object CrateManagementMenu {
             player.closeInventory()
         }
 
-        player.sendMessage("Enter new crate ID:")
+        Messages.CRATE_CREATE_PROMPT.message().send(player)
         val id = ChatInput.createHandle(listOf("cancel")).await(player)?.trim().orEmpty()
         if (id.isEmpty()) {
             open(player, returnPage)
@@ -102,13 +104,15 @@ object CrateManagementMenu {
         }
 
         if (!idPattern.matches(id)) {
-            player.sendMessage("Invalid crate ID. Use only letters, numbers, '_' or '-'.")
+            Messages.CRATE_INVALID_ID.message().send(player)
             open(player, returnPage)
             return
         }
 
         if (CrateStorage.exists(id)) {
-            player.sendMessage("Crate '$id' already exists.")
+            Messages.CRATE_ALREADY_EXISTS.message()
+                .replacePlaceholder("%crate_id%", id)
+                .send(player)
             open(player, returnPage)
             return
         }
@@ -129,7 +133,9 @@ object CrateManagementMenu {
             runCatching {
                 CrateEditor.open(player, crateId)
             }.onFailure { throwable ->
-                player.sendMessage("Failed to open crate editor: ${throwable.message ?: throwable.javaClass.simpleName}")
+                Messages.CRATE_EDITOR_OPEN_FAILED.message()
+                    .replacePlaceholder("%reason%", throwable.message ?: throwable.javaClass.simpleName)
+                    .send(player)
                 throwable.printStackTrace()
             }
         })

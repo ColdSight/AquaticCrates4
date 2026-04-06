@@ -1,6 +1,7 @@
 package gg.aquatic.crates.command.impl
 
 import gg.aquatic.common.coroutine.BukkitCtx
+import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.data.CrateStorage
@@ -25,7 +26,7 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.crateCommand() =
                 suspendExecute<Player> {
                     withContext(BukkitCtx.ofEntity(sender)) {
                         val crate = get<Crate>("crate")
-                        sender.sendMessage("You have been given the crate!")
+                        Messages.CRATE_GIVEN.message().send(sender)
                         sender.inventory.addItem(crate.crateItemStack)
                     }
                 }

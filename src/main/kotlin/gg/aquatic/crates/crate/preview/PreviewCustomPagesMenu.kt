@@ -43,6 +43,7 @@ class PreviewCustomPagesMenu private constructor(
             ).apply {
                 addButtons()
                 addRewards()
+                pageSettings.anvilSettings?.applyTo(this)
             }
         }
     }

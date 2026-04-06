@@ -5,7 +5,6 @@ import gg.aquatic.crates.await.awaitStartupDependencies
 import gg.aquatic.crates.command.initializeCommands
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.data.CrateStorage
-import gg.aquatic.crates.open.currency.CrateKeyCurrency
 import gg.aquatic.kregistry.bootstrap.RegistryHolder
 import gg.aquatic.kurrency.Currency
 import gg.aquatic.kurrency.impl.VirtualCurrency
@@ -16,21 +15,14 @@ import kotlinx.coroutines.runBlocking
 import org.bukkit.plugin.java.JavaPlugin
 
 object CratesPlugin : JavaPlugin(), RegistryHolder {
+    var debugLevel: Int = 0
+        private set
+
     override fun onLoad() {
         registryBootstrap(Waves) {
             pre {
                 CrateHandler.crates.clear()
                 CrateHandler.crates.putAll(CrateStorage.loadAllCrates())
-            }
-            val virtualCurrencies = CrateHandler.crates.keys.associateWith { crateId ->
-                VirtualCurrency.of("aqcrates:key:$crateId")
-            }
-            val currencies = CrateHandler.crates.keys.map { crateId ->
-                CrateKeyCurrency(
-                    crateId,
-                    { CrateHandler.crates[crateId] },
-                    virtualCurrencies.getValue(crateId)
-                )
             }
 
             registry(StackedItem.ITEM_REGISTRY_KEY) {
@@ -42,23 +34,29 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
             }
 
             registry(VirtualCurrency.REGISTRY_KEY) {
-                for (currency in virtualCurrencies.values) {
-                    add(currency.id, currency)
+                for (crate in CrateHandler.crates.values) {
+                    add(crate.keyVirtualCurrency.id, crate.keyVirtualCurrency)
                 }
             }
 
             registry(Currency.REGISTRY_KEY) {
-                for (currency in currencies) {
-                    add(currency.id, currency)
+                for (crate in CrateHandler.crates.values) {
+                    add(crate.keyCurrency.id, crate.keyCurrency)
                 }
             }
         }
     }
 
     override fun onEnable() {
+        saveDefaultConfig()
+        saveResource("messages.yml", false)
+        reloadConfig()
+        debugLevel = config.getInt("debug.level", 0).coerceAtLeast(0)
+
         initializeCommands()
 
         VirtualsCtx {
+            Messages.load()
             awaitStartupDependencies()
             CrateHandler.loadPlacedCrates()
         }
@@ -71,22 +69,13 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
     }
 
     suspend fun reload() {
+        reloadConfig()
+        debugLevel = config.getInt("debug.level", 0).coerceAtLeast(0)
+        Messages.load()
         CrateHandler.reloadPlacedCrates {
             CrateHandler.crates.clear()
             CrateHandler.crates.putAll(CrateStorage.loadAllCrates())
             Waves.rebuildRegistries(this)
         }
-    }
-
-    fun crateKeyVirtualCurrency(crateId: String): VirtualCurrency {
-        val currencyId = "aqcrates:key:$crateId"
-        return VirtualCurrency.REGISTRY[currencyId]
-            ?: error("Virtual currency '$currencyId' is not registered.")
-    }
-
-    fun crateKeyCurrency(crateId: String): CrateKeyCurrency {
-        val currencyId = "aqcrates:key:$crateId"
-        return Currency.REGISTRY[currencyId] as? CrateKeyCurrency
-            ?: error("Crate key currency '$currencyId' is not registered.")
     }
 }

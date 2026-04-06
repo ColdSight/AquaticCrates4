@@ -38,6 +38,10 @@ data class ConditionalPoolsRewardProviderData(
         )
     }
 
+    fun rewardEntries(): List<Pair<String, gg.aquatic.crates.data.RewardData>> {
+        return pools.values.flatMap { it.rewardEntries() }
+    }
+
     companion object {
         fun TypedNestedSchemaBuilder<ConditionalPoolsRewardProviderData>.defineEditor() {
             field(

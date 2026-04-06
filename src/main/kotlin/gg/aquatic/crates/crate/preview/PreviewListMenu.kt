@@ -60,6 +60,7 @@ class PreviewListMenu private constructor(
         ): PreviewListMenu {
             val menu = PreviewListMenu(player, crate, crateHandle, mappedEntries(crate, player), settings)
             menu.addButtons()
+            settings.anvilSettings?.applyTo(menu)
             return menu
         }
     }

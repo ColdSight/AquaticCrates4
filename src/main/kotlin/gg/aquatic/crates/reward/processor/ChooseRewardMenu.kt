@@ -41,6 +41,7 @@ class ChooseRewardMenu private constructor(
             ).apply {
                 addButtons()
                 addRewardButtons()
+                settings.anvilSettings?.applyTo(this)
             }
         }
     }

@@ -7,22 +7,25 @@ import gg.aquatic.crates.data.condition.*
 import gg.aquatic.crates.data.editor.CrateEditorValidators
 import gg.aquatic.crates.data.editor.PreviewSectionFieldAdapter
 import gg.aquatic.crates.data.hologram.CrateHologramLineTypes
+import gg.aquatic.crates.data.hologram.RewardHologramEntry
 import gg.aquatic.crates.data.hologram.findHologramLineSubtypeId
 import gg.aquatic.crates.data.interactable.*
 import gg.aquatic.crates.data.item.StackedItemData
 import gg.aquatic.crates.data.price.OpenPriceGroupData
 import gg.aquatic.crates.data.price.OpenPriceTypes
 import gg.aquatic.crates.data.price.findOpenPriceSubtypeId
-import gg.aquatic.crates.data.processor.*
+import gg.aquatic.crates.data.processor.BasicRewardProcessorData
+import gg.aquatic.crates.data.processor.ChooseRewardProcessorData
+import gg.aquatic.crates.data.processor.RewardProcessorSectionFieldAdapter
+import gg.aquatic.crates.data.processor.RewardProcessorType
 import gg.aquatic.crates.data.provider.ConditionalPoolsRewardProviderData
-import gg.aquatic.crates.data.provider.RewardProviderType
 import gg.aquatic.crates.data.provider.RewardProviderSectionFieldAdapter
+import gg.aquatic.crates.data.provider.RewardProviderType
 import gg.aquatic.crates.data.provider.SimpleRewardProviderData
-import gg.aquatic.crates.reward.RewardRarity
-import gg.aquatic.crates.reward.provider.ConditionalPoolsRewardProvider
-import gg.aquatic.crates.reward.provider.SimpleRewardProvider
 import gg.aquatic.crates.reward.processor.BasicRewardProcessor
 import gg.aquatic.crates.reward.processor.ChooseRewardProcessor
+import gg.aquatic.crates.reward.provider.ConditionalPoolsRewardProvider
+import gg.aquatic.crates.reward.provider.SimpleRewardProvider
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Polymorphic
@@ -81,12 +84,13 @@ data class CrateData(
     fun toCrate(id: String): Crate {
         val normalized = normalized(id)
         val crateKeyItem by lazy { normalized.keyItem.asStacked().getItem() }
+        val rewardHologramEntries by lazy { normalized.rewardHologramEntries() }
 
         return Crate(
             id = id,
             keyItemSupplier = { crateKeyItem },
             displayName = normalized.displayName.toMMComponent(),
-            hologramSupplier = { normalized.hologram?.toSettings() },
+            hologramSupplier = { normalized.hologram?.toSettings(rewardHologramEntries) },
             priceGroupsSupplier = { normalized.priceGroups.map { it.toOpenPriceGroup(id, crateKeyItem) } },
             openConditionsSupplier = {
                 normalized.openConditions
@@ -395,6 +399,25 @@ private fun buildRewards(
         rewardData.toReward(rewardId, crateId, crateKeyItem, rewardRarity)
     }.toMutableList().also { builtRewards ->
         normalizeRewardChances(builtRewards, resolvedRarities)
+    }
+}
+
+private fun CrateData.rewardHologramEntries(): List<RewardHologramEntry> {
+    val rewards = when (RewardProviderType.of(rewardProviderType)) {
+        RewardProviderType.CONDITIONAL_POOLS -> conditionalPoolsProvider.rewardEntries()
+        RewardProviderType.SIMPLE -> simpleProvider.rewardEntries()
+    }
+
+    return rewards.map { (rewardId, rewardData) ->
+        val item = rewardData.previewItem.asStacked().getItem()
+        val displayName = rewardData.displayName?.toMMComponent()
+            ?: item.itemMeta.displayName()
+            ?: net.kyori.adventure.text.Component.text(rewardId)
+
+        RewardHologramEntry(
+            item = item,
+            displayName = displayName
+        )
     }
 }
 

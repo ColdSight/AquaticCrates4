@@ -17,6 +17,9 @@ data class MultiBlockCrateInteractableData(
     val blocks: Map<String, BlockDefinitionData> = mapOf("x" to BlockDefinitionData()),
     val layers: Map<String, MultiBlockLayerData> = mapOf("0" to MultiBlockLayerData()),
     val viewRange: Int = 50,
+    val offsetX: Double = 0.0,
+    val offsetY: Double = 0.0,
+    val offsetZ: Double = 0.0,
 ) : CrateInteractableData() {
 
     override fun toSettings() = ClientsideMultiBlockSettings(
@@ -32,7 +35,10 @@ data class MultiBlockCrateInteractableData(
                 }.toMap().toMutableMap()
             )
         ),
-        viewRange = viewRange
+        viewRange = viewRange,
+        offsetX = offsetX,
+        offsetY = offsetY,
+        offsetZ = offsetZ
     )
 
     companion object {
@@ -86,6 +92,11 @@ data class MultiBlockCrateInteractableData(
                 IntFieldConfig(prompt = "Enter interactable view range:", min = 1),
                 displayName = "View Range",
                 description = listOf("Maximum distance where this clientside interactable stays visible.")
+            )
+            defineInteractableOffsetEditor(
+                MultiBlockCrateInteractableData::offsetX,
+                MultiBlockCrateInteractableData::offsetY,
+                MultiBlockCrateInteractableData::offsetZ
             )
         }
     }

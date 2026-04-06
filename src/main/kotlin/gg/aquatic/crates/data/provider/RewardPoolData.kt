@@ -56,6 +56,10 @@ data class RewardPoolData(
         )
     }
 
+    fun rewardEntries(): List<Pair<String, RewardData>> {
+        return rewards.entries.map { it.toPair() }
+    }
+
     companion object {
         fun TypedNestedSchemaBuilder<RewardPoolData>.defineEditor() {
             field(

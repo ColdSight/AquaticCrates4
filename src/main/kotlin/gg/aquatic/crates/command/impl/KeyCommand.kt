@@ -1,18 +1,23 @@
 package gg.aquatic.crates.command.impl
 
 import gg.aquatic.common.coroutine.BukkitCtx
-import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.common.toMMComponent
+import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
+import gg.aquatic.crates.message.MessageStorage
+import gg.aquatic.crates.message.replacePlaceholder
 import gg.aquatic.kommand.CommandBuilder
 import gg.aquatic.kommand.hasPermission
+import gg.aquatic.klocale.impl.paper.replacePlaceholders
 import gg.aquatic.kommand.playerArgument
 import io.papermc.paper.command.brigadier.CommandSourceStack
-import java.math.BigDecimal
 import kotlinx.coroutines.withContext
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.math.BigDecimal
 import java.math.BigInteger
 
 /**
@@ -25,8 +30,9 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
         "give" {
             listArgument("crate", { CrateHandler.crates.values }, { it.id }) {
                 playerArgument("player", true) {
-                    bigIntegerArgument("amount")
-                    flagsArgument("options", listOf("-s", "-v"))
+                    bigIntegerArgument("amount") {
+                        flagsArgument("options", listOf("-s", "-v"))
+                    }
                 }
                 suspendExecute<CommandSender> {
                     val crate = get<Crate>("crate")
@@ -38,7 +44,7 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
                     if (player == null) {
                         if (sender !is Player) {
                             if (!silent) {
-                                sender.sendMessage("You must be a player to give yourself keys!")
+                                Messages.KEYS_SELF_REQUIRES_PLAYER.message().send(sender)
                             }
                             return@suspendExecute
                         }
@@ -46,7 +52,10 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
                         withContext(BukkitCtx.ofEntity(self)) {
                             giveKeys(crate, self, amount, virtual)
                             if (!silent) {
-                                self.sendMessage("You have been given ${amount}x ${keyTypeName(virtual)} key!")
+                                Messages.KEYS_GIVEN_SELF.message()
+                                    .replacePlaceholder("%amount%", amount.toString())
+                                    .replacePlaceholder("%key_type%", keyTypeName(virtual))
+                                    .send(self)
                             }
                         }
                         return@suspendExecute
@@ -55,20 +64,51 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
                     withContext(BukkitCtx.ofEntity(player)) {
                         giveKeys(crate, player, amount, virtual)
                         if (!silent) {
-                            player.sendMessage("You have been given ${amount}x ${keyTypeName(virtual)} key!")
+                            Messages.KEYS_GIVEN_TARGET.message()
+                                .replacePlaceholder("%amount%", amount.toString())
+                                .replacePlaceholder("%key_type%", keyTypeName(virtual))
+                                .send(player)
                             if (sender != player) {
-                                sender.sendMessage("You have given ${player.name} ${amount}x ${keyTypeName(virtual)} key!")
+                                Messages.KEYS_GIVEN_SENDER.message()
+                                    .replacePlaceholder("%player%", player.name)
+                                    .replacePlaceholder("%amount%", amount.toString())
+                                    .replacePlaceholder("%key_type%", keyTypeName(virtual))
+                                    .send(sender)
                             }
                         }
                     }
                 }
             }
         }
+
+        "bank" {
+            playerArgument("player") {
+            }
+
+            suspendExecute<CommandSender> {
+                val target = getOrNull<Player>("player") ?: run {
+                    if (sender !is Player) {
+                        Messages.KEYS_SELF_REQUIRES_PLAYER.message().send(sender)
+                        return@suspendExecute
+                    }
+                    sender as Player
+                }
+
+                if (target != sender && !sender.hasPermission("aqcrates.admin.keybank.others")) {
+                    Messages.NO_PERMISSION.message()
+                        .replacePlaceholder("%permission%", "aqcrates.admin.keybank.others")
+                        .send(sender)
+                    return@suspendExecute
+                }
+
+                sendKeyBank(sender, target)
+            }
+        }
     }
 
 private suspend fun giveKeys(crate: Crate, player: Player, amount: BigInteger, virtual: Boolean) {
     if (virtual) {
-        CratesPlugin.crateKeyCurrency(crate.id).give(player, amount.toBigDecimal())
+        crate.keyCurrency.give(player, amount.toBigDecimal())
         return
     }
 
@@ -91,3 +131,49 @@ private fun givePhysicalKeys(keyItem: ItemStack, player: Player, amount: BigInte
 }
 
 private fun keyTypeName(virtual: Boolean): String = if (virtual) "virtual" else "physical"
+
+private suspend fun sendKeyBank(sender: CommandSender, target: Player) {
+    val data = MessageStorage.loadData()
+    val entries = CrateHandler.crates.values
+        .sortedBy { it.id }
+        .mapNotNull { crate ->
+            val balance = crate.keyVirtualCurrency.getBalance(target)
+            if (balance <= BigDecimal.ZERO) return@mapNotNull null
+            KeyBankEntry(
+                crateId = crate.id,
+                crateName = PlainTextComponentSerializer.plainText().serialize(crate.displayName),
+                amount = balance.stripTrailingZeros().toPlainString()
+            )
+        }
+
+    if (entries.isEmpty()) {
+        Messages.KEY_BANK_EMPTY.message()
+            .replacePlaceholder("%player%", target.name)
+            .send(sender)
+        return
+    }
+
+    val renderedLines = entries.flatMap { entry ->
+        data.keyBank.lines.map { line ->
+            line.toMiniMessage().toMMComponent().replacePlaceholders(
+                mapOf(
+                    "player" to target.name,
+                    "crate_id" to entry.crateId,
+                    "crate_name" to entry.crateName,
+                    "amount" to entry.amount,
+                )
+            )
+        }
+    }
+
+    data.keyBank.toPaperMessage(
+        renderedLines,
+        paginationReplacements = mapOf("player" to target.name)
+    ).send(sender)
+}
+
+private data class KeyBankEntry(
+    val crateId: String,
+    val crateName: String,
+    val amount: String,
+)

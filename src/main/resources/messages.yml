@@ -1,0 +1,290 @@
+help:
+  pagination:
+    page-size: 9
+    header: null
+    footer:
+      components:
+        - text: "<#18788C>[← Previous]"
+          hover:
+            - "<gray>Open the previous help page."
+          click:
+            type: PAGE
+            value: "prev"
+          visibility-conditions:
+            - type: has-previous-page
+        - text: " <gray>| "
+          visibility-conditions:
+            - type: has-previous-page
+            - type: has-next-page
+        - text: "<#3EC4DE>[Next →]"
+          hover:
+            - "<gray>Open the next help page."
+          click:
+            type: PAGE
+            value: "next"
+          visibility-conditions:
+            - type: has-next-page
+      visibility-conditions:
+        - type: has-next-or-previous-page
+  lines:
+    - components:
+        - text: " "
+    - components:
+        - text: " <#9BE0EE>⬛⬛⬛⬛⬛⬛                   <underlined><#3EC4DE>AquaticCrates"
+    - components:
+        - text: " <#3EC4DE>⬛        ⬛"
+    - components:
+        - text: "<#18788C>⬛⬛⬛⬛⬛⬛⬛           <white>Welcome on the help page!"
+    - components:
+        - text: " <#3EC4DE>⬛   <#18788C>⬛<#3EC4DE>   ⬛"
+    - components:
+        - text: " <#3EC4DE>⬛        ⬛                "
+        - text: "<#6E7EF0>[Discord]"
+          hover:
+            - "<gray>Click to open Aquatic Discord."
+          click:
+            type: OPEN_URL
+            value: "https://discord.com/invite/ffKAAQwNdC"
+        - text: " "
+        - text: "<#8AE3D9>[Wiki]"
+          hover:
+            - "<gray>Click to open the documentation."
+          click:
+            type: OPEN_URL
+            value: "https://mrlarkyy.gitbook.io/aquaticcrates-v3"
+    - components:
+        - text: "<#18788C>⬛⬛<#3EC4DE>⬛⬛⬛<#18788C>⬛⬛"
+    - components:
+        - text: "<#18788C>⬛⬛      ⬛⬛  "
+        - text: "<#68A6E8>[BuiltByBit]"
+          hover:
+            - "<gray>Open the BuiltByBit profile."
+          click:
+            type: OPEN_URL
+            value: "https://builtbybit.com/members/larkyy.122935"
+        - text: " "
+        - text: "<#B082F5>[Patreon]"
+          hover:
+            - "<gray>Open the Patreon page."
+          click:
+            type: OPEN_URL
+            value: "https://www.patreon.com/c/aquaticgg"
+    - components:
+        - text: " "
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates crate menu"
+          hover:
+            - "<white>Open the in-game crate management menu."
+            - ""
+            - "<gray>Click to suggest this command."
+          click:
+            type: SUGGEST_COMMAND
+            value: "/aqcrates crate menu"
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates crate edit <gray><crate-id>"
+          hover:
+            - "<white>Edit an existing crate."
+            - ""
+            - "<gray>Click to suggest this command."
+          click:
+            type: SUGGEST_COMMAND
+            value: "/aqcrates crate edit "
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates crate give <gray><crate-id>"
+          hover:
+            - "<white>Give yourself a crate item."
+            - ""
+            - "<gray>Click to suggest this command."
+          click:
+            type: SUGGEST_COMMAND
+            value: "/aqcrates crate give "
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates key give <gray><crate-id> [player] [amount] [-v] [-s]"
+          hover:
+            - "<white>Give crate keys."
+            - ""
+            - "<gray>Arguments:"
+            - "<gray><crate-id> <white>= target crate id"
+            - "<gray>[player] <white>= target player, defaults to self"
+            - "<gray>[amount] <white>= key amount, defaults to 1"
+            - ""
+            - "<gray>Flags:"
+            - "<gray>-v <white>= virtual keys"
+            - "<gray>-s <white>= silent"
+            - ""
+            - "<gray>Click to suggest this command."
+          click:
+            type: SUGGEST_COMMAND
+            value: "/aqcrates key give "
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates key bank <gray>[player]"
+          hover:
+            - "<white>Show virtual key balances."
+            - ""
+            - "<gray>Arguments:"
+            - "<gray>[player] <white>= target player, defaults to self"
+            - ""
+            - "<gray>Permission:"
+            - "<gray>aqcrates.admin.keybank.others <white>= view other players"
+            - ""
+            - "<gray>Click to suggest this command."
+          click:
+            type: SUGGEST_COMMAND
+            value: "/aqcrates key bank "
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates messages"
+          hover:
+            - "<white>Open the in-game messages editor."
+            - ""
+            - "<gray>Click to suggest this command."
+          click:
+            type: SUGGEST_COMMAND
+            value: "/aqcrates messages"
+    - components:
+        - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates reload"
+          hover:
+            - "<white>Reload crates, messages and runtime registries."
+            - ""
+            - "<gray>Click to run this command."
+          click:
+            type: RUN_COMMAND
+            value: "/aqcrates reload"
+  actions: []
+
+crate-given:
+  lines:
+    - components:
+        - text: "<green>You have been given the crate!"
+  actions: []
+
+keys-self-requires-player:
+  lines:
+    - components:
+        - text: "<red>You must be a player to give yourself keys!"
+  actions: []
+
+keys-given-self:
+  lines:
+    - components:
+        - text: "<green>You have been given <yellow>%amount%x</yellow> <gold>%key_type%</gold> key!"
+  actions: []
+
+keys-given-target:
+  lines:
+    - components:
+        - text: "<green>You have been given <yellow>%amount%x</yellow> <gold>%key_type%</gold> key!"
+  actions: []
+
+keys-given-sender:
+  lines:
+    - components:
+        - text: "<green>You have given <yellow>%player%</yellow> <yellow>%amount%x</yellow> <gold>%key_type%</gold> key!"
+  actions: []
+
+key-bank:
+  pagination:
+    page-size: 8
+    header:
+      components:
+        - text: "<#18788C><bold>|</bold> <#3EC4DE>%player%'s Virtual Key Bank"
+    footer:
+      components:
+        - text: "<#18788C>[← Previous]"
+          hover:
+            - "<gray>Open the previous page."
+          click:
+            type: PAGE
+            value: "prev"
+          visibility-conditions:
+            - type: has-previous-page
+        - text: " <gray>| "
+          visibility-conditions:
+            - type: has-previous-page
+            - type: has-next-page
+        - text: "<#3EC4DE>[Next →]"
+          hover:
+            - "<gray>Open the next page."
+          click:
+            type: PAGE
+            value: "next"
+          visibility-conditions:
+            - type: has-next-page
+      visibility-conditions:
+        - type: has-next-or-previous-page
+  lines:
+    - components:
+        - text: "<#18788C><bold>|</bold> <yellow>%crate_name%</yellow> <gray>(<white>%crate_id%</white>)<gray>: <aqua>%amount%</aqua>"
+  actions: []
+
+key-bank-empty:
+  lines:
+    - components:
+        - text: "<red>%player% has no virtual keys."
+  actions: []
+
+no-permission:
+  lines:
+    - components:
+        - text: "<red>You do not have permission to do that."
+  actions: []
+
+plugin-reloading:
+  lines:
+    - components:
+        - text: "<yellow>Reloading..."
+  actions: []
+
+plugin-reloaded:
+  lines:
+    - components:
+        - text: "<green>Reloaded!"
+  actions: []
+
+crate-placed:
+  lines:
+    - components:
+        - text: "<green>You have placed the crate!"
+  actions: []
+
+crate-destroyed:
+  lines:
+    - components:
+        - text: "<red>Crate destroyed!"
+  actions: []
+
+crate-saved:
+  lines:
+    - components:
+        - text: "<green>Saved crate '<yellow>%crate_id%</yellow>'."
+  actions: []
+
+crate-create-prompt:
+  lines:
+    - components:
+        - text: "<aqua>Enter new crate ID:"
+  actions: []
+
+crate-invalid-id:
+  lines:
+    - components:
+        - text: "<red>Invalid crate ID. Use only letters, numbers, '_' or '-'."
+  actions: []
+
+crate-already-exists:
+  lines:
+    - components:
+        - text: "<red>Crate '<yellow>%crate_id%</yellow>' already exists."
+  actions: []
+
+crate-editor-open-failed:
+  lines:
+    - components:
+        - text: "<red>Failed to open crate editor: <yellow>%reason%</yellow>"
+  actions: []

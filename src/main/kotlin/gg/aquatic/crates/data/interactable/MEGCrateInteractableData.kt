@@ -11,11 +11,17 @@ import kotlinx.serialization.Serializable
 data class MEGCrateInteractableData(
     val modelId: String = "crate_model",
     val viewRange: Int = 50,
+    val offsetX: Double = 0.0,
+    val offsetY: Double = 0.0,
+    val offsetZ: Double = 0.0,
 ) : CrateInteractableData() {
 
     override fun toSettings() = ClientsideMEGSettings(
         modelId = modelId,
-        viewRange = viewRange
+        viewRange = viewRange,
+        offsetX = offsetX,
+        offsetY = offsetY,
+        offsetZ = offsetZ
     )
 
     companion object {
@@ -36,6 +42,11 @@ data class MEGCrateInteractableData(
                 IntFieldConfig(prompt = "Enter interactable view range:", min = 1),
                 displayName = "View Range",
                 description = listOf("Maximum distance where this clientside interactable stays visible.")
+            )
+            defineInteractableOffsetEditor(
+                MEGCrateInteractableData::offsetX,
+                MEGCrateInteractableData::offsetY,
+                MEGCrateInteractableData::offsetZ
             )
         }
     }

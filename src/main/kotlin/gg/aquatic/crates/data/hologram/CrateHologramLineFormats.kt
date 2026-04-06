@@ -19,6 +19,7 @@ object CrateHologramLineFormats {
             subclass(TextCrateHologramLineData::class)
             subclass(ItemCrateHologramLineData::class)
             subclass(AnimatedCrateHologramLineData::class)
+            subclass(RollRewardCrateHologramLineData::class)
         }
     }
 
@@ -67,6 +68,14 @@ object CrateHologramLineTypes {
             { AnimatedCrateHologramLineData() },
             { AnimatedCrateHologramLineData.serializer().descriptor }
         ),
+        Definition(
+            "roll-reward",
+            "Roll Reward Line",
+            listOf("Cycles through crate rewards", "using an item line and reward name above it."),
+            Material.MINECART,
+            { RollRewardCrateHologramLineData() },
+            { RollRewardCrateHologramLineData.serializer().descriptor }
+        ),
     )
 
     private val byId = definitions.associateBy { it.id }
@@ -93,12 +102,12 @@ object CrateHologramLineTypes {
 }
 
 object HologramLineSelectionMenu {
-    private val entrySlots = listOf(11, 13, 15)
+    private val entrySlots = listOf(10, 12, 14, 16)
     private val definitions = CrateHologramLineTypes.definitions.map {
         PolymorphicSelectionMenu.Definition(it.id, it.displayName, it.description, it.icon)
     }
     private val frameDefinitions = CrateHologramLineTypes.definitions
-        .filterNot { it.id == "animated" }
+        .filter { it.id == "text" || it.id == "item" }
         .map {
             PolymorphicSelectionMenu.Definition(it.id, it.displayName, it.description, it.icon)
         }

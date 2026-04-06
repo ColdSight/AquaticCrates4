@@ -1,6 +1,6 @@
 package gg.aquatic.crates.data.editor
 
-import gg.aquatic.crates.data.PreviewType
+import gg.aquatic.crates.data.PREVIEW_TYPE_AUTOMATIC
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
@@ -43,8 +43,8 @@ object PreviewSectionFieldAdapter : EditorFieldAdapter {
     }
 
     private fun currentType(context: EditorFieldContext): String {
-        val currentObject = context.value as? JsonObject ?: return PreviewType.AUTOMATIC.id
-        return (currentObject["previewType"] as? JsonPrimitive)?.content ?: PreviewType.AUTOMATIC.id
+        val currentObject = context.value as? JsonObject ?: return PREVIEW_TYPE_AUTOMATIC
+        return (currentObject["previewType"] as? JsonPrimitive)?.content ?: PREVIEW_TYPE_AUTOMATIC
     }
 
     private fun updatePreviewType(current: JsonElement, type: String): JsonElement {

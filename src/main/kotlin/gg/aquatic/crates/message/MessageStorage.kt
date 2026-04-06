@@ -1,0 +1,52 @@
+package gg.aquatic.crates.message
+
+import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.crates.Messages
+import gg.aquatic.klocale.impl.paper.PaperMessage
+import java.io.File
+
+object MessageStorage {
+    val file: File
+        get() = File(CratesPlugin.dataFolder, "messages.yml")
+
+    fun loadData(): MessagesFileData {
+        val target = file
+        if (!target.exists()) {
+            return MessagesFileData()
+        }
+
+        return MessagesFormats.yaml.decodeFromString(MessagesFileData.serializer(), target.readText(Charsets.UTF_8))
+    }
+
+    fun saveData(data: MessagesFileData) {
+        val target = file
+        target.parentFile?.mkdirs()
+        target.writeText(MessagesFormats.yaml.encodeToString(MessagesFileData.serializer(), data), Charsets.UTF_8)
+    }
+
+    fun loadRuntimeMessages(): Map<String, Map<String, PaperMessage>> {
+        val data = loadData()
+        return mapOf(
+            "en" to mapOf(
+                Messages.HELP.path to data.help.toPaperMessage(),
+                Messages.CRATE_GIVEN.path to data.crateGiven.toPaperMessage(),
+                Messages.KEYS_SELF_REQUIRES_PLAYER.path to data.keysSelfRequiresPlayer.toPaperMessage(),
+                Messages.KEYS_GIVEN_SELF.path to data.keysGivenSelf.toPaperMessage(),
+                Messages.KEYS_GIVEN_TARGET.path to data.keysGivenTarget.toPaperMessage(),
+                Messages.KEYS_GIVEN_SENDER.path to data.keysGivenSender.toPaperMessage(),
+                Messages.KEY_BANK.path to data.keyBank.toPaperMessage(),
+                Messages.KEY_BANK_EMPTY.path to data.keyBankEmpty.toPaperMessage(),
+                Messages.NO_PERMISSION.path to data.noPermission.toPaperMessage(),
+                Messages.PLUGIN_RELOADING.path to data.pluginReloading.toPaperMessage(),
+                Messages.PLUGIN_RELOADED.path to data.pluginReloaded.toPaperMessage(),
+                Messages.CRATE_PLACED.path to data.cratePlaced.toPaperMessage(),
+                Messages.CRATE_DESTROYED.path to data.crateDestroyed.toPaperMessage(),
+                Messages.CRATE_SAVED.path to data.crateSaved.toPaperMessage(),
+                Messages.CRATE_CREATE_PROMPT.path to data.crateCreatePrompt.toPaperMessage(),
+                Messages.CRATE_INVALID_ID.path to data.crateInvalidId.toPaperMessage(),
+                Messages.CRATE_ALREADY_EXISTS.path to data.crateAlreadyExists.toPaperMessage(),
+                Messages.CRATE_EDITOR_OPEN_FAILED.path to data.crateEditorOpenFailed.toPaperMessage(),
+            )
+        )
+    }
+}

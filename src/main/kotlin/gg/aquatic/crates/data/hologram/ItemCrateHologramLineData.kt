@@ -16,28 +16,27 @@ data class ItemCrateHologramLineData(
     val item: StackedItemData = StackedItemData(material = org.bukkit.Material.DIAMOND.name),
     val height: Double = 0.3,
     val scale: Double = 1.0,
-    val billboard: String = Display.Billboard.CENTER.name,
-    val itemDisplayTransform: String = ItemDisplay.ItemDisplayTransform.GROUND.name,
+    val billboard: Display.Billboard = Display.Billboard.CENTER,
+    val itemDisplayTransform: ItemDisplay.ItemDisplayTransform = ItemDisplay.ItemDisplayTransform.GROUND,
     val transformationDuration: Int = 0,
     val teleportInterpolation: Int = 0,
     val translationX: Double = 0.0,
     val translationY: Double = 0.0,
     val translationZ: Double = 0.0,
 ) : CrateHologramLineData() {
-    override fun toSettings(): ItemHologramLine.Settings {
-        return ItemHologramLine.Settings(
+    override fun toSettings(rewardEntries: List<RewardHologramEntry>): List<ItemHologramLine.Settings> {
+        return listOf(ItemHologramLine.Settings(
             item = item.asStacked().getItem(),
             height = height,
             scale = scale.toFloat(),
-            billboard = runCatching { Display.Billboard.valueOf(billboard) }.getOrDefault(Display.Billboard.CENTER),
-            itemDisplayTransform = runCatching { ItemDisplay.ItemDisplayTransform.valueOf(itemDisplayTransform) }
-                .getOrDefault(ItemDisplay.ItemDisplayTransform.GROUND),
+            billboard = billboard,
+            itemDisplayTransform = itemDisplayTransform,
             filter = { true },
             failLine = null,
             transformationDuration = transformationDuration,
             teleportInterpolation = teleportInterpolation,
             translation = Vector3f(translationX.toFloat(), translationY.toFloat(), translationZ.toFloat())
-        )
+        ))
     }
 
     companion object {

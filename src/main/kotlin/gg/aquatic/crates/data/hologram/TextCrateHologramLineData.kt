@@ -18,7 +18,7 @@ data class TextCrateHologramLineData(
     val height: Double = 0.3,
     val lineWidth: Int = 200,
     val scale: Double = 1.0,
-    val billboard: String = Display.Billboard.CENTER.name,
+    val billboard: Display.Billboard = Display.Billboard.CENTER,
     val hasShadow: Boolean = true,
     val backgroundColor: String? = null,
     val seeThrough: Boolean = true,
@@ -29,13 +29,13 @@ data class TextCrateHologramLineData(
     val translationZ: Double = 0.0,
 ) : CrateHologramLineData() {
 
-    override fun toSettings(): TextHologramLine.Settings {
-        return TextHologramLine.Settings(
+    override fun toSettings(rewardEntries: List<RewardHologramEntry>): List<TextHologramLine.Settings> {
+        return listOf(TextHologramLine.Settings(
             height = height,
             text = text.toMMComponent(),
             lineWidth = lineWidth,
             scale = scale.toFloat(),
-            billboard = runCatching { Display.Billboard.valueOf(billboard) }.getOrDefault(Display.Billboard.CENTER),
+            billboard = billboard,
             filter = { true },
             hasShadow = hasShadow,
             backgroundColor = backgroundColor?.let(::parseColor),
@@ -44,7 +44,7 @@ data class TextCrateHologramLineData(
             failLine = null,
             teleportInterpolation = teleportInterpolation,
             translation = Vector3f(translationX.toFloat(), translationY.toFloat(), translationZ.toFloat())
-        )
+        ))
     }
 
     companion object {

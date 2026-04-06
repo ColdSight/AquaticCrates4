@@ -11,11 +11,17 @@ import org.bukkit.entity.EntityType
 data class EntityCrateInteractableData(
     val entityType: String = EntityType.ARMOR_STAND.name,
     val viewRange: Int = 50,
+    val offsetX: Double = 0.0,
+    val offsetY: Double = 0.0,
+    val offsetZ: Double = 0.0,
 ) : CrateInteractableData() {
 
     override fun toSettings() = ClientsideEntitySettings(
         entityType = runCatching { EntityType.valueOf(entityType.uppercase()) }.getOrDefault(EntityType.ARMOR_STAND),
-        viewRange = viewRange
+        viewRange = viewRange,
+        offsetX = offsetX,
+        offsetY = offsetY,
+        offsetZ = offsetZ
     )
 
     companion object {
@@ -36,6 +42,11 @@ data class EntityCrateInteractableData(
                 IntFieldConfig(prompt = "Enter interactable view range:", min = 1),
                 displayName = "View Range",
                 description = listOf("Maximum distance where this clientside interactable stays visible.")
+            )
+            defineInteractableOffsetEditor(
+                EntityCrateInteractableData::offsetX,
+                EntityCrateInteractableData::offsetY,
+                EntityCrateInteractableData::offsetZ
             )
         }
     }

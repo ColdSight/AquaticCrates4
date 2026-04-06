@@ -3,8 +3,7 @@ package gg.aquatic.crates.data
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.data.editor.CrateEditorValidators
-import gg.aquatic.crates.data.editor.InventoryTypeFieldAdapter
-import gg.aquatic.kmenu.inventory.InventoryType
+import gg.aquatic.crates.data.menu.MenuInventoryData
 import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
@@ -20,8 +19,8 @@ import org.bukkit.Material
 
 @Serializable
 data class PreviewMenuData(
-    val previewType: String = PreviewType.AUTOMATIC.id,
-    val inventoryType: String = "GENERIC9X3",
+    val previewType: String = PREVIEW_TYPE_AUTOMATIC,
+    val inventory: MenuInventoryData = MenuInventoryData(),
     val title: String = "<yellow>Preview Menu",
     val rewardSlots: List<Int> = listOf(10, 11, 12, 13, 14, 15, 16),
     val customButtons: Map<String, PreviewButtonData> = emptyMap(),
@@ -29,8 +28,8 @@ data class PreviewMenuData(
 ) {
 
     fun toPreviewSettings(): PreviewMenuSettings {
-        val type = PreviewType.of(previewType)
-        if (type == PreviewType.CUSTOM_PAGES && pages.isNotEmpty()) {
+        val type = normalizePreviewType(previewType)
+        if (type == PREVIEW_TYPE_CUSTOM_PAGES && pages.isNotEmpty()) {
             return PreviewMenuSettings.CustomPages(
                 pages.map { it.toBasicSettings() }
             )
@@ -40,8 +39,7 @@ data class PreviewMenuData(
     }
 
     fun toBasicSettings(): PreviewMenuSettings.Basic {
-        val resolvedType = runCatching { InventoryType.valueOf(inventoryType.trim()) }
-            .getOrDefault(InventoryType.GENERIC9X3)
+        val inventorySettings = inventory.toRuntimeSettings()
 
         val components = hashMapOf<String, gg.aquatic.kmenu.menu.settings.IButtonSettings>()
 
@@ -52,10 +50,11 @@ data class PreviewMenuData(
         return PreviewMenuSettings.Basic(
             rewardSlots = rewardSlots.distinct(),
             invSettings = PrivateMenuSettings(
-                resolvedType,
+                inventorySettings.inventoryType,
                 title.toMMComponent(),
                 components
-            )
+            ),
+            anvilSettings = inventorySettings.anvil
         )
     }
 
@@ -64,14 +63,13 @@ data class PreviewMenuData(
 
         fun TypedNestedSchemaBuilder<PreviewMenuData>.defineEditor() {
             field(PreviewMenuData::previewType, visibleWhen = { false })
-            field(
-                PreviewMenuData::inventoryType,
-                adapter = InventoryTypeFieldAdapter,
-                displayName = "Preview Inventory Type",
-                iconMaterial = Material.CHEST,
-                description = listOf("Inventory layout used for the crate preview menu."),
-                visibleWhen = { it.isPreviewType(PreviewType.AUTOMATIC) }
-            )
+            include<PreviewMenuData>(visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }) {
+                group(PreviewMenuData::inventory) {
+                    with(MenuInventoryData) {
+                        defineEditor(typeLabel = "Preview Inventory Type")
+                    }
+                }
+            }
             field(
                 PreviewMenuData::title,
                 TextFieldAdapter,
@@ -79,7 +77,7 @@ data class PreviewMenuData(
                 displayName = "Preview Title",
                 iconMaterial = Material.NAME_TAG,
                 description = listOf("Menu title shown at the top of the preview inventory."),
-                visibleWhen = { it.isPreviewType(PreviewType.AUTOMATIC) }
+                visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
             )
             list(
                 PreviewMenuData::rewardSlots,
@@ -87,7 +85,7 @@ data class PreviewMenuData(
                 iconMaterial = Material.HOPPER,
                 description = listOf("Slots where reward icons can appear in the preview menu."),
                 newValueFactory = EditorEntryFactories.int("Enter reward slot or range (e.g. 10-16 or 10,12,14):", unique = true),
-                visibleWhen = { it.isPreviewType(PreviewType.AUTOMATIC) }
+                visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
             )
             map(
                 PreviewMenuData::customButtons,
@@ -114,7 +112,7 @@ data class PreviewMenuData(
                         )
                     }
                 ),
-                visibleWhen = { it.isPreviewType(PreviewType.AUTOMATIC) }
+                visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
             ) {
                 with(PreviewButtonData) {
                     defineEditor()
@@ -128,7 +126,7 @@ data class PreviewMenuData(
                 newValueFactory = EntryFactory { _, _ ->
                     schemaJson.encodeToJsonElement(PreviewPageData.serializer(), PreviewPageData())
                 },
-                visibleWhen = { it.isPreviewType(PreviewType.CUSTOM_PAGES) }
+                visibleWhen = { it.isPreviewType(PREVIEW_TYPE_CUSTOM_PAGES) }
             ) {
                 with(PreviewPageData) {
                     defineEditor()
@@ -140,14 +138,14 @@ data class PreviewMenuData(
 
 @Serializable
 data class PreviewPageData(
-    val inventoryType: String = "GENERIC9X3",
+    val inventory: MenuInventoryData = MenuInventoryData(),
     val title: String = "<yellow>Preview Page",
     val rewardSlots: List<Int> = listOf(10, 11, 12, 13, 14, 15, 16),
     val customButtons: Map<String, PreviewButtonData> = emptyMap(),
 ) {
     fun toBasicSettings(): PreviewMenuSettings.Basic {
         return PreviewMenuData(
-            inventoryType = inventoryType,
+            inventory = inventory,
             title = title,
             rewardSlots = rewardSlots,
             customButtons = customButtons
@@ -158,13 +156,11 @@ data class PreviewPageData(
         private val schemaJson = Json { encodeDefaults = true }
 
         fun TypedNestedSchemaBuilder<PreviewPageData>.defineEditor() {
-            field(
-                PreviewPageData::inventoryType,
-                adapter = InventoryTypeFieldAdapter,
-                displayName = "Page Inventory Type",
-                iconMaterial = Material.CHEST,
-                description = listOf("Inventory layout used for this custom preview page.")
-            )
+            group(PreviewPageData::inventory) {
+                with(MenuInventoryData) {
+                    defineEditor(typeLabel = "Page Inventory Type")
+                }
+            }
             field(
                 PreviewPageData::title,
                 TextFieldAdapter,
@@ -214,26 +210,23 @@ data class PreviewPageData(
     }
 }
 
-enum class PreviewType(val id: String) {
-    AUTOMATIC("automatic"),
-    CUSTOM_PAGES("custom-pages");
+const val PREVIEW_TYPE_AUTOMATIC = "automatic"
+const val PREVIEW_TYPE_CUSTOM_PAGES = "custom-pages"
 
-    companion object {
-        val entries = listOf(AUTOMATIC, CUSTOM_PAGES)
-
-        fun of(raw: String): PreviewType {
-            return entries.firstOrNull { it.id.equals(raw, true) } ?: AUTOMATIC
-        }
+private fun normalizePreviewType(raw: String): String {
+    return when {
+        raw.equals(PREVIEW_TYPE_CUSTOM_PAGES, ignoreCase = true) -> PREVIEW_TYPE_CUSTOM_PAGES
+        else -> PREVIEW_TYPE_AUTOMATIC
     }
 }
 
-private fun EditorFieldContext.isPreviewType(type: PreviewType): Boolean {
+private fun EditorFieldContext.isPreviewType(type: String): Boolean {
     val current = when (val currentValue = value as? JsonObject) {
         null -> null
         else -> (currentValue["previewType"] as? JsonPrimitive)?.content
     }
     if (current != null) {
-        return current.equals(type.id, true)
+        return normalizePreviewType(current).equals(type, true)
     }
 
     val rootType = (root as? JsonObject)
@@ -243,5 +236,5 @@ private fun EditorFieldContext.isPreviewType(type: PreviewType): Boolean {
         ?.let { it as? JsonPrimitive }
         ?.content
 
-    return (rootType ?: PreviewType.AUTOMATIC.id).equals(type.id, true)
+    return normalizePreviewType(rootType ?: PREVIEW_TYPE_AUTOMATIC).equals(type, true)
 }

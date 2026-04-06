@@ -37,6 +37,7 @@ class RewardShowcaseMenu private constructor(
 
             return RewardShowcaseMenu(player, entries, settings).apply {
                 addButtons()
+                settings.anvilSettings?.applyTo(this)
             }
         }
     }

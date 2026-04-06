@@ -1,6 +1,6 @@
 package gg.aquatic.crates.data.price
 
-import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.open.OpenPriceHandle
 import gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
@@ -27,7 +27,10 @@ data class CrateKeyOpenPriceData(
             ?.takeIf { it.isNotEmpty() && gg.aquatic.crates.crate.CrateHandler.crates.containsKey(it) }
             ?: crateId
         return OpenPriceHandle(
-            currencyResolver = { CratesPlugin.crateKeyCurrency(targetCrateId) },
+            currencyResolver = {
+                CrateHandler.crates[targetCrateId]?.keyCurrency
+                    ?: error("Crate '$targetCrateId' is not loaded.")
+            },
             price = BigDecimal.valueOf(amount.toLong())
         )
     }

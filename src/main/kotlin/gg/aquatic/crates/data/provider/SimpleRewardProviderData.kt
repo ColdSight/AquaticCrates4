@@ -29,6 +29,10 @@ data class SimpleRewardProviderData(
         )
     }
 
+    fun rewardEntries(): List<Pair<String, RewardData>> {
+        return rewards.entries.map { it.toPair() }
+    }
+
     companion object {
         fun TypedNestedSchemaBuilder<SimpleRewardProviderData>.defineEditor() {
             list(

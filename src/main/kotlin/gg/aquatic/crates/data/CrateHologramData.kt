@@ -1,6 +1,7 @@
 package gg.aquatic.crates.data
 
 import gg.aquatic.crates.data.hologram.CrateHologramLineData
+import gg.aquatic.crates.data.hologram.RewardHologramEntry
 import gg.aquatic.crates.data.hologram.HologramLineSelectionMenu
 import gg.aquatic.crates.data.hologram.defineHologramLineEditor
 import gg.aquatic.kholograms.Hologram
@@ -17,11 +18,11 @@ data class CrateHologramData(
     val viewDistance: Int = 20,
 ) {
 
-    fun toSettings(): Hologram.Settings? {
+    fun toSettings(rewardEntries: List<RewardHologramEntry> = emptyList()): Hologram.Settings? {
         if (lines.isEmpty()) return null
 
         return Hologram.Settings(
-            lines = lines.map { it.toSettings() },
+            lines = lines.flatMap { it.toSettings(rewardEntries) },
             filter = { true },
             viewDistance = viewDistance
         )

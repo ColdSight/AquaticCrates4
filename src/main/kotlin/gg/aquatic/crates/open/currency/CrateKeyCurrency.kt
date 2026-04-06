@@ -1,9 +1,7 @@
 package gg.aquatic.crates.open.currency
 
 import gg.aquatic.common.coroutine.BukkitCtx
-import gg.aquatic.crates.CratesPlugin
 import gg.aquatic.crates.crate.Crate
-import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.kurrency.Currency
 import gg.aquatic.kurrency.impl.VirtualCurrency
 import kotlinx.coroutines.withContext
@@ -21,12 +19,6 @@ class CrateKeyCurrency(
     override val id: String = "aqcrates:key:$crateId"
     override val prefix: String = ""
     override val suffix: String = ""
-
-    constructor(crateId: String) : this(
-        crateId,
-        { CrateHandler.crates[crateId] },
-        CratesPlugin.crateKeyVirtualCurrency(crateId)
-    )
 
     private fun resolveKeyItem(): ItemStack? {
         return crateResolver()?.keyItem?.clone()

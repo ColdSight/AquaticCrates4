@@ -1,6 +1,7 @@
 package gg.aquatic.crates.command.impl
 
 import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.crates.Messages
 import gg.aquatic.kommand.CommandBuilder
 import gg.aquatic.kommand.hasPermission
 import io.papermc.paper.command.brigadier.CommandSourceStack
@@ -11,8 +12,8 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.reloadCommand() =
         hasPermission("aqcrates.admin")
 
         suspendExecute<CommandSender> {
-            sender.sendMessage("Reloading...")
+            Messages.PLUGIN_RELOADING.message().send(sender)
             CratesPlugin.reload()
-            sender.sendMessage("Reloaded!")
+            Messages.PLUGIN_RELOADED.message().send(sender)
         }
     }

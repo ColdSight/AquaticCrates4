@@ -1,6 +1,7 @@
 package gg.aquatic.crates.data.editor
 
-import gg.aquatic.crates.data.PreviewType
+import gg.aquatic.crates.data.PREVIEW_TYPE_AUTOMATIC
+import gg.aquatic.crates.data.PREVIEW_TYPE_CUSTOM_PAGES
 import gg.aquatic.kmenu.inventory.InventoryType
 import org.bukkit.Material
 
@@ -16,7 +17,7 @@ object PreviewTypeSelectionMenu {
             cancelSlot = 22,
             definitions = listOf(
                 PolymorphicSelectionMenu.Definition(
-                    id = PreviewType.AUTOMATIC.id,
+                    id = PREVIEW_TYPE_AUTOMATIC,
                     displayName = "Automatic",
                     description = listOf(
                         "Uses one shared layout.",
@@ -26,7 +27,7 @@ object PreviewTypeSelectionMenu {
                     icon = Material.CRAFTER
                 ),
                 PolymorphicSelectionMenu.Definition(
-                    id = PreviewType.CUSTOM_PAGES.id,
+                    id = PREVIEW_TYPE_CUSTOM_PAGES,
                     displayName = "Custom Pages",
                     description = listOf(
                         "Lets you define each page manually.",

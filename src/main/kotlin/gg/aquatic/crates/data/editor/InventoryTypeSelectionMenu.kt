@@ -122,6 +122,11 @@ object InventoryTypeSelectionMenu {
         displayName = text(inventoryTypeName, NamedTextColor.AQUA)
         lore += text("Use this inventory layout", NamedTextColor.GRAY)
         lore += text("for the preview menu UI.", NamedTextColor.GRAY)
+        if (inventoryTypeName == "ANVIL") {
+            lore += text(" ", NamedTextColor.DARK_GRAY)
+            lore += text("Supports confirm actions", NamedTextColor.YELLOW)
+            lore += text("and %anvil_input% placeholder.", NamedTextColor.GRAY)
+        }
         if (currentValue == inventoryTypeName) {
             lore += text(" ", NamedTextColor.DARK_GRAY)
             lore += text("Currently selected", NamedTextColor.GREEN)

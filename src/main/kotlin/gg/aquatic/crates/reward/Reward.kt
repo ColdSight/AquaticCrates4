@@ -1,5 +1,4 @@
 package gg.aquatic.crates.reward
-
 import gg.aquatic.crates.util.Weightable
 import gg.aquatic.crates.util.randomItem
 import gg.aquatic.execute.ActionHandle

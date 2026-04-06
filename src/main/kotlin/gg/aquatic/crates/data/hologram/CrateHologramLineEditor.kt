@@ -28,6 +28,11 @@ fun TypedNestedSchemaBuilder<CrateHologramLineData>.defineHologramLineEditor() {
             defineEditor()
         }
     }
+    include<RollRewardCrateHologramLineData>(visibleWhen = { it.matchesHologramLineSubtype("roll-reward") }) {
+        with(RollRewardCrateHologramLineData) {
+            defineEditor()
+        }
+    }
 }
 
 fun TypedNestedSchemaBuilder<AnimatedHologramFrameData>.defineHologramFrameLineEditor() {

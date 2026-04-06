@@ -1,9 +1,12 @@
 package gg.aquatic.crates.crate
 
+import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.data.interactable.CrateInteractableData
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
+import gg.aquatic.crates.open.currency.CrateKeyCurrency
+import gg.aquatic.kurrency.impl.VirtualCurrency
 import gg.aquatic.crates.reward.processor.RewardProcessor
 import gg.aquatic.crates.reward.provider.RewardProvider
 import gg.aquatic.kholograms.Hologram
@@ -46,6 +49,12 @@ class Crate(
     val rewardProvider: RewardProvider by lazy(rewardProviderSupplier)
     val rewardProcessor: RewardProcessor by lazy(rewardProcessorSupplier)
     val preview: PreviewMenuSettings? by lazy(previewSupplier)
+    val keyVirtualCurrency: VirtualCurrency by lazy {
+        VirtualCurrency.of("aqcrates:key:$id")
+    }
+    val keyCurrency: CrateKeyCurrency by lazy {
+        CrateKeyCurrency(id, { this }, keyVirtualCurrency)
+    }
 
     val crateItem by lazy {
         stackedItem(Material.CHEST) {
@@ -71,7 +80,7 @@ class Crate(
             return
         }
 
-        player.sendMessage("You have placed the crate!")
+        Messages.CRATE_PLACED.message().send(player)
 
         val rotation = player.yaw - 180
         val location = originalEvent.clickedBlock!!.location.add(originalEvent.blockFace.direction).apply { yaw = rotation }

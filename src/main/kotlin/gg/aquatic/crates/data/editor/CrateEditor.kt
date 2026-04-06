@@ -2,10 +2,12 @@ package gg.aquatic.crates.data.editor
 
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.crates.Messages
 import gg.aquatic.crates.data.CrateData
 import gg.aquatic.crates.data.CrateDataEditorSchema
 import gg.aquatic.crates.data.CrateDataFormats
 import gg.aquatic.crates.data.CrateStorage
+import gg.aquatic.crates.message.replacePlaceholder
 import gg.aquatic.waves.serialization.editor.SerializableEditor
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
@@ -27,7 +29,9 @@ object CrateEditor {
                 VirtualsCtx {
                     CratesPlugin.reload()
                 }
-                player.sendMessage("Saved crate '$id'.")
+                Messages.CRATE_SAVED.message()
+                    .replacePlaceholder("%crate_id%", id)
+                    .send(player)
             }
         )
     }

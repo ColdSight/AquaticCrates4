@@ -3,6 +3,7 @@ package gg.aquatic.crates.crate
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.common.location.world.AwaitingWorld
 import gg.aquatic.crates.CratesPlugin
+import gg.aquatic.crates.debug.CratesDebug
 import gg.aquatic.snapshotmap.SuspendingSnapshotMap
 import kotlinx.coroutines.withContext
 import org.bukkit.Location
@@ -29,7 +30,7 @@ object CrateHandler {
         crateHandles[blockLocation]?.destroy()
 
         val crateHandle = CrateHandle(crate, location, persistent).apply {
-            println("Registering interactable")
+            CratesDebug.log(1, "Registering interactable")
             interactables.forEach { it.register() }
         }
         crateHandles[blockLocation] = crateHandle

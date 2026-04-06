@@ -2,9 +2,9 @@ package gg.aquatic.crates.data.processor
 
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.data.PreviewButtonData
-import gg.aquatic.crates.data.editor.InventoryTypeFieldAdapter
 import gg.aquatic.crates.data.editor.CrateEditorValidators
-import gg.aquatic.kmenu.inventory.InventoryType
+import gg.aquatic.crates.data.menu.AnvilMenuRuntimeSettings
+import gg.aquatic.crates.data.menu.MenuInventoryData
 import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
@@ -16,14 +16,13 @@ import org.bukkit.Material
 
 @Serializable
 data class RewardDisplayMenuData(
-    val inventoryType: String = "GENERIC9X3",
+    val inventory: MenuInventoryData = MenuInventoryData(),
     val title: String = "<yellow>Rewards",
     val rewardSlots: List<Int> = listOf(10, 11, 12, 13, 14, 15, 16),
     val customButtons: Map<String, PreviewButtonData> = emptyMap(),
 ) {
     fun toMenuSettings(): RewardDisplayMenuSettings {
-        val resolvedType = runCatching { InventoryType.valueOf(inventoryType.trim()) }
-            .getOrDefault(InventoryType.GENERIC9X3)
+        val inventorySettings = inventory.toRuntimeSettings()
 
         val components = hashMapOf<String, gg.aquatic.kmenu.menu.settings.IButtonSettings>()
         customButtons.forEach { (id, button) ->
@@ -33,10 +32,11 @@ data class RewardDisplayMenuData(
         return RewardDisplayMenuSettings(
             rewardSlots = rewardSlots.distinct(),
             invSettings = PrivateMenuSettings(
-                resolvedType,
+                inventorySettings.inventoryType,
                 title.toMMComponent(),
                 components
-            )
+            ),
+            anvilSettings = inventorySettings.anvil
         )
     }
 
@@ -44,13 +44,11 @@ data class RewardDisplayMenuData(
         private val schemaJson = Json { encodeDefaults = true }
 
         fun TypedNestedSchemaBuilder<RewardDisplayMenuData>.defineEditor() {
-            field(
-                RewardDisplayMenuData::inventoryType,
-                adapter = InventoryTypeFieldAdapter,
-                displayName = "Inventory Type",
-                iconMaterial = Material.CHEST,
-                description = listOf("Inventory layout used for this reward menu.")
-            )
+            group(RewardDisplayMenuData::inventory) {
+                with(MenuInventoryData) {
+                    defineEditor()
+                }
+            }
             field(
                 RewardDisplayMenuData::title,
                 TextFieldAdapter,
@@ -105,4 +103,5 @@ data class RewardDisplayMenuData(
 data class RewardDisplayMenuSettings(
     val rewardSlots: Collection<Int>,
     val invSettings: PrivateMenuSettings,
+    val anvilSettings: AnvilMenuRuntimeSettings?,
 )
