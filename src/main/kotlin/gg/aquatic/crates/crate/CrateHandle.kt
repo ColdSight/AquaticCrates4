@@ -32,11 +32,11 @@ class CrateHandle(
                 return@create
             }
 
-            val session = CrateOpeningService.tryStart(player, crate) ?: return@create
+            val session = CrateOpeningService.reserveOpening(player, crate) ?: return@create
 
             VirtualsCtx {
                 CratesDebug.message(player, 1, "Opening the crate!")
-                if (CrateOpeningService.tryOpen(session, this@CrateHandle)) {
+                if (CrateOpeningService.executeOpening(session, this@CrateHandle)) {
                     CratesDebug.message(player, 1, "Crate opened!")
                 }
             }

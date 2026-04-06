@@ -10,16 +10,16 @@ import gg.aquatic.crates.stats.LoggedRewardWin
 import org.bukkit.entity.Player
 
 object CrateOpeningService {
-    fun tryStart(player: Player, crate: Crate): OpeningSession? {
+    fun reserveOpening(player: Player, crate: Crate): OpeningSession? {
         return OpeningSessionManager.tryStart(player, crate)
     }
 
     suspend fun tryOpen(player: Player, crate: Crate, crateHandle: CrateHandle? = null, amount: Int = 1): Boolean {
-        val session = tryStart(player, crate) ?: return false
-        return tryOpen(session, crateHandle, amount)
+        val session = reserveOpening(player, crate) ?: return false
+        return executeOpening(session, crateHandle, amount)
     }
 
-    suspend fun tryOpen(session: OpeningSession, crateHandle: CrateHandle? = null, amount: Int = 1): Boolean {
+    suspend fun executeOpening(session: OpeningSession, crateHandle: CrateHandle? = null, amount: Int = 1): Boolean {
         val crate = session.crate
         val player = session.player
         return try {
