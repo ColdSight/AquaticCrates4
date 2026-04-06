@@ -72,7 +72,7 @@ dependencies {
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
-    implementation("com.charleskorn.kaml:kaml:0.104.0")
+    compileOnly("com.charleskorn.kaml:kaml:0.104.0")
     compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
