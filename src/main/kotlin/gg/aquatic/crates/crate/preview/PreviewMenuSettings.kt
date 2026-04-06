@@ -11,6 +11,10 @@ interface PreviewMenuSettings {
 
     class Basic(
         val rewardSlots: Collection<Int>,
+        val randomRewardSlots: Collection<Int>,
+        val randomRewardSwitchTicks: Int,
+        val randomRewardUnique: Boolean,
+        val rewardLore: List<String>,
         val invSettings: PrivateMenuSettings,
         val anvilSettings: AnvilMenuRuntimeSettings?,
     ): PreviewMenuSettings {

@@ -14,6 +14,7 @@ import org.bukkit.Material
 object PlayerConditionFormats {
     val module = SerializersModule {
         polymorphic(PlayerConditionData::class) {
+            subclass(AvailableRewardsPlayerConditionData::class)
             subclass(BiomePlayerConditionData::class)
             subclass(DateRangePlayerConditionData::class)
             subclass(DayOfMonthPlayerConditionData::class)
@@ -25,6 +26,7 @@ object PlayerConditionFormats {
             subclass(TimeRangePlayerConditionData::class)
             subclass(WeekParityPlayerConditionData::class)
             subclass(WeekOfYearModuloPlayerConditionData::class)
+            subclass(WorldBlacklistPlayerConditionData::class)
             subclass(WorldPlayerConditionData::class)
         }
     }
@@ -50,6 +52,17 @@ object PlayerConditionTypes {
     )
 
     val definitions: List<Definition> = listOf(
+        Definition(
+            id = "available-rewards",
+            displayName = "Available Rewards",
+            description = listOf(
+                "Checks whether at least a minimum amount",
+                "of rewards can currently be won."
+            ),
+            icon = Material.CHEST,
+            factory = { AvailableRewardsPlayerConditionData() },
+            descriptorFactory = { AvailableRewardsPlayerConditionData.serializer().descriptor }
+        ),
         Definition(
             id = "biome",
             displayName = "Biome",
@@ -170,6 +183,17 @@ object PlayerConditionTypes {
             icon = Material.CLOCK,
             factory = { TimeRangePlayerConditionData() },
             descriptorFactory = { TimeRangePlayerConditionData.serializer().descriptor }
+        ),
+        Definition(
+            id = "world-blacklist",
+            displayName = "World Blacklist",
+            description = listOf(
+                "Blocks opening this crate in",
+                "the selected worlds."
+            ),
+            icon = Material.BARRIER,
+            factory = { WorldBlacklistPlayerConditionData() },
+            descriptorFactory = { WorldBlacklistPlayerConditionData.serializer().descriptor }
         ),
         Definition(
             id = "world",

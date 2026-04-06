@@ -8,6 +8,7 @@ import gg.aquatic.crates.data.action.RewardActionFormats
 import gg.aquatic.crates.data.condition.PlayerConditionFormats
 import gg.aquatic.crates.data.hologram.CrateHologramLineFormats
 import gg.aquatic.crates.data.interactable.CrateInteractableFormats
+import gg.aquatic.crates.data.interaction.CrateClickActionFormats
 import gg.aquatic.crates.data.price.OpenPriceFormats
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -20,6 +21,7 @@ object CrateDataFormats {
         include(PlayerConditionFormats.module)
         include(CrateHologramLineFormats.module)
         include(CrateInteractableFormats.module)
+        include(CrateClickActionFormats.module)
         include(OpenPriceFormats.module)
     }
 
@@ -36,6 +38,7 @@ object CrateDataFormats {
         serializersModule = module,
         configuration = YamlConfiguration(
             encodeDefaults = true,
+            strictMode = false,
             yamlNamingStrategy = YamlNamingStrategy.KebabCase,
             polymorphismStyle = PolymorphismStyle.Property,
             polymorphismPropertyName = "type"

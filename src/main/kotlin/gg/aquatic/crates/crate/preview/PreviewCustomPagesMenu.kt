@@ -38,11 +38,12 @@ class PreviewCustomPagesMenu private constructor(
                 crateHandle = crateHandle,
                 pageSettings = pages[safePage],
                 allPages = pages,
-                entries = PreviewListMenu.mappedEntries(crate, player),
+                entries = PreviewListMenu.mappedEntries(crate, player, pages[safePage].rewardLore),
                 page = safePage
             ).apply {
                 addButtons()
                 addRewards()
+                addRandomRewards()
                 pageSettings.anvilSettings?.applyTo(this)
             }
         }
@@ -82,6 +83,30 @@ class PreviewCustomPagesMenu private constructor(
         pageSettings.rewardSlots.forEachIndexed { index, slot ->
             val entry = entries.getOrNull(lowerIndex + index) ?: return@forEachIndexed
             addComponent(entry.createButton(slot))
+        }
+    }
+
+    private suspend fun addRandomRewards() {
+        if (pageSettings.randomRewardSlots.isEmpty()) {
+            return
+        }
+
+        val randomEntries = PreviewListMenu.mappedEntries(crate, player, pageSettings.rewardLore)
+        val slots = if (pageSettings.randomRewardUnique) {
+            pageSettings.randomRewardSlots.take(randomEntries.size)
+        } else pageSettings.randomRewardSlots.toList()
+        val coordinator = RollingRandomRewardCoordinator(randomEntries, pageSettings.randomRewardUnique)
+
+        slots.forEach { slot ->
+            addComponent(
+                RollingRandomRewardButton(
+                    id = "random-preview:$slot",
+                    slots = listOf(slot),
+                    priority = 1,
+                    updateEvery = pageSettings.randomRewardSwitchTicks,
+                    coordinator = coordinator,
+                )
+            )
         }
     }
 }

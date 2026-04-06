@@ -75,9 +75,9 @@ dependencies {
     implementation("com.charleskorn.kaml:kaml:0.104.0")
     compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.8")
-    implementation("org.xerial:sqlite-jdbc:3.51.3.0")
+    compileOnly("com.zaxxer:HikariCP:7.0.2")
+    compileOnly("org.mariadb.jdbc:mariadb-java-client:3.5.8")
+    compileOnly("org.xerial:sqlite-jdbc:3.51.3.0")
 
     implementation("org.reflections:reflections:0.10.2")
 
@@ -124,6 +124,6 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("org.bstats", "gg.aquatic.waves.libs.bstats")
 
-    relocate("com.zaxxer.hikari", "gg.aquatic.aquaticcrates.libs.hikari")
+    relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
     relocate("org.jetbrains.exposed", "gg.aquatic.waves.libs.exposed")
 }

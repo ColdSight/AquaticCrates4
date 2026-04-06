@@ -26,6 +26,9 @@ object CrateOpeningService {
             var openedAny = false
 
             repeat(amount.coerceAtLeast(1)) {
+                if (crateHandle != null && crate.keyMustBeHeld && !crate.isHoldingKey(player)) {
+                    return@repeat
+                }
                 if (!crate.openConditions.check(player, crate, crateHandle)) {
                     return@repeat
                 }
@@ -62,7 +65,7 @@ object CrateOpeningService {
     }
 
     private suspend fun logGrantedRewards(player: Player, crate: Crate, rolledRewards: List<RolledReward>) {
-        if (rolledRewards.isEmpty()) {
+        if (crate.disableOpenStats || rolledRewards.isEmpty()) {
             return
         }
 

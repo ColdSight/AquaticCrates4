@@ -9,6 +9,11 @@ import gg.aquatic.crates.data.editor.PreviewSectionFieldAdapter
 import gg.aquatic.crates.data.hologram.CrateHologramLineTypes
 import gg.aquatic.crates.data.hologram.RewardHologramEntry
 import gg.aquatic.crates.data.hologram.findHologramLineSubtypeId
+import gg.aquatic.crates.data.interaction.CrateClickActionTypes
+import gg.aquatic.crates.data.interaction.CrateClickMappingData
+import gg.aquatic.crates.data.interaction.OpenCrateClickActionData
+import gg.aquatic.crates.data.interaction.PreviewCrateClickActionData
+import gg.aquatic.crates.data.interaction.findCrateClickActionSubtypeId
 import gg.aquatic.crates.data.interactable.*
 import gg.aquatic.crates.data.item.StackedItemData
 import gg.aquatic.crates.data.price.OpenPriceGroupData
@@ -26,7 +31,6 @@ import gg.aquatic.crates.reward.processor.BasicRewardProcessor
 import gg.aquatic.crates.reward.processor.ChooseRewardProcessor
 import gg.aquatic.crates.reward.provider.ConditionalPoolsRewardProvider
 import gg.aquatic.crates.reward.provider.SimpleRewardProvider
-import gg.aquatic.execute.checkConditions
 import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
@@ -41,8 +45,17 @@ data class CrateData(
         material = org.bukkit.Material.TRIPWIRE_HOOK.name,
         displayName = "<yellow>Crate Key"
     ),
+    val keyMustBeHeld: Boolean = false,
+    val crateClickMapping: CrateClickMappingData = CrateClickMappingData(),
+    val keyClickMapping: CrateClickMappingData = CrateClickMappingData(
+        right = listOf(OpenCrateClickActionData()),
+        shiftRight = listOf(OpenCrateClickActionData()),
+        left = listOf(PreviewCrateClickActionData()),
+        shiftLeft = emptyList()
+    ),
     val interactables: List<@Polymorphic CrateInteractableData> = listOf(BlockCrateInteractableData()),
     val openConditions: List<@Polymorphic PlayerConditionData> = emptyList(),
+    val disableOpenStats: Boolean = false,
     val limits: List<LimitData> = emptyList(),
     val priceGroups: List<OpenPriceGroupData> = listOf(OpenPriceGroupData()),
     val rarities: Map<String, RewardRarityData> = mapOf(
@@ -85,27 +98,34 @@ data class CrateData(
 
     fun toCrate(id: String): Crate {
         val normalized = normalized(id)
-        val crateKeyItem by lazy { normalized.keyItem.asStacked().getItem() }
+        val crateKeyStackedItem by lazy { normalized.keyItem.asStacked() }
+        val crateKeyItem by lazy { crateKeyStackedItem.getItem() }
         val rewardHologramEntries by lazy { normalized.rewardHologramEntries() }
 
         return Crate(
             id = id,
-            keyItemSupplier = { crateKeyItem },
+            keyItemSupplier = { crateKeyStackedItem },
+            keyMustBeHeld = normalized.keyMustBeHeld,
+            crateClickMapping = normalized.crateClickMapping,
+            keyClickMapping = normalized.keyClickMapping,
             displayName = normalized.displayName.toMMComponent(),
             hologramSupplier = { normalized.hologram?.toSettings(rewardHologramEntries) },
             priceGroupsSupplier = { normalized.priceGroups.map { it.toOpenPriceGroup(id, crateKeyItem) } },
             openConditionsSupplier = {
                 normalized.openConditions
-                    .map { it.toConditionHandle() }
                     .takeIf { it.isNotEmpty() }
                     ?.let { conditions ->
-                        gg.aquatic.crates.open.OpenConditions { player, _, _ ->
-                            conditions.checkConditions(player)
+                        gg.aquatic.crates.open.OpenConditions { player, crate, crateHandle ->
+                            val binder = CrateOpenConditionBinder(player, crate, crateHandle)
+                            conditions
+                                .map { it.toOpenConditionHandle() }
+                                .all { it.execute(binder) { _, str -> str } }
                         }
                     }
                     ?: gg.aquatic.crates.open.OpenConditions.DUMMY
             },
             interactables = normalized.interactables,
+            disableOpenStats = normalized.disableOpenStats,
             limits = normalized.limits.map { it.toHandle() },
             rewardProviderSupplier = {
                 when (RewardProviderType.of(normalized.rewardProviderType)) {
@@ -172,7 +192,9 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
         (context.pathSegments.contains("priceGroups") || context.pathSegments.contains("cost")) && context.pathSegments.contains("prices") ->
             context.findOpenPriceSubtypeId()?.let(OpenPriceTypes::descriptor)
         context.pathSegments.contains("winActions") || context.pathSegments.contains("clickActions") ->
-            context.findRewardActionType()?.let(RewardActionTypes::descriptor)
+        context.findRewardActionType()?.let(RewardActionTypes::descriptor)
+        context.pathSegments.any { it == "crateClickMapping" || it == "keyClickMapping" } ->
+            context.findCrateClickActionSubtypeId()?.let(CrateClickActionTypes::descriptor)
         context.pathSegments.contains("openConditions") || context.pathSegments.contains("conditions") ->
         context.findConditionSubtypeId()?.let(PlayerConditionTypes::descriptor)
         else -> null
@@ -230,10 +252,22 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
             displayName = "Open Conditions",
             iconMaterial = Material.TRIPWIRE_HOOK,
             description = listOf("Conditions that must pass before the crate can be opened."),
-            newValueFactory = PlayerConditionSelectionMenu.entryFactory
+            newValueFactory = OpenPlayerConditionSelectionMenu.entryFactory
         ) {
-            definePlayerConditionEditor()
+            definePlayerConditionEditor(
+                includeOpenOnlyConditions = true,
+                adapter = OpenPlayerConditionEntryFieldAdapter
+            )
         }
+        field(
+            CrateData::disableOpenStats,
+            displayName = "Disable Open Stats",
+            prompt = "Enter true or false:",
+            iconMaterial = Material.LECTERN,
+            description = listOf(
+                "If enabled, openings and won rewards from this crate will not be written into the stats database."
+            )
+        )
         list(
             CrateData::limits,
             displayName = "Limits",
@@ -368,6 +402,25 @@ object CrateDataEditorSchema : EditableModel<CrateData>(CrateData.serializer()) 
                     namePrompt = "Enter key display name:",
                     loreLabel = "Key Lore"
                 )
+            }
+        }
+        field(
+            CrateData::keyMustBeHeld,
+            displayName = "Key Must Be Held",
+            prompt = "Enter true or false:",
+            iconMaterial = Material.TRIPWIRE_HOOK,
+            description = listOf(
+                "If enabled, players must hold this crate key in hand when opening the crate directly in the world."
+            )
+        )
+        group(CrateData::crateClickMapping) {
+            with(CrateClickMappingData) {
+                defineEditor("Crate Click")
+            }
+        }
+        group(CrateData::keyClickMapping) {
+            with(CrateClickMappingData) {
+                defineEditor("Key Click", allowDestroy = false)
             }
         }
 

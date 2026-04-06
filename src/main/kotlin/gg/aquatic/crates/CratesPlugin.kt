@@ -7,6 +7,10 @@ import gg.aquatic.crates.command.initializeCommands
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.data.CrateStorage
 import gg.aquatic.crates.debug.CratesLogger
+import gg.aquatic.crates.interact.DestroyCrateClickAction
+import gg.aquatic.crates.interact.OpenCrateClickAction
+import gg.aquatic.crates.interact.PreviewCrateClickAction
+import gg.aquatic.execute.Action
 import gg.aquatic.crates.stats.CrateStats
 import gg.aquatic.crates.stats.CrateStatsPlaceholders
 import gg.aquatic.kregistry.bootstrap.RegistryHolder
@@ -35,6 +39,9 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
                     crate.crateItem.register(this, "acrates_chest", id) { e ->
                         crate.handleCrateItemInteractions(e)
                     }
+                    crate.keyStackedItem.register(this, "acrates_key", id) { e ->
+                        crate.handleKeyItemInteractions(e)
+                    }
                 }
             }
 
@@ -48,6 +55,12 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
                 for (crate in CrateHandler.crates.values) {
                     add(crate.keyCurrency.id, crate.keyCurrency)
                 }
+            }
+
+            registry(Action.REGISTRY_KEY) {
+                add("preview", PreviewCrateClickAction)
+                add("open", OpenCrateClickAction)
+                add("destroy", DestroyCrateClickAction)
             }
         }
     }

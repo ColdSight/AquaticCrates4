@@ -23,6 +23,10 @@ data class PreviewMenuData(
     val inventory: MenuInventoryData = MenuInventoryData(),
     val title: String = "<yellow>Preview Menu",
     val rewardSlots: List<Int> = listOf(10, 11, 12, 13, 14, 15, 16),
+    val randomRewardSlots: List<Int> = emptyList(),
+    val randomRewardSwitchTicks: Int = 20,
+    val randomRewardUnique: Boolean = false,
+    val rewardLore: List<String> = emptyList(),
     val customButtons: Map<String, PreviewButtonData> = emptyMap(),
     val pages: List<PreviewPageData> = emptyList(),
 ) {
@@ -49,6 +53,10 @@ data class PreviewMenuData(
 
         return PreviewMenuSettings.Basic(
             rewardSlots = rewardSlots.distinct(),
+            randomRewardSlots = randomRewardSlots.distinct(),
+            randomRewardSwitchTicks = randomRewardSwitchTicks.coerceAtLeast(1),
+            randomRewardUnique = randomRewardUnique,
+            rewardLore = rewardLore,
             invSettings = PrivateMenuSettings(
                 inventorySettings.inventoryType,
                 title.toMMComponent(),
@@ -86,6 +94,44 @@ data class PreviewMenuData(
                 description = listOf("Slots where reward icons can appear in the preview menu."),
                 newValueFactory = EditorEntryFactories.int("Enter reward slot or range (e.g. 10-16 or 10,12,14):", unique = true),
                 visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
+            )
+            list(
+                PreviewMenuData::randomRewardSlots,
+                "Random Reward Slots",
+                iconMaterial = Material.CHEST,
+                description = listOf("Slots where randomly selected reward icons can appear in the preview menu."),
+                newValueFactory = EditorEntryFactories.int("Enter random reward slot or range (e.g. 19-25):", unique = true),
+                visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
+            )
+            field(
+                PreviewMenuData::randomRewardSwitchTicks,
+                gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter,
+                gg.aquatic.waves.serialization.editor.meta.IntFieldConfig(prompt = "Enter random reward switch ticks:", min = 1),
+                displayName = "Random Reward Switch Ticks",
+                iconMaterial = Material.CLOCK,
+                description = listOf("How often random reward slots reroll to a new reward."),
+                visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
+            )
+            field(
+                PreviewMenuData::randomRewardUnique,
+                displayName = "Random Reward Unique",
+                prompt = "Enter true or false:",
+                iconMaterial = Material.COMPARATOR,
+                description = listOf(
+                    "If enabled, each random reward slot shows a different reward.",
+                    "Extra slots are hidden when there are not enough unique rewards."
+                ),
+                visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
+            )
+            list(
+                PreviewMenuData::rewardLore,
+                displayName = "Reward Lore",
+                iconMaterial = Material.WRITABLE_BOOK,
+                description = listOf(
+                    "Extra lore appended to preview reward items.",
+                    "Useful for showing reward metadata in preview."
+                ),
+                newValueFactory = EditorEntryFactories.text("Enter reward lore line:")
             )
             map(
                 PreviewMenuData::customButtons,
@@ -141,6 +187,10 @@ data class PreviewPageData(
     val inventory: MenuInventoryData = MenuInventoryData(),
     val title: String = "<yellow>Preview Page",
     val rewardSlots: List<Int> = listOf(10, 11, 12, 13, 14, 15, 16),
+    val randomRewardSlots: List<Int> = emptyList(),
+    val randomRewardSwitchTicks: Int = 20,
+    val randomRewardUnique: Boolean = false,
+    val rewardLore: List<String> = emptyList(),
     val customButtons: Map<String, PreviewButtonData> = emptyMap(),
 ) {
     fun toBasicSettings(): PreviewMenuSettings.Basic {
@@ -148,6 +198,10 @@ data class PreviewPageData(
             inventory = inventory,
             title = title,
             rewardSlots = rewardSlots,
+            randomRewardSlots = randomRewardSlots,
+            randomRewardSwitchTicks = randomRewardSwitchTicks,
+            randomRewardUnique = randomRewardUnique,
+            rewardLore = rewardLore,
             customButtons = customButtons
         ).toBasicSettings()
     }
@@ -175,6 +229,41 @@ data class PreviewPageData(
                 iconMaterial = Material.HOPPER,
                 description = listOf("Slots where reward icons can appear on this page."),
                 newValueFactory = EditorEntryFactories.int("Enter reward slot or range (e.g. 10-16 or 10,12,14):", unique = true)
+            )
+            list(
+                PreviewPageData::randomRewardSlots,
+                "Random Reward Slots",
+                iconMaterial = Material.CHEST,
+                description = listOf("Slots where randomly selected reward icons can appear on this page."),
+                newValueFactory = EditorEntryFactories.int("Enter random reward slot or range (e.g. 19-25):", unique = true)
+            )
+            field(
+                PreviewPageData::randomRewardSwitchTicks,
+                gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter,
+                gg.aquatic.waves.serialization.editor.meta.IntFieldConfig(prompt = "Enter random reward switch ticks:", min = 1),
+                displayName = "Random Reward Switch Ticks",
+                iconMaterial = Material.CLOCK,
+                description = listOf("How often random reward slots reroll to a new reward on this page.")
+            )
+            field(
+                PreviewPageData::randomRewardUnique,
+                displayName = "Random Reward Unique",
+                prompt = "Enter true or false:",
+                iconMaterial = Material.COMPARATOR,
+                description = listOf(
+                    "If enabled, each random reward slot on this page shows a different reward.",
+                    "Extra slots are hidden when there are not enough unique rewards."
+                )
+            )
+            list(
+                PreviewPageData::rewardLore,
+                displayName = "Reward Lore",
+                iconMaterial = Material.WRITABLE_BOOK,
+                description = listOf(
+                    "Extra lore appended to preview reward items on this page.",
+                    "Useful for showing reward metadata in preview."
+                ),
+                newValueFactory = EditorEntryFactories.text("Enter reward lore line:")
             )
             map(
                 PreviewPageData::customButtons,

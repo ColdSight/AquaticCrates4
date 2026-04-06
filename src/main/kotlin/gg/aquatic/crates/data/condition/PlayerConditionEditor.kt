@@ -1,11 +1,15 @@
 package gg.aquatic.crates.data.condition
 
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
+import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
 
-fun TypedNestedSchemaBuilder<PlayerConditionData>.definePlayerConditionEditor() {
+fun TypedNestedSchemaBuilder<PlayerConditionData>.definePlayerConditionEditor(
+    includeOpenOnlyConditions: Boolean = false,
+    adapter: EditorFieldAdapter = PlayerConditionEntryFieldAdapter,
+) {
     fieldPattern(
         displayName = "Condition",
-        adapter = PlayerConditionEntryFieldAdapter,
+        adapter = adapter,
         description = listOf(
             "Left click to edit this condition.",
             "Right click to change its condition type."
@@ -69,6 +73,18 @@ fun TypedNestedSchemaBuilder<PlayerConditionData>.definePlayerConditionEditor() 
     include<WorldPlayerConditionData>(visibleWhen = { it.matchesConditionSubtype("world") }) {
         with(WorldPlayerConditionData) {
             defineEditor()
+        }
+    }
+    if (includeOpenOnlyConditions) {
+        include<WorldBlacklistPlayerConditionData>(visibleWhen = { it.matchesConditionSubtype("world-blacklist") }) {
+            with(WorldBlacklistPlayerConditionData) {
+                defineEditor()
+            }
+        }
+        include<AvailableRewardsPlayerConditionData>(visibleWhen = { it.matchesConditionSubtype("available-rewards") }) {
+            with(AvailableRewardsPlayerConditionData) {
+                defineEditor()
+            }
         }
     }
 }

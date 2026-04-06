@@ -3,7 +3,12 @@ package gg.aquatic.crates.crate
 import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.crate.opening.CrateOpeningService
+import gg.aquatic.crates.interact.CrateClickBinder
+import gg.aquatic.crates.interact.CrateClickType
 import gg.aquatic.crates.data.interactable.CrateInteractableData
+import gg.aquatic.crates.data.interaction.CrateClickMappingData
+import gg.aquatic.crates.debug.CratesDebug
+import gg.aquatic.execute.executeActions
 import gg.aquatic.crates.limit.LimitHandle
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
@@ -14,6 +19,8 @@ import gg.aquatic.crates.reward.provider.RewardProvider
 import gg.aquatic.kholograms.Hologram
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import gg.aquatic.stacked.stackedItem
+import gg.aquatic.common.coroutine.VirtualsCtx
+import gg.aquatic.crates.CratesPlugin
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -33,19 +40,24 @@ import org.bukkit.inventory.ItemStack
  */
 class Crate(
     val id: String,
-    keyItemSupplier: () -> ItemStack,
+    keyItemSupplier: () -> gg.aquatic.stacked.StackedItem<*>,
+    val keyMustBeHeld: Boolean,
+    val crateClickMapping: CrateClickMappingData,
+    val keyClickMapping: CrateClickMappingData,
     val displayName: Component,
     hologramSupplier: () -> Hologram.Settings?,
     priceGroupsSupplier: () -> Collection<OpenPriceGroup>,
     openConditionsSupplier: () -> OpenConditions = { OpenConditions.DUMMY },
     val interactables: Collection<CrateInteractableData>,
+    val disableOpenStats: Boolean,
     val limits: Collection<LimitHandle>,
     rewardProviderSupplier: () -> RewardProvider,
     rewardProcessorSupplier: () -> RewardProcessor,
     previewSupplier: () -> PreviewMenuSettings?,
 ) {
 
-    val keyItem: ItemStack by lazy(keyItemSupplier)
+    val keyStackedItem: gg.aquatic.stacked.StackedItem<*> by lazy(keyItemSupplier)
+    val keyItem: ItemStack by lazy { keyStackedItem.getItem() }
     val hologram: Hologram.Settings? by lazy(hologramSupplier)
     val priceGroups: Collection<OpenPriceGroup> by lazy(priceGroupsSupplier)
     val openConditions: OpenConditions by lazy(openConditionsSupplier)
@@ -92,6 +104,61 @@ class Crate(
     }
 
     val crateItemStack by lazy { crateItem.getItem() }
+
+    internal fun handleKeyItemInteractions(event: StackedItemInteractEvent) {
+        val player = event.player
+        val interactType = event.interactType
+        val clickType = when (interactType) {
+            StackedItemInteractEvent.InteractType.LEFT -> CrateClickType.LEFT
+            StackedItemInteractEvent.InteractType.RIGHT -> CrateClickType.RIGHT
+            StackedItemInteractEvent.InteractType.SHIFT_LEFT -> CrateClickType.SHIFT_LEFT
+            StackedItemInteractEvent.InteractType.SHIFT_RIGHT -> CrateClickType.SHIFT_RIGHT
+            else -> return
+        }
+
+        val startedAt = System.currentTimeMillis()
+        val originalEvent = event.originalEvent as? PlayerInteractEvent
+        event.cancelled = true
+        fun execute() {
+            if (CrateInteractionGuard.wasCrateInteractionClaimedSince(player.uniqueId, startedAt)) {
+                return
+            }
+            if (!CrateInteractionGuard.tryMarkExecuted(player.uniqueId)) {
+                return
+            }
+
+            val actions = keyClickMapping.actions(clickType)
+            CratesDebug.message(player, 1, "You have interacted with the key! $clickType -> ${actions.size} action(s)")
+
+            if (actions.isEmpty()) {
+                return
+            }
+
+            val binder = CrateClickBinder(
+                player = player,
+                crate = this,
+                crateHandle = null,
+                clickType = clickType,
+                usingKeyMapping = true
+            )
+
+            VirtualsCtx {
+                actions.map { it.toActionHandle() }.executeActions(binder) { _, str -> str }
+            }
+        }
+
+        if (originalEvent?.clickedBlock != null) {
+            CratesPlugin.server.scheduler.runTask(CratesPlugin, Runnable {
+                execute()
+            })
+        } else {
+            execute()
+        }
+    }
+
+    fun isHoldingKey(player: Player): Boolean {
+        return player.inventory.itemInMainHand.isSimilar(keyItem) || player.inventory.itemInOffHand.isSimilar(keyItem)
+    }
 
     suspend fun tryOpen(player: Player, crateHandle: CrateHandle? = null): Boolean {
         return CrateOpeningService.tryOpen(player, this, crateHandle)

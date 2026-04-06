@@ -44,9 +44,16 @@ object CrateStorage {
         }
 
         val content = yamlFile.readText()
+        val existingIds = availableIds().toSet()
+        val normalized = yaml.decodeFromString(CrateData.serializer(), content)
+            .normalized(id, existingIds)
 
-        return yaml.decodeFromString(CrateData.serializer(), content)
-            .normalized(id, availableIds().toSet())
+        val normalizedYaml = encodeCompactYaml(normalized)
+        if (!sameYaml(content, normalizedYaml)) {
+            yamlFile.writeText(normalizedYaml)
+        }
+
+        return normalized
     }
 
     fun loadAllCrates(): Map<String, Crate> {
@@ -83,6 +90,14 @@ object CrateStorage {
         val encoded = yaml.encodeToString(CrateData.serializer(), crateData)
         val compactNode = yaml.parseToYamlNode(encoded).pruneEmpty()
         return yaml.encodeToString(YamlNode.serializer(), compactNode)
+    }
+
+    private fun sameYaml(current: String, normalized: String): Boolean {
+        return current
+            .replace("\r\n", "\n")
+            .trim() == normalized
+            .replace("\r\n", "\n")
+            .trim()
     }
 
     private fun YamlNode.pruneEmpty(): YamlNode {
