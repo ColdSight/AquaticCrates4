@@ -4,11 +4,11 @@ import com.charleskorn.kaml.PolymorphismStyle
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlNamingStrategy
+import gg.aquatic.crates.data.editor.PolymorphicTypeDefinition
+import gg.aquatic.crates.data.editor.PolymorphicTypeRegistry
+import gg.aquatic.crates.data.editor.createPolymorphicJson
+import gg.aquatic.crates.data.editor.createPolymorphicYaml
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.PolymorphicSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -31,37 +31,16 @@ object CrateClickActionFormats {
         }
     }
 
-    val json = Json {
-        serializersModule = module
-        classDiscriminator = "type"
-        prettyPrint = true
-        prettyPrintIndent = "  "
-        encodeDefaults = true
-        ignoreUnknownKeys = true
-    }
-
-    val yaml = Yaml(
-        serializersModule = module,
-        configuration = YamlConfiguration(
-            yamlNamingStrategy = YamlNamingStrategy.KebabCase,
-            polymorphismStyle = PolymorphismStyle.Property,
-            polymorphismPropertyName = "type"
-        )
-    )
+    val json = createPolymorphicJson(module)
+    val yaml = createPolymorphicYaml(module)
 }
 
 object CrateClickActionTypes {
-    data class Definition(
-        val id: String,
-        val displayName: String,
-        val description: List<String>,
-        val icon: Material,
-        val factory: () -> CrateClickActionData,
-        val descriptorFactory: () -> SerialDescriptor,
-    )
-
-    val definitions: List<Definition> = listOf(
-        Definition(
+    private val registry = PolymorphicTypeRegistry(
+        CrateClickActionData::class.java,
+        CrateClickActionFormats.json,
+        listOf(
+        PolymorphicTypeDefinition(
             id = "preview",
             displayName = "Preview",
             description = listOf("Opens the crate preview menu."),
@@ -69,7 +48,7 @@ object CrateClickActionTypes {
             factory = { PreviewCrateClickActionData() },
             descriptorFactory = { PreviewCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "open",
             displayName = "Open",
             description = listOf("Attempts to open the crate."),
@@ -77,7 +56,7 @@ object CrateClickActionTypes {
             factory = { OpenCrateClickActionData() },
             descriptorFactory = { OpenCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "destroy",
             displayName = "Destroy",
             description = listOf("Destroys the placed crate.", "Only useful for direct crate interaction."),
@@ -85,7 +64,7 @@ object CrateClickActionTypes {
             factory = { DestroyCrateClickActionData() },
             descriptorFactory = { DestroyCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "message",
             displayName = "Message",
             description = listOf("Sends one or more chat lines", "to the clicking player."),
@@ -93,7 +72,7 @@ object CrateClickActionTypes {
             factory = { MessageCrateClickActionData() },
             descriptorFactory = { MessageCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "actionbar",
             displayName = "Actionbar",
             description = listOf("Shows a short actionbar message", "above the hotbar."),
@@ -101,7 +80,7 @@ object CrateClickActionTypes {
             factory = { ActionbarCrateClickActionData() },
             descriptorFactory = { ActionbarCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "command",
             displayName = "Command",
             description = listOf("Executes one or more commands", "as console or player."),
@@ -109,7 +88,7 @@ object CrateClickActionTypes {
             factory = { CommandCrateClickActionData() },
             descriptorFactory = { CommandCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "sound",
             displayName = "Play Sound",
             description = listOf("Plays a sound with custom", "volume and pitch."),
@@ -117,7 +96,7 @@ object CrateClickActionTypes {
             factory = { SoundCrateClickActionData() },
             descriptorFactory = { SoundCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "stop-sound",
             displayName = "Stop Sound",
             description = listOf("Stops a specific sound", "for the clicking player."),
@@ -125,7 +104,7 @@ object CrateClickActionTypes {
             factory = { StopSoundCrateClickActionData() },
             descriptorFactory = { StopSoundCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "title",
             displayName = "Title",
             description = listOf("Shows a title and subtitle", "with timing settings."),
@@ -133,7 +112,7 @@ object CrateClickActionTypes {
             factory = { TitleCrateClickActionData() },
             descriptorFactory = { TitleCrateClickActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "close-inventory",
             displayName = "Close Inventory",
             description = listOf("Closes the current inventory", "for the clicking player."),
@@ -141,19 +120,12 @@ object CrateClickActionTypes {
             factory = { CloseInventoryCrateClickActionData() },
             descriptorFactory = { CloseInventoryCrateClickActionData.serializer().descriptor }
         ),
+        )
     )
 
-    private val definitionsById = definitions.associateBy { it.id }
-
-    fun definition(id: String): Definition? = definitionsById[id]
-    fun create(id: String): CrateClickActionData? = definition(id)?.factory?.invoke()
-    fun descriptor(id: String): SerialDescriptor? = definition(id)?.descriptorFactory?.invoke()
-
-    fun defaultElement(id: String): JsonElement? {
-        val action = create(id) ?: return null
-        return CrateClickActionFormats.json.encodeToJsonElement(
-            PolymorphicSerializer(CrateClickActionData::class),
-            action
-        )
-    }
+    val definitions get() = registry.definitions
+    fun definition(id: String) = registry.definition(id)
+    fun create(id: String): CrateClickActionData? = registry.create(id)
+    fun descriptor(id: String) = registry.descriptor(id)
+    fun defaultElement(id: String) = registry.defaultElement(id)
 }

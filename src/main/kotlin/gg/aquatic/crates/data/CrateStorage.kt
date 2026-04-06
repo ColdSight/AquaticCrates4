@@ -44,15 +44,8 @@ object CrateStorage {
         }
 
         val content = yamlFile.readText()
-        val existingIds = availableIds().toSet()
-        val normalized = yaml.decodeFromString(CrateData.serializer(), content)
-            .normalized(id, existingIds)
-
-        val normalizedYaml = encodeCompactYaml(normalized)
-        if (!sameYaml(content, normalizedYaml)) {
-            yamlFile.writeText(normalizedYaml)
-        }
-
+        val normalized = normalizeCrateData(id, decodeCrateData(content))
+        rewriteNormalizedCrateFileIfNeeded(yamlFile, content, normalized)
         return normalized
     }
 
@@ -65,7 +58,7 @@ object CrateStorage {
 
     fun save(id: String, crateData: CrateData) {
         cratesDirectory.mkdirs()
-        yamlFileFor(id).writeText(encodeCompactYaml(crateData.normalized(id, availableIds().toSet() + id)))
+        yamlFileFor(id).writeText(encodeCompactYaml(normalizeCrateData(id, crateData, includeCurrentId = true)))
     }
 
     fun exists(id: String): Boolean {
@@ -84,6 +77,25 @@ object CrateStorage {
 
     private fun yamlAltFileFor(id: String): File {
         return File(cratesDirectory, "$id.yaml")
+    }
+
+    private fun decodeCrateData(content: String): CrateData {
+        return yaml.decodeFromString(CrateData.serializer(), content)
+    }
+
+    private fun normalizeCrateData(id: String, crateData: CrateData, includeCurrentId: Boolean = false): CrateData {
+        val existingIds = availableIds().toMutableSet()
+        if (includeCurrentId) {
+            existingIds += id
+        }
+        return crateData.normalized(id, existingIds)
+    }
+
+    private fun rewriteNormalizedCrateFileIfNeeded(yamlFile: File, currentContent: String, crateData: CrateData) {
+        val normalizedYaml = encodeCompactYaml(crateData)
+        if (!sameYaml(currentContent, normalizedYaml)) {
+            yamlFile.writeText(normalizedYaml)
+        }
     }
 
     private fun encodeCompactYaml(crateData: CrateData): String {

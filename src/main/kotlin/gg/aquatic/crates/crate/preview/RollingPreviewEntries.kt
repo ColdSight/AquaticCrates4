@@ -8,7 +8,7 @@ import gg.aquatic.kmenu.menu.util.ListMenu
 import org.bukkit.inventory.ItemStack
 import kotlin.random.Random
 
-class RollingRandomRewardCoordinator(
+class RollingPreviewEntrySet(
     private val entries: List<ListMenu.Entry<Reward>>,
     private val unique: Boolean,
 ) {
@@ -46,7 +46,6 @@ class RollingRandomRewardCoordinator(
         if (entries.isEmpty()) {
             return null
         }
-
         if (!unique) {
             return entries.random(Random.Default)
         }
@@ -64,10 +63,7 @@ class RollingRandomRewardCoordinator(
 
         val previous = currentEntries[id]
         val different = available.filter { it != previous }
-        return when {
-            different.isNotEmpty() -> different.random(Random.Default)
-            else -> available.random(Random.Default)
-        }
+        return if (different.isNotEmpty()) different.random(Random.Default) else available.random(Random.Default)
     }
 
     private fun rerollAll() {
@@ -82,17 +78,17 @@ class RollingRandomRewardCoordinator(
     }
 }
 
-class RollingRandomRewardButton(
+class RollingPreviewEntryButton(
     override val id: String,
     override val slots: Collection<Int>,
     override val priority: Int,
     private val updateEvery: Int,
-    private val coordinator: RollingRandomRewardCoordinator,
+    private val entrySet: RollingPreviewEntrySet,
 ) : MenuComponent() {
 
     private var tick = 0
     private var cycle = 0
-    private var currentEntry: ListMenu.Entry<Reward>? = coordinator.register(id)
+    private var currentEntry: ListMenu.Entry<Reward>? = entrySet.register(id)
 
     override val onClick: suspend (AsyncPacketInventoryInteractEvent) -> Unit = { }
 
@@ -104,7 +100,7 @@ class RollingRandomRewardButton(
         if (tick >= updateEvery) {
             tick = 0
             cycle++
-            currentEntry = coordinator.reroll(id, cycle)
+            currentEntry = entrySet.reroll(id, cycle)
             menu.updateComponent(this)
         }
 

@@ -87,26 +87,14 @@ class PreviewCustomPagesMenu private constructor(
     }
 
     private suspend fun addRandomRewards() {
-        if (pageSettings.randomRewardSlots.isEmpty()) {
-            return
-        }
-
-        val randomEntries = PreviewListMenu.mappedEntries(crate, player, pageSettings.rewardLore)
-        val slots = if (pageSettings.randomRewardUnique) {
-            pageSettings.randomRewardSlots.take(randomEntries.size)
-        } else pageSettings.randomRewardSlots.toList()
-        val coordinator = RollingRandomRewardCoordinator(randomEntries, pageSettings.randomRewardUnique)
-
-        slots.forEach { slot ->
-            addComponent(
-                RollingRandomRewardButton(
-                    id = "random-preview:$slot",
-                    slots = listOf(slot),
-                    priority = 1,
-                    updateEvery = pageSettings.randomRewardSwitchTicks,
-                    coordinator = coordinator,
-                )
-            )
-        }
+        PreviewRewardEntries.addRollingRandomRewards(
+            menu = this,
+            crate = crate,
+            player = player,
+            rewardLore = pageSettings.rewardLore,
+            randomRewardSlots = pageSettings.randomRewardSlots,
+            randomRewardSwitchTicks = pageSettings.randomRewardSwitchTicks,
+            randomRewardUnique = pageSettings.randomRewardUnique,
+        )
     }
 }

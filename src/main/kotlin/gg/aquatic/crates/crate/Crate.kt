@@ -3,12 +3,10 @@ package gg.aquatic.crates.crate
 import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.crate.opening.CrateOpeningService
-import gg.aquatic.crates.interact.CrateClickBinder
 import gg.aquatic.crates.interact.CrateClickType
+import gg.aquatic.crates.interact.CrateInteractionService
 import gg.aquatic.crates.data.interactable.CrateInteractableData
 import gg.aquatic.crates.data.interaction.CrateClickMappingData
-import gg.aquatic.crates.debug.CratesDebug
-import gg.aquatic.execute.executeActions
 import gg.aquatic.crates.limit.LimitHandle
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
@@ -19,8 +17,6 @@ import gg.aquatic.crates.reward.provider.RewardProvider
 import gg.aquatic.kholograms.Hologram
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import gg.aquatic.stacked.stackedItem
-import gg.aquatic.common.coroutine.VirtualsCtx
-import gg.aquatic.crates.CratesPlugin
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -106,7 +102,6 @@ class Crate(
     val crateItemStack by lazy { crateItem.getItem() }
 
     internal fun handleKeyItemInteractions(event: StackedItemInteractEvent) {
-        val player = event.player
         val interactType = event.interactType
         val clickType = when (interactType) {
             StackedItemInteractEvent.InteractType.LEFT -> CrateClickType.LEFT
@@ -116,44 +111,11 @@ class Crate(
             else -> return
         }
 
-        val startedAt = System.currentTimeMillis()
         val originalEvent = event.originalEvent as? PlayerInteractEvent
-        event.cancelled = true
-        fun execute() {
-            if (CrateInteractionGuard.wasCrateInteractionClaimedSince(player.uniqueId, startedAt)) {
-                return
-            }
-            if (!CrateInteractionGuard.tryMarkExecuted(player.uniqueId)) {
-                return
-            }
-
-            val actions = keyClickMapping.actions(clickType)
-            CratesDebug.message(player, 1, "You have interacted with the key! $clickType -> ${actions.size} action(s)")
-
-            if (actions.isEmpty()) {
-                return
-            }
-
-            val binder = CrateClickBinder(
-                player = player,
-                crate = this,
-                crateHandle = null,
-                clickType = clickType,
-                usingKeyMapping = true
-            )
-
-            VirtualsCtx {
-                actions.map { it.toActionHandle() }.executeActions(binder) { _, str -> str }
-            }
+        if (CrateInteractionService.isPhysicalCrateInteraction(originalEvent)) {
+            return
         }
-
-        if (originalEvent?.clickedBlock != null) {
-            CratesPlugin.server.scheduler.runTask(CratesPlugin, Runnable {
-                execute()
-            })
-        } else {
-            execute()
-        }
+        CrateInteractionService.handleKeyInteraction(this, event, clickType)
     }
 
     fun isHoldingKey(player: Player): Boolean {

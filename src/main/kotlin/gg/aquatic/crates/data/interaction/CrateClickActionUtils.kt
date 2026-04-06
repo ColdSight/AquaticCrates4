@@ -1,10 +1,7 @@
 package gg.aquatic.crates.data.interaction
 
+import gg.aquatic.crates.data.editor.findPolymorphicSubtypeId
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 
 internal fun EditorFieldContext.matchesCrateClickActionSubtype(id: String): Boolean {
     val currentType = findCrateClickActionSubtypeId() ?: return false
@@ -12,39 +9,5 @@ internal fun EditorFieldContext.matchesCrateClickActionSubtype(id: String): Bool
 }
 
 internal fun EditorFieldContext.findCrateClickActionSubtypeId(): String? {
-    val direct = (value as? JsonObject)
-        ?.get("type")
-        ?.let { it as? JsonPrimitive }
-        ?.contentOrNull
-    if (direct != null) {
-        return direct
-    }
-
-    val numericIndex = pathSegments.indexOfLast { it.toIntOrNull() != null }
-    if (numericIndex == -1) {
-        return null
-    }
-
-    val actionElement = root.findByPath(pathSegments.take(numericIndex + 1)) as? JsonObject ?: return null
-    return actionElement["type"]
-        ?.let { it as? JsonPrimitive }
-        ?.contentOrNull
-}
-
-private fun JsonElement.findByPath(path: List<String>): JsonElement? {
-    var current: JsonElement = this
-    for (segment in path) {
-        current = when {
-            segment.toIntOrNull() != null -> {
-                if (current !is kotlinx.serialization.json.JsonArray) return null
-                current.getOrNull(segment.toInt()) ?: return null
-            }
-
-            else -> {
-                if (current !is JsonObject) return null
-                current[segment] ?: return null
-            }
-        }
-    }
-    return current
+    return findPolymorphicSubtypeId()
 }

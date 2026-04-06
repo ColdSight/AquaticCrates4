@@ -4,11 +4,11 @@ import com.charleskorn.kaml.PolymorphismStyle
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlNamingStrategy
+import gg.aquatic.crates.data.editor.PolymorphicTypeDefinition
+import gg.aquatic.crates.data.editor.PolymorphicTypeRegistry
+import gg.aquatic.crates.data.editor.createPolymorphicJson
+import gg.aquatic.crates.data.editor.createPolymorphicYaml
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.PolymorphicSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -29,39 +29,18 @@ object RewardActionFormats {
         }
     }
 
-    val json = Json {
-        serializersModule = module
-        classDiscriminator = "type"
-        prettyPrint = true
-        prettyPrintIndent = "  "
-        encodeDefaults = true
-        ignoreUnknownKeys = true
-    }
-
-    val yaml = Yaml(
-        serializersModule = module,
-        configuration = YamlConfiguration(
-            yamlNamingStrategy = YamlNamingStrategy.KebabCase,
-            polymorphismStyle = PolymorphismStyle.Property,
-            polymorphismPropertyName = "type"
-        )
-    )
+    val json = createPolymorphicJson(module)
+    val yaml = createPolymorphicYaml(module)
 
     val legacyYaml = Yaml.default
 }
 
 object RewardActionTypes {
-    data class Definition(
-        val id: String,
-        val displayName: String,
-        val description: List<String>,
-        val icon: Material,
-        val factory: () -> RewardActionData,
-        val descriptorFactory: () -> SerialDescriptor,
-    )
-
-    val definitions: List<Definition> = listOf(
-        Definition(
+    private val registry = PolymorphicTypeRegistry(
+        RewardActionData::class.java,
+        RewardActionFormats.json,
+        listOf(
+        PolymorphicTypeDefinition(
             id = "give-item",
             displayName = "Give Item",
             description = listOf(
@@ -72,7 +51,7 @@ object RewardActionTypes {
             factory = { GiveItemRewardActionData() },
             descriptorFactory = { GiveItemRewardActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "message",
             displayName = "Message",
             description = listOf(
@@ -83,7 +62,7 @@ object RewardActionTypes {
             factory = { MessageRewardActionData() },
             descriptorFactory = { MessageRewardActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "actionbar",
             displayName = "Actionbar",
             description = listOf(
@@ -94,7 +73,7 @@ object RewardActionTypes {
             factory = { ActionbarRewardActionData() },
             descriptorFactory = { ActionbarRewardActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "command",
             displayName = "Command",
             description = listOf(
@@ -105,7 +84,7 @@ object RewardActionTypes {
             factory = { CommandRewardActionData() },
             descriptorFactory = { CommandRewardActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "sound",
             displayName = "Play Sound",
             description = listOf(
@@ -116,7 +95,7 @@ object RewardActionTypes {
             factory = { SoundRewardActionData() },
             descriptorFactory = { SoundRewardActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "stop-sound",
             displayName = "Stop Sound",
             description = listOf(
@@ -127,7 +106,7 @@ object RewardActionTypes {
             factory = { StopSoundRewardActionData() },
             descriptorFactory = { StopSoundRewardActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "title",
             displayName = "Title",
             description = listOf(
@@ -138,7 +117,7 @@ object RewardActionTypes {
             factory = { TitleRewardActionData() },
             descriptorFactory = { TitleRewardActionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "close-inventory",
             displayName = "Close Inventory",
             description = listOf(
@@ -149,30 +128,13 @@ object RewardActionTypes {
             factory = { CloseInventoryRewardActionData() },
             descriptorFactory = { CloseInventoryRewardActionData.serializer().descriptor }
         ),
-    )
-    private val definitionsById = definitions.associateBy { it.id }
-
-    fun parse(raw: String): String? {
-        return definitionsById.keys.firstOrNull { it.equals(raw.trim(), ignoreCase = true) }
-    }
-
-    fun definition(id: String): Definition? {
-        return definitionsById[id]
-    }
-
-    fun create(id: String): RewardActionData? {
-        return definition(id)?.factory?.invoke()
-    }
-
-    fun defaultElement(id: String): JsonElement? {
-        val action = create(id) ?: return null
-        return RewardActionFormats.json.encodeToJsonElement(
-            PolymorphicSerializer(RewardActionData::class),
-            action
         )
-    }
+    )
 
-    fun descriptor(id: String): SerialDescriptor? {
-        return definition(id)?.descriptorFactory?.invoke()
-    }
+    val definitions get() = registry.definitions
+    fun parse(raw: String): String? = registry.parse(raw)
+    fun definition(id: String) = registry.definition(id)
+    fun create(id: String): RewardActionData? = registry.create(id)
+    fun defaultElement(id: String) = registry.defaultElement(id)
+    fun descriptor(id: String) = registry.descriptor(id)
 }
