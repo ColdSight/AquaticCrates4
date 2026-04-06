@@ -76,7 +76,7 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.6")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.8")
     implementation("org.xerial:sqlite-jdbc:3.51.3.0")
 
     implementation("org.reflections:reflections:0.10.2")
