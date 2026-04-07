@@ -3,6 +3,7 @@ package gg.aquatic.crates.crate.opening
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandle
 import gg.aquatic.crates.limit.LimitService
+import gg.aquatic.crates.milestone.CrateMilestoneService
 import gg.aquatic.crates.reward.processor.RolledReward
 import gg.aquatic.crates.reward.provider.ResolvedRewardProvider
 import gg.aquatic.crates.stats.CrateStats
@@ -52,12 +53,19 @@ object CrateOpeningService {
         val resolvedProvider = resolveWinnableProvider(session) ?: return null
         session.stage = OpeningStage.PROCESSING_REWARDS
 
-        return session.crate.rewardProcessor.process(
+        val grantedRewards = session.crate.rewardProcessor.process(
             player = session.player,
             crate = session.crate,
             crateHandle = crateHandle,
             provider = resolvedProvider,
         )
+
+        if (grantedRewards.isEmpty()) {
+            return emptyList()
+        }
+
+        val milestoneRewards = CrateMilestoneService.grantReachedMilestones(session.player, session.crate)
+        return grantedRewards + milestoneRewards
     }
 
     private suspend fun canAttemptOpen(session: OpeningSession, crateHandle: CrateHandle?): Boolean {

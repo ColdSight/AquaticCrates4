@@ -24,6 +24,12 @@ fun CrateData.normalized(crateId: String? = null, existingCrateIds: Set<String> 
         rewardProcessorType = RewardProcessorType.of(rewardProcessorType).id,
         chooseProcessor = chooseProcessor.normalized(),
         limits = limits.map { it.normalized() }.distinctBy { it.timeframe },
+        milestones = milestones
+            .map { it.normalized(availableRarityIds, fallbackRarityId, crateId, existingCrateIds) }
+            .sortedBy { it.milestone },
+        repeatableMilestones = repeatableMilestones
+            .map { it.normalized(availableRarityIds, fallbackRarityId, crateId, existingCrateIds) }
+            .sortedBy { it.milestone },
         priceGroups = priceGroups.map { it.normalized(crateId, existingCrateIds) },
     )
 }

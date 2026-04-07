@@ -35,6 +35,8 @@ data class CrateData(
     val openConditions: List<@Polymorphic gg.aquatic.crates.data.condition.PlayerConditionData> = emptyList(),
     val disableOpenStats: Boolean = false,
     val limits: List<LimitData> = emptyList(),
+    val milestones: List<MilestoneData> = emptyList(),
+    val repeatableMilestones: List<MilestoneData> = emptyList(),
     val priceGroups: List<OpenPriceGroupData> = listOf(OpenPriceGroupData()),
     val rarities: Map<String, RewardRarityData> = mapOf(
         DEFAULT_RARITY_ID to RewardRarityData(displayName = "<gray>Default")

@@ -7,6 +7,7 @@ import gg.aquatic.crates.data.editor.switchingSection
 import gg.aquatic.crates.data.hologram.HologramSettingsSectionFieldAdapter
 import gg.aquatic.crates.data.interaction.InteractionSettingsSectionFieldAdapter
 import gg.aquatic.crates.data.key.KeySettingsSectionFieldAdapter
+import gg.aquatic.crates.data.milestone.MilestoneSettingsSectionFieldAdapter
 import gg.aquatic.crates.data.processor.BasicRewardProcessorData
 import gg.aquatic.crates.data.processor.ChooseRewardProcessorData
 import gg.aquatic.crates.data.processor.RewardProcessorSectionFieldAdapter
@@ -45,6 +46,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
     field(CrateData::openConditions, visibleWhen = { false })
     field(CrateData::disableOpenStats, visibleWhen = { false })
     field(CrateData::limits, visibleWhen = { false })
+    field(CrateData::repeatableMilestones, visibleWhen = { false })
     field(CrateData::priceGroups, visibleWhen = { false })
     map(
         CrateData::rarities,
@@ -124,6 +126,16 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
     ) {
         with(ChooseRewardProcessorData) { defineEditor() }
     }
+    field(
+        CrateData::milestones,
+        adapter = MilestoneSettingsSectionFieldAdapter,
+        displayName = "Milestones",
+        iconMaterial = Material.DIAMOND,
+        description = listOf(
+            "Milestone rewards granted based on alltime player opens.",
+            "Supports one-time and repeatable milestones."
+        )
+    )
     field(
         CrateData::keyItem,
         adapter = KeySettingsSectionFieldAdapter,

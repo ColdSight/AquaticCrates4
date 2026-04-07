@@ -4,6 +4,7 @@ import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.data.condition.CrateOpenConditionBinder
 import gg.aquatic.crates.data.hologram.RewardHologramEntry
+import gg.aquatic.crates.milestone.CrateMilestoneRuntimeFactory
 import gg.aquatic.crates.data.processor.RewardProcessorType
 import gg.aquatic.crates.data.provider.RewardProviderType
 import gg.aquatic.crates.reward.runtime.RewardRuntimeFactory
@@ -43,6 +44,15 @@ fun CrateData.toCrate(id: String): Crate {
         interactables = normalized.interactables,
         disableOpenStats = normalized.disableOpenStats,
         limits = normalized.limits.map { it.toHandle() },
+        milestoneManagerSupplier = {
+            CrateMilestoneRuntimeFactory.createManager(
+                crateId = id,
+                keyItem = crateKeyItem,
+                rarities = normalized.rarities,
+                milestones = normalized.milestones,
+                repeatableMilestones = normalized.repeatableMilestones
+            )
+        },
         rewardProviderSupplier = {
             when (RewardProviderType.of(normalized.rewardProviderType)) {
                 RewardProviderType.CONDITIONAL_POOLS -> ConditionalPoolsRewardProvider(

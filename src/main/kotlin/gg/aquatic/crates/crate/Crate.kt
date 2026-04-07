@@ -8,6 +8,7 @@ import gg.aquatic.crates.interact.CrateInteractionService
 import gg.aquatic.crates.data.interactable.CrateInteractableData
 import gg.aquatic.crates.data.interaction.CrateClickMappingData
 import gg.aquatic.crates.limit.LimitHandle
+import gg.aquatic.crates.milestone.CrateMilestoneManager
 import gg.aquatic.crates.open.OpenConditions
 import gg.aquatic.crates.open.OpenPriceGroup
 import gg.aquatic.crates.open.currency.CrateKeyCurrency
@@ -47,6 +48,7 @@ class Crate(
     val interactables: Collection<CrateInteractableData>,
     val disableOpenStats: Boolean,
     val limits: Collection<LimitHandle>,
+    milestoneManagerSupplier: () -> CrateMilestoneManager,
     rewardProviderSupplier: () -> RewardProvider,
     rewardProcessorSupplier: () -> RewardProcessor,
     previewSupplier: () -> PreviewMenuSettings?,
@@ -57,6 +59,7 @@ class Crate(
     val hologram: Hologram.Settings? by lazy(hologramSupplier)
     val priceGroups: Collection<OpenPriceGroup> by lazy(priceGroupsSupplier)
     val openConditions: OpenConditions by lazy(openConditionsSupplier)
+    val milestoneManager: CrateMilestoneManager by lazy(milestoneManagerSupplier)
     val rewardProvider: RewardProvider by lazy(rewardProviderSupplier)
     val rewardProcessor: RewardProcessor by lazy(rewardProcessorSupplier)
     val preview: PreviewMenuSettings? by lazy(previewSupplier)
