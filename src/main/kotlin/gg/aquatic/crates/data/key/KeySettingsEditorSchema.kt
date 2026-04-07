@@ -2,11 +2,15 @@ package gg.aquatic.crates.data.key
 
 import gg.aquatic.crates.data.interaction.CrateClickMappingData
 import gg.aquatic.crates.data.item.StackedItemData
+import gg.aquatic.crates.data.resolveCrateDataDescriptor
 import gg.aquatic.waves.serialization.editor.meta.EditableModel
+import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.TypedEditorSchemaBuilder
 import org.bukkit.Material
 
 object KeySettingsEditorSchema : EditableModel<KeySettingsData>(KeySettingsData.serializer()) {
+    override fun resolveDescriptor(context: EditorFieldContext) = resolveCrateDataDescriptor(context)
+
     override fun TypedEditorSchemaBuilder<KeySettingsData>.define() {
         group(KeySettingsData::keyItem) {
             with(StackedItemData) {

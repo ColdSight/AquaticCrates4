@@ -42,13 +42,12 @@ open class PolymorphicEntryFieldAdapter(
 
     override suspend fun edit(player: Player, context: EditorFieldContext, buttonType: ButtonType): FieldEditResult {
         return when (buttonType) {
-            ButtonType.LEFT -> FieldEditResult.PassThrough
-            ButtonType.RIGHT -> {
+            ButtonType.RIGHT, ButtonType.SHIFT_RIGHT -> {
                 val selected = selectType(player) ?: return FieldEditResult.NoChange
                 val element = createElement(selected) ?: return FieldEditResult.NoChange
                 FieldEditResult.Updated(mergeType(element, context.value))
             }
-            else -> FieldEditResult.NoChange
+            else -> FieldEditResult.PassThrough
         }
     }
 

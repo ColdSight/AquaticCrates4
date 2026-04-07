@@ -1,11 +1,15 @@
 package gg.aquatic.crates.data.milestone
 
 import gg.aquatic.crates.data.MilestoneData
+import gg.aquatic.crates.data.resolveCrateDataDescriptor
 import gg.aquatic.waves.serialization.editor.meta.EditableModel
+import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.TypedEditorSchemaBuilder
 import org.bukkit.Material
 
 object MilestoneSettingsEditorSchema : EditableModel<MilestoneSettingsData>(MilestoneSettingsData.serializer()) {
+    override fun resolveDescriptor(context: EditorFieldContext) = resolveCrateDataDescriptor(context)
+
     override fun TypedEditorSchemaBuilder<MilestoneSettingsData>.define() {
         list(
             MilestoneSettingsData::milestones,

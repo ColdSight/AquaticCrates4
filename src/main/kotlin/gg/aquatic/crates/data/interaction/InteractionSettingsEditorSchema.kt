@@ -1,6 +1,7 @@
 package gg.aquatic.crates.data.interaction
 
 import gg.aquatic.crates.data.LimitData
+import gg.aquatic.crates.data.resolveCrateDataDescriptor
 import gg.aquatic.crates.data.condition.OpenPlayerConditionEntryFieldAdapter
 import gg.aquatic.crates.data.condition.OpenPlayerConditionSelectionMenu
 import gg.aquatic.crates.data.condition.definePlayerConditionEditor
@@ -12,10 +13,13 @@ import gg.aquatic.crates.data.interactable.MEGCrateInteractableData
 import gg.aquatic.crates.data.interactable.MultiBlockCrateInteractableData
 import gg.aquatic.crates.data.price.OpenPriceGroupData
 import gg.aquatic.waves.serialization.editor.meta.EditableModel
+import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.TypedEditorSchemaBuilder
 import org.bukkit.Material
 
 object InteractionSettingsEditorSchema : EditableModel<InteractionSettingsData>(InteractionSettingsData.serializer()) {
+    override fun resolveDescriptor(context: EditorFieldContext) = resolveCrateDataDescriptor(context)
+
     override fun TypedEditorSchemaBuilder<InteractionSettingsData>.define() {
         list(
             InteractionSettingsData::interactables,
