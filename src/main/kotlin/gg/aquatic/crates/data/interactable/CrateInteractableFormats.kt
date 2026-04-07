@@ -1,10 +1,11 @@
 package gg.aquatic.crates.data.interactable
 
+import com.charleskorn.kaml.YamlNode
+import gg.aquatic.crates.data.editor.createPolymorphicYaml
+import gg.aquatic.crates.data.editor.encodeToNode
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -21,14 +22,7 @@ object CrateInteractableFormats {
         }
     }
 
-    val json = Json {
-        serializersModule = module
-        classDiscriminator = "type"
-        prettyPrint = true
-        prettyPrintIndent = "  "
-        encodeDefaults = true
-        ignoreUnknownKeys = true
-    }
+    val yaml = createPolymorphicYaml(module)
 }
 
 object CrateInteractableTypes {
@@ -92,9 +86,9 @@ object CrateInteractableTypes {
 
     fun definition(id: String): Definition? = definitionsById[id]
 
-    fun defaultElement(id: String): JsonElement? {
+    fun defaultElement(id: String): YamlNode? {
         val interactable = definition(id)?.factory?.invoke() ?: return null
-        return CrateInteractableFormats.json.encodeToJsonElement(
+        return CrateInteractableFormats.yaml.encodeToNode(
             PolymorphicSerializer(CrateInteractableData::class),
             interactable
         )

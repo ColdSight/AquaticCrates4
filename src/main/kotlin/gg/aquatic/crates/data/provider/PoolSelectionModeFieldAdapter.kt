@@ -1,10 +1,11 @@
 package gg.aquatic.crates.data.provider
 
+import gg.aquatic.crates.data.editor.stringContentOrNull
+import gg.aquatic.crates.data.editor.yamlScalar
 import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
-import kotlinx.serialization.json.JsonPrimitive
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -14,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 
 object PoolSelectionModeFieldAdapter : EditorFieldAdapter {
     override fun createItem(context: EditorFieldContext, defaultItem: () -> ItemStack): ItemStack {
-        val current = context.value.toString().trim('"')
+        val current = context.value.stringContentOrNull ?: ""
         return stackedItem(Material.COMPARATOR) {
             displayName = text(context.label, NamedTextColor.AQUA)
             if (context.description.isNotEmpty()) {
@@ -28,7 +29,7 @@ object PoolSelectionModeFieldAdapter : EditorFieldAdapter {
 
     override suspend fun edit(player: Player, context: EditorFieldContext): FieldEditResult {
         val selected = PoolSelectionModeSelectionMenu.select(player) ?: return FieldEditResult.NoChange
-        return FieldEditResult.Updated(JsonPrimitive(selected))
+        return FieldEditResult.Updated(yamlScalar(selected))
     }
 
     private fun text(content: String, color: NamedTextColor): Component {

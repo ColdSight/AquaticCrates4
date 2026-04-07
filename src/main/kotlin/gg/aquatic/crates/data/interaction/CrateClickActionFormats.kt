@@ -6,7 +6,6 @@ import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlNamingStrategy
 import gg.aquatic.crates.data.editor.PolymorphicTypeDefinition
 import gg.aquatic.crates.data.editor.PolymorphicTypeRegistry
-import gg.aquatic.crates.data.editor.createPolymorphicJson
 import gg.aquatic.crates.data.editor.createPolymorphicYaml
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.modules.SerializersModule
@@ -31,14 +30,13 @@ object CrateClickActionFormats {
         }
     }
 
-    val json = createPolymorphicJson(module)
     val yaml = createPolymorphicYaml(module)
 }
 
 object CrateClickActionTypes {
     private val registry = PolymorphicTypeRegistry(
         CrateClickActionData::class.java,
-        CrateClickActionFormats.json,
+        CrateClickActionFormats.yaml,
         listOf(
         PolymorphicTypeDefinition(
             id = "preview",
@@ -123,7 +121,7 @@ object CrateClickActionTypes {
         )
     )
 
-    val definitions get() = registry.definitions
+    val definitions get() = registry.selectionDefinitions()
     fun definition(id: String) = registry.definition(id)
     fun create(id: String): CrateClickActionData? = registry.create(id)
     fun descriptor(id: String) = registry.descriptor(id)

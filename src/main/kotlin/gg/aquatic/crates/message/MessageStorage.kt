@@ -1,9 +1,13 @@
-package gg.aquatic.crates.message
+package gg.aquatic.crates.message.storage
 
 import gg.aquatic.crates.CratesPlugin
 import gg.aquatic.crates.Messages
 import gg.aquatic.crates.debug.CratesLogger
+import gg.aquatic.crates.message.MessagesFileData
+import gg.aquatic.crates.message.MessagesFormats
 import gg.aquatic.klocale.impl.paper.PaperMessage
+import gg.aquatic.crates.yaml.encodeCompactString
+import gg.aquatic.crates.yaml.parseCompactNode
 import java.io.File
 
 object MessageStorage {
@@ -20,7 +24,7 @@ object MessageStorage {
 
         val currentText = target.readText(Charsets.UTF_8)
         val decoded = runCatching {
-            MessagesFormats.yaml.decodeFromString(MessagesFileData.serializer(), currentText)
+            MessagesFormats.yaml.decodeFromYamlNode(MessagesFileData.serializer(), MessagesFormats.yaml.parseCompactNode(currentText))
         }.getOrElse { exception ->
             CratesLogger.warning(
                 "Failed to load messages.yml, falling back to defaults: ${exception.message ?: exception.javaClass.simpleName}"
@@ -28,7 +32,7 @@ object MessageStorage {
             defaults
         }
 
-        val mergedText = MessagesFormats.yaml.encodeToString(MessagesFileData.serializer(), decoded)
+        val mergedText = MessagesFormats.yaml.encodeCompactString(MessagesFileData.serializer(), decoded)
         if (mergedText != currentText) {
             target.writeText(mergedText, Charsets.UTF_8)
         }
@@ -39,7 +43,7 @@ object MessageStorage {
     fun saveData(data: MessagesFileData) {
         val target = file
         target.parentFile?.mkdirs()
-        target.writeText(MessagesFormats.yaml.encodeToString(MessagesFileData.serializer(), data), Charsets.UTF_8)
+        target.writeText(MessagesFormats.yaml.encodeCompactString(MessagesFileData.serializer(), data), Charsets.UTF_8)
     }
 
     fun loadRuntimeMessages(): Map<String, Map<String, PaperMessage>> {
@@ -76,7 +80,7 @@ object MessageStorage {
             ?: return MessagesFileData()
 
         return runCatching {
-            MessagesFormats.yaml.decodeFromString(MessagesFileData.serializer(), defaultText)
+            MessagesFormats.yaml.decodeFromYamlNode(MessagesFileData.serializer(), MessagesFormats.yaml.parseCompactNode(defaultText))
         }.getOrElse { exception ->
             CratesLogger.warning(
                 "Failed to load default messages.yml, falling back to hardcoded defaults: ${exception.message ?: exception.javaClass.simpleName}"

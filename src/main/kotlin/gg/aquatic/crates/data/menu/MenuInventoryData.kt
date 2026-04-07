@@ -4,6 +4,8 @@ import gg.aquatic.crates.data.action.RewardActionSelectionMenu
 import gg.aquatic.crates.data.action.defineRewardActionEditor
 import gg.aquatic.crates.data.action.RewardActionData
 import gg.aquatic.crates.data.editor.InventoryTypeFieldAdapter
+import gg.aquatic.crates.data.editor.mapValue
+import gg.aquatic.crates.data.editor.stringContentOrNull
 import gg.aquatic.crates.data.item.StackedItemData
 import gg.aquatic.execute.ActionHandle
 import gg.aquatic.kmenu.inventory.AnvilInventoryType
@@ -16,8 +18,6 @@ import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -168,20 +168,14 @@ data class AnvilMenuRuntimeSettings(
 }
 
 private fun EditorFieldContext.currentInventoryType(): String {
-    val current = (value as? JsonObject)
-        ?.get("type")
-        ?.let { it as? JsonPrimitive }
-        ?.content
+    val current = value.mapValue("type")?.stringContentOrNull
     if (current != null) {
         return current.uppercase()
     }
 
-    val rootType = (root as? JsonObject)
-        ?.get("inventory")
-        ?.let { it as? JsonObject }
-        ?.get("type")
-        ?.let { it as? JsonPrimitive }
-        ?.content
+    val rootType = root.mapValue("inventory")
+        ?.mapValue("type")
+        ?.stringContentOrNull
 
     return (rootType ?: "GENERIC9X3").uppercase()
 }

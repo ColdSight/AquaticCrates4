@@ -4,12 +4,12 @@ import gg.aquatic.crates.data.action.RewardActionData
 import gg.aquatic.crates.data.action.RewardActionSelectionMenu
 import gg.aquatic.crates.data.action.defineRewardActionEditor
 import gg.aquatic.crates.data.item.StackedItemData
+import gg.aquatic.crates.data.editor.mapValue
+import gg.aquatic.crates.data.editor.stringContentOrNull
 import gg.aquatic.crates.data.range.RewardAmountRangeData
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import kotlinx.serialization.Polymorphic
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.Serializable
 import org.bukkit.Material
 
@@ -103,20 +103,14 @@ data class ChooseRewardProcessorData(
 }
 
 private fun EditorFieldContext.currentBoolean(key: String): Boolean? {
-    val current = (value as? JsonObject)
-        ?.get(key)
-        ?.let { it as? JsonPrimitive }
-        ?.content
+    val current = value.mapValue(key)?.stringContentOrNull
     if (current != null) {
         return current.toBooleanStrictOrNull()
     }
 
-    val rootValue = (root as? JsonObject)
-        ?.get("chooseProcessor")
-        ?.let { it as? JsonObject }
-        ?.get(key)
-        ?.let { it as? JsonPrimitive }
-        ?.content
+    val rootValue = root.mapValue("chooseProcessor")
+        ?.mapValue(key)
+        ?.stringContentOrNull
 
     return rootValue?.toBooleanStrictOrNull()
 }

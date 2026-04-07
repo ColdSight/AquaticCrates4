@@ -1,5 +1,6 @@
 package gg.aquatic.crates.data.editor
 
+import com.charleskorn.kaml.YamlNode
 import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.kmenu.KMenu
 import gg.aquatic.kmenu.inventory.InventoryType
@@ -9,7 +10,6 @@ import gg.aquatic.waves.serialization.editor.meta.EntryFactory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonElement
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -45,7 +45,7 @@ object PolymorphicSelectionMenu {
         entrySlots: List<Int>,
         cancelSlot: Int = 22,
         definitions: List<Definition>,
-        elementFactory: (String) -> JsonElement?
+        elementFactory: (String) -> YamlNode?
     ): EntryFactory {
         return EntryFactory { player, _ ->
             val selected = selectType(

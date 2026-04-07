@@ -1,8 +1,10 @@
 package gg.aquatic.crates.data.processor
 
 import gg.aquatic.common.toMMComponent
+import gg.aquatic.crates.data.CrateDataFormats
 import gg.aquatic.crates.data.PreviewButtonData
 import gg.aquatic.crates.data.editor.CrateEditorValidators
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.crates.data.menu.AnvilMenuRuntimeSettings
 import gg.aquatic.crates.data.menu.MenuInventoryData
 import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
@@ -80,7 +82,7 @@ data class RewardDisplayMenuData(
                     keyPrompt = "Enter custom button ID:",
                     keyValidator = { if (CrateEditorValidators.crateIdRegex.matches(it)) null else "Use only letters, numbers, '_' or '-'." },
                     valueFactory = { buttonId ->
-                        schemaJson.encodeToJsonElement(
+                        CrateDataFormats.yaml.encodeToNode(
                             PreviewButtonData.serializer(),
                             PreviewButtonData(
                                 item = gg.aquatic.crates.data.item.StackedItemData(

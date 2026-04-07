@@ -1,6 +1,9 @@
-package gg.aquatic.crates.message
+package gg.aquatic.crates.message.editor
 
 import gg.aquatic.crates.Messages
+import gg.aquatic.crates.message.EditableMessageData
+import gg.aquatic.crates.message.MessageEntryFieldAdapter
+import gg.aquatic.crates.message.MessagesFileData
 import gg.aquatic.waves.serialization.editor.meta.TypedEditorSchemaBuilder
 import kotlin.reflect.KProperty1
 

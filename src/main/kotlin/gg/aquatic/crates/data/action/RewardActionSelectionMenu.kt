@@ -7,14 +7,7 @@ import gg.aquatic.waves.serialization.editor.meta.EntryFactory
 object RewardActionSelectionMenu {
 
     private val entrySlots = listOf(10, 11, 12, 13, 14, 15, 16, 19)
-    private val definitions = RewardActionTypes.definitions.map { definition ->
-        PolymorphicSelectionMenu.Definition(
-            id = definition.id,
-            displayName = definition.displayName,
-            description = definition.description,
-            icon = definition.icon
-        )
-    }
+    private val definitions = RewardActionTypes.definitions
 
     val entryFactory: EntryFactory = PolymorphicSelectionMenu.entryFactory(
         title = "Select Win Action",

@@ -1,10 +1,11 @@
 package gg.aquatic.crates.data.price
 
+import com.charleskorn.kaml.YamlNode
+import gg.aquatic.crates.data.editor.createPolymorphicYaml
+import gg.aquatic.crates.data.editor.encodeToNode
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -19,14 +20,7 @@ object OpenPriceFormats {
         }
     }
 
-    val json = Json {
-        serializersModule = module
-        classDiscriminator = "type"
-        prettyPrint = true
-        prettyPrintIndent = "  "
-        encodeDefaults = true
-        ignoreUnknownKeys = true
-    }
+    val yaml = createPolymorphicYaml(module)
 }
 
 object OpenPriceTypes {
@@ -72,9 +66,9 @@ object OpenPriceTypes {
         return definition(id)?.descriptorFactory?.invoke()
     }
 
-    fun defaultElement(id: String): JsonElement? {
+    fun defaultElement(id: String): YamlNode? {
         val price = definition(id)?.factory?.invoke() ?: return null
-        return OpenPriceFormats.json.encodeToJsonElement(
+        return OpenPriceFormats.yaml.encodeToNode(
             PolymorphicSerializer(OpenPriceData::class),
             price
         )

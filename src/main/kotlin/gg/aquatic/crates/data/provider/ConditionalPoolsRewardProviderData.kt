@@ -1,6 +1,7 @@
 package gg.aquatic.crates.data.provider
 
 import gg.aquatic.crates.data.editor.CrateEditorValidators
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.crates.data.range.RewardAmountRangeData
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
@@ -96,7 +97,7 @@ data class ConditionalPoolsRewardProviderData(
                     keyPrompt = "Enter pool ID:",
                     keyValidator = { if (CrateEditorValidators.crateIdRegex.matches(it)) null else "Use only letters, numbers, '_' or '-'." },
                     valueFactory = {
-                        gg.aquatic.crates.data.CrateDataFormats.json.encodeToJsonElement(
+                        gg.aquatic.crates.data.CrateDataFormats.yaml.encodeToNode(
                             RewardPoolData.serializer(),
                             RewardPoolData(displayName = it)
                         )

@@ -1,5 +1,6 @@
 package gg.aquatic.crates.message
 
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.crates.message.condition.MessageConditionSelectionMenu
 import gg.aquatic.crates.message.condition.defineMessageConditionEditor
 import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
@@ -34,7 +35,7 @@ fun TypedNestedSchemaBuilder<EditableMessageLineData>.defineMessageLineEditor() 
         newValueFactory = gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories.text(
             prompt = "Enter default component text:",
             transform = {
-                MessagesFormats.json.encodeToJsonElement(
+                MessagesFormats.yaml.encodeToNode(
                     MessageComponentData.serializer(),
                     MessageComponentData(text = it)
                 )

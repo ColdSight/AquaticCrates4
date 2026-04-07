@@ -1,4 +1,4 @@
-package gg.aquatic.crates.crate.preview
+package gg.aquatic.crates.crate.preview.runtime
 
 import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.common.toMMComponent
@@ -14,9 +14,7 @@ import org.bukkit.inventory.ItemStack
 
 object PreviewRewardEntries {
     suspend fun buildPreviewItem(reward: Reward, player: Player, rewardLore: List<String>): ItemStack? {
-        val item = if (reward.canWin(player)) {
-            reward.previewItem()
-        } else reward.fallbackItem?.invoke() ?: return null
+        val item = if (reward.canWin(player)) reward.previewItem() else reward.fallbackItem?.invoke() ?: return null
 
         if (rewardLore.isEmpty()) {
             return item
@@ -24,9 +22,7 @@ object PreviewRewardEntries {
 
         val meta = item.itemMeta ?: return item
         val originalLore = meta.lore().orEmpty()
-        val appendedLore = rewardLore.map {
-            reward.updatePlaceholders(it, 1).toMMComponent()
-        }
+        val appendedLore = rewardLore.map { reward.updatePlaceholders(it, 1).toMMComponent() }
         meta.lore(originalLore + appendedLore)
         item.itemMeta = meta
         return item
@@ -58,9 +54,7 @@ object PreviewRewardEntries {
     }
 
     suspend fun mappedEntries(crate: Crate, player: Player, rewardLore: List<String>): List<ListMenu.Entry<Reward>> {
-        return crate.rewardProvider.getRewards(player).mapNotNull {
-            createEntry(it, player, rewardLore)
-        }
+        return crate.rewardProvider.getRewards(player).mapNotNull { createEntry(it, player, rewardLore) }
     }
 
     suspend fun addRollingRandomRewards(
@@ -77,9 +71,7 @@ object PreviewRewardEntries {
         }
 
         val randomEntries = mappedEntries(crate, player, rewardLore)
-        val slots = if (randomRewardUnique) {
-            randomRewardSlots.take(randomEntries.size)
-        } else randomRewardSlots.toList()
+        val slots = if (randomRewardUnique) randomRewardSlots.take(randomEntries.size) else randomRewardSlots.toList()
         val entrySet = RollingPreviewEntrySet(randomEntries, randomRewardUnique)
 
         slots.forEach { slot ->

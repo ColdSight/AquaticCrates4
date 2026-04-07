@@ -2,6 +2,7 @@ package gg.aquatic.crates.data.price
 
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.open.OpenPriceGroup
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.waves.serialization.editor.meta.EntryFactory
 import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.TextFieldConfig
@@ -37,7 +38,7 @@ data class OpenPriceGroupData(
 
     companion object {
         val defaultEntryFactory: EntryFactory = EntryFactory { _, _ ->
-            OpenPriceFormats.json.encodeToJsonElement(OpenPriceGroupData.serializer(), OpenPriceGroupData())
+            OpenPriceFormats.yaml.encodeToNode(OpenPriceGroupData.serializer(), OpenPriceGroupData())
         }
 
         fun TypedNestedSchemaBuilder<OpenPriceGroupData>.defineEditor() {

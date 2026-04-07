@@ -6,7 +6,6 @@ import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlNamingStrategy
 import gg.aquatic.crates.data.editor.PolymorphicTypeDefinition
 import gg.aquatic.crates.data.editor.PolymorphicTypeRegistry
-import gg.aquatic.crates.data.editor.createPolymorphicJson
 import gg.aquatic.crates.data.editor.createPolymorphicYaml
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.modules.SerializersModule
@@ -29,7 +28,6 @@ object RewardActionFormats {
         }
     }
 
-    val json = createPolymorphicJson(module)
     val yaml = createPolymorphicYaml(module)
 
     val legacyYaml = Yaml.default
@@ -38,7 +36,7 @@ object RewardActionFormats {
 object RewardActionTypes {
     private val registry = PolymorphicTypeRegistry(
         RewardActionData::class.java,
-        RewardActionFormats.json,
+        RewardActionFormats.yaml,
         listOf(
         PolymorphicTypeDefinition(
             id = "give-item",
@@ -131,7 +129,7 @@ object RewardActionTypes {
         )
     )
 
-    val definitions get() = registry.definitions
+    val definitions get() = registry.selectionDefinitions()
     fun parse(raw: String): String? = registry.parse(raw)
     fun definition(id: String) = registry.definition(id)
     fun create(id: String): RewardActionData? = registry.create(id)

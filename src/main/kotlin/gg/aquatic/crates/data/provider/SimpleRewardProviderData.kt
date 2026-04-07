@@ -3,8 +3,11 @@ package gg.aquatic.crates.data.provider
 import gg.aquatic.crates.data.CrateData
 import gg.aquatic.crates.data.CrateDataFormats
 import gg.aquatic.crates.data.RewardData
+import gg.aquatic.crates.data.RewardDataEditorSchema
+import gg.aquatic.crates.data.normalized
 import gg.aquatic.crates.data.range.RewardAmountRangeData
 import gg.aquatic.crates.data.editor.CrateEditorValidators
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.Serializable
@@ -62,7 +65,7 @@ data class SimpleRewardProviderData(
                     keyPrompt = "Enter reward ID:",
                     keyValidator = { if (CrateEditorValidators.crateIdRegex.matches(it)) null else "Use only letters, numbers, '_' or '-'." },
                     valueFactory = { rewardId ->
-                        CrateDataFormats.json.encodeToJsonElement(
+                        CrateDataFormats.yaml.encodeToNode(
                             RewardData.serializer(),
                             RewardData(
                                 displayName = rewardId,
@@ -76,7 +79,7 @@ data class SimpleRewardProviderData(
                     }
                 )
             ) {
-                with(RewardData) {
+                with(RewardDataEditorSchema) {
                     defineEditor()
                 }
             }

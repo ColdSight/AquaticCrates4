@@ -6,6 +6,7 @@ import gg.aquatic.crates.data.condition.CrateOpenConditionBinder
 import gg.aquatic.crates.data.hologram.RewardHologramEntry
 import gg.aquatic.crates.data.processor.RewardProcessorType
 import gg.aquatic.crates.data.provider.RewardProviderType
+import gg.aquatic.crates.reward.runtime.RewardRuntimeFactory
 import gg.aquatic.crates.reward.processor.BasicRewardProcessor
 import gg.aquatic.crates.reward.processor.ChooseRewardProcessor
 import gg.aquatic.crates.reward.provider.ConditionalPoolsRewardProvider
@@ -97,7 +98,7 @@ private fun buildRewards(
 
     return rewards.entries.map { (rewardId, rewardData) ->
         val rewardRarity = resolvedRarities[rewardData.rarity] ?: fallbackRarity
-        rewardData.toReward(rewardId, crateId, crateKeyItem, rewardRarity)
+        RewardRuntimeFactory.create(rewardData, rewardId, crateId, crateKeyItem, rewardRarity)
     }.toMutableList().also { builtRewards ->
         normalizeRewardChances(builtRewards, resolvedRarities)
     }

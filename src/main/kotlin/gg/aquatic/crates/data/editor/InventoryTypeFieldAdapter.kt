@@ -4,7 +4,6 @@ import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
-import kotlinx.serialization.json.JsonPrimitive
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -28,14 +27,14 @@ object InventoryTypeFieldAdapter : EditorFieldAdapter {
     override suspend fun edit(player: Player, context: EditorFieldContext): FieldEditResult {
         return when (val result = InventoryTypeSelectionMenu.select(player, currentValue(context))) {
             InventoryTypeSelectionMenu.SelectionResult.Cancelled -> FieldEditResult.NoChange
-            is InventoryTypeSelectionMenu.SelectionResult.Selected -> FieldEditResult.Updated(JsonPrimitive(result.inventoryType))
+            is InventoryTypeSelectionMenu.SelectionResult.Selected -> FieldEditResult.Updated(yamlScalar(result.inventoryType))
             InventoryTypeSelectionMenu.SelectionResult.NextPage,
             InventoryTypeSelectionMenu.SelectionResult.PreviousPage -> FieldEditResult.NoChange
         }
     }
 
     private fun currentValue(context: EditorFieldContext): String {
-        return context.value.toString().trim('"')
+        return context.value.stringContentOrNull ?: ""
     }
 
     private fun text(content: String, color: NamedTextColor): Component {

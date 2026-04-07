@@ -4,10 +4,9 @@ import com.charleskorn.kaml.PolymorphismStyle
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlNamingStrategy
+import com.charleskorn.kaml.YamlNode
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import org.bukkit.Material
 
 data class PolymorphicTypeDefinition<T : Any>(
@@ -21,7 +20,7 @@ data class PolymorphicTypeDefinition<T : Any>(
 
 class PolymorphicTypeRegistry<T : Any>(
     private val baseClass: Class<T>,
-    private val json: Json,
+    private val yaml: Yaml,
     definitions: List<PolymorphicTypeDefinition<T>>,
 ) {
     val definitions: List<PolymorphicTypeDefinition<T>> = definitions
@@ -31,23 +30,22 @@ class PolymorphicTypeRegistry<T : Any>(
     fun create(id: String): T? = definition(id)?.factory?.invoke()
     fun descriptor(id: String): SerialDescriptor? = definition(id)?.descriptorFactory?.invoke()
     fun parse(raw: String): String? = definitionsById.keys.firstOrNull { it.equals(raw.trim(), ignoreCase = true) }
+    fun selectionDefinitions(): List<PolymorphicSelectionMenu.Definition> = definitions.map { definition ->
+        PolymorphicSelectionMenu.Definition(
+            id = definition.id,
+            displayName = definition.displayName,
+            description = definition.description,
+            icon = definition.icon
+        )
+    }
 
-    fun defaultElement(id: String): JsonElement? {
+    fun defaultElement(id: String): YamlNode? {
         val element = create(id) ?: return null
-        return json.encodeToJsonElement(
+        return yaml.encodeToNode(
             PolymorphicSerializer(baseClass.kotlin),
             element
         )
     }
-}
-
-fun createPolymorphicJson(module: kotlinx.serialization.modules.SerializersModule): Json = Json {
-    serializersModule = module
-    classDiscriminator = "type"
-    prettyPrint = true
-    prettyPrintIndent = "  "
-    encodeDefaults = true
-    ignoreUnknownKeys = true
 }
 
 fun createPolymorphicYaml(module: kotlinx.serialization.modules.SerializersModule): Yaml = Yaml(

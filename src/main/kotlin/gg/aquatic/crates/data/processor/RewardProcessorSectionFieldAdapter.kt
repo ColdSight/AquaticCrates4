@@ -1,61 +1,35 @@
 package gg.aquatic.crates.data.processor
 
-import gg.aquatic.kmenu.inventory.ButtonType
-import gg.aquatic.stacked.stackedItem
-import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import gg.aquatic.crates.data.editor.SwitchingSectionFieldAdapter
+import gg.aquatic.crates.data.editor.stringContentOrNull
+import gg.aquatic.crates.data.editor.withMapValue
+import gg.aquatic.crates.data.editor.yamlScalar
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 
-object RewardProcessorSectionFieldAdapter : EditorFieldAdapter {
-    override fun createItem(context: EditorFieldContext, defaultItem: () -> ItemStack): ItemStack {
-        val currentType = currentType(context)
-        return stackedItem(Material.HOPPER_MINECART) {
-            displayName = text("Reward Processor", NamedTextColor.AQUA)
-            if (context.description.isNotEmpty()) {
-                lore += text("Description", NamedTextColor.DARK_AQUA)
-                lore += context.description.map { text(it, NamedTextColor.GRAY) }
-            }
-            lore += text("Current Type: $currentType", NamedTextColor.WHITE)
-            lore += text("Left Click: Edit processor settings", NamedTextColor.GREEN)
-            lore += text("Right Click: Change processor type", NamedTextColor.YELLOW)
-        }.getItem()
+object RewardProcessorSectionFieldAdapter : SwitchingSectionFieldAdapter(
+    sectionName = "Reward Processor",
+    iconMaterial = Material.HOPPER_MINECART,
+    defaultType = RewardProcessorType.BASIC.id,
+    editHint = "Edit processor settings",
+    changeHint = "Change processor type"
+) {
+    override suspend fun selectType(player: Player): String? = RewardProcessorTypeSelectionMenu.select(player)
+
+    override fun updateType(context: EditorFieldContext, selected: String): FieldEditResult {
+        return FieldEditResult.UpdatedRoot(updateRewardProcessorType(context.root, selected))
     }
 
-    override suspend fun edit(player: Player, context: EditorFieldContext, buttonType: ButtonType): FieldEditResult {
-        return when (buttonType) {
-            ButtonType.LEFT -> FieldEditResult.PassThrough
-            ButtonType.RIGHT -> {
-                val selected = RewardProcessorTypeSelectionMenu.select(player) ?: return FieldEditResult.NoChange
-                FieldEditResult.UpdatedRoot(updateRewardProcessorType(context.root, selected))
-            }
-            else -> FieldEditResult.NoChange
-        }
+    override fun currentType(context: EditorFieldContext): String {
+        val root = context.root as? YamlMap ?: return RewardProcessorType.BASIC.id
+        return root.get<YamlNode>("rewardProcessorType")?.stringContentOrNull ?: RewardProcessorType.BASIC.id
     }
 
-    private fun currentType(context: EditorFieldContext): String {
-        val root = context.root as? JsonObject ?: return RewardProcessorType.BASIC.id
-        return (root["rewardProcessorType"] as? JsonPrimitive)?.content ?: RewardProcessorType.BASIC.id
-    }
-
-    private fun updateRewardProcessorType(root: kotlinx.serialization.json.JsonElement, type: String): kotlinx.serialization.json.JsonElement {
-        val objectRoot = root as? JsonObject ?: return root
-        return JsonObject(
-            objectRoot.toMutableMap().apply {
-                put("rewardProcessorType", JsonPrimitive(type))
-            }
-        )
-    }
-
-    private fun text(content: String, color: NamedTextColor): Component {
-        return Component.text(content, color)
-            .decoration(TextDecoration.ITALIC, false)
+    private fun updateRewardProcessorType(root: YamlNode, type: String): YamlNode {
+        return root.withMapValue("rewardProcessorType", yamlScalar(type))
     }
 }

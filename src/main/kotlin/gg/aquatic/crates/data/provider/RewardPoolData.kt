@@ -2,11 +2,15 @@ package gg.aquatic.crates.data.provider
 
 import gg.aquatic.crates.data.CrateData
 import gg.aquatic.crates.data.RewardData
+import gg.aquatic.crates.data.RewardDataEditorSchema
+import gg.aquatic.crates.data.normalized
 import gg.aquatic.crates.data.condition.PlayerConditionData
 import gg.aquatic.crates.data.condition.PlayerConditionSelectionMenu
 import gg.aquatic.crates.data.condition.definePlayerConditionEditor
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.crates.data.normalizeRewardChances
 import gg.aquatic.crates.reward.provider.RewardPool
+import gg.aquatic.crates.reward.runtime.RewardRuntimeFactory
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.Polymorphic
@@ -44,7 +48,7 @@ data class RewardPoolData(
         val fallbackRarity = resolvedRarities.values.first()
         val resolvedRewards = rewards.entries.map { (rewardId, rewardData) ->
             val rewardRarity = resolvedRarities[rewardData.rarity] ?: fallbackRarity
-            rewardData.toReward(rewardId, crateId, crateKeyItem, rewardRarity)
+            RewardRuntimeFactory.create(rewardData, rewardId, crateId, crateKeyItem, rewardRarity)
         }.toMutableList().also { rewards ->
             normalizeRewardChances(rewards, resolvedRarities)
         }
@@ -95,7 +99,7 @@ data class RewardPoolData(
                     keyPrompt = "Enter reward ID:",
                     keyValidator = { if (gg.aquatic.crates.data.editor.CrateEditorValidators.crateIdRegex.matches(it)) null else "Use only letters, numbers, '_' or '-'." },
                     valueFactory = { rewardId ->
-                        gg.aquatic.crates.data.CrateDataFormats.json.encodeToJsonElement(
+                        gg.aquatic.crates.data.CrateDataFormats.yaml.encodeToNode(
                             RewardData.serializer(),
                             RewardData(
                                 displayName = rewardId,
@@ -109,7 +113,7 @@ data class RewardPoolData(
                     }
                 )
             ) {
-                with(RewardData) {
+                with(RewardDataEditorSchema) {
                     defineEditor()
                 }
             }

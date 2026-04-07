@@ -1,14 +1,12 @@
 package gg.aquatic.crates.data.editor
 
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -21,7 +19,7 @@ open class PolymorphicEntryFieldAdapter(
     private val iconResolver: (String?) -> Material?,
     private val nameResolver: (String?) -> String?,
     private val selectType: suspend (Player) -> String?,
-    private val createElement: (String) -> JsonElement?,
+    private val createElement: (String) -> YamlNode?,
     private val currentTypeResolver: (EditorFieldContext) -> String?,
 ) : EditorFieldAdapter {
 
@@ -54,11 +52,11 @@ open class PolymorphicEntryFieldAdapter(
         }
     }
 
-    private fun mergeType(newElement: JsonElement, previousElement: JsonElement): JsonElement {
-        val previousObject = previousElement as? JsonObject ?: return newElement
-        val newObject = newElement as? JsonObject ?: return newElement
-        val newType = (newObject["type"] as? JsonPrimitive)?.jsonPrimitive?.content
-        val previousType = (previousObject["type"] as? JsonPrimitive)?.jsonPrimitive?.content
+    private fun mergeType(newElement: YamlNode, previousElement: YamlNode): YamlNode {
+        val previousObject = previousElement as? YamlMap ?: return newElement
+        val newObject = newElement as? YamlMap ?: return newElement
+        val newType = newObject.get<YamlNode>("type")?.stringContentOrNull
+        val previousType = previousObject.get<YamlNode>("type")?.stringContentOrNull
 
         if (newType != null && previousType != null && newType.lowercase() == previousType.lowercase()) {
             return previousElement

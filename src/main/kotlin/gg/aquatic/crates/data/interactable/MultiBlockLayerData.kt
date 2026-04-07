@@ -1,5 +1,6 @@
 package gg.aquatic.crates.data.interactable
 
+import gg.aquatic.crates.data.editor.yamlScalar
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.Serializable
@@ -20,7 +21,7 @@ data class MultiBlockLayerData(
                     keyValidator = { raw ->
                         if (raw.trim().toIntOrNull() != null) null else "Row index must be an integer."
                     },
-                    valueFactory = { kotlinx.serialization.json.JsonPrimitive("x") }
+                    valueFactory = { yamlScalar("x") }
                 )
             )
         }

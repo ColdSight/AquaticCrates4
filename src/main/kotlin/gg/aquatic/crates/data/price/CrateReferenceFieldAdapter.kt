@@ -1,11 +1,12 @@
 package gg.aquatic.crates.data.price
 
+import gg.aquatic.crates.data.editor.stringContentOrNull
+import gg.aquatic.crates.data.editor.yamlNull
+import gg.aquatic.crates.data.editor.yamlScalar
 import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonPrimitive
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -15,7 +16,7 @@ import org.bukkit.inventory.ItemStack
 
 object CrateReferenceFieldAdapter : EditorFieldAdapter {
     override fun createItem(context: EditorFieldContext, defaultItem: () -> ItemStack): ItemStack {
-        val rawValue = context.value.toString().trim('"')
+        val rawValue = context.value.stringContentOrNull.orEmpty()
         val selected = rawValue.takeIf { it.isNotBlank() && it != "null" } ?: "Current crate"
 
         return stackedItem(Material.CHEST) {
@@ -33,7 +34,7 @@ object CrateReferenceFieldAdapter : EditorFieldAdapter {
         return when (val result = CrateReferenceSelectionMenu.select(player, currentValue(context))) {
             CrateReferenceSelectionMenu.SelectionResult.Cancelled -> FieldEditResult.NoChange
             is CrateReferenceSelectionMenu.SelectionResult.Selected -> {
-                val value = result.crateId?.let(::JsonPrimitive) ?: JsonNull
+                val value = result.crateId?.let(::yamlScalar) ?: yamlNull()
                 FieldEditResult.Updated(value)
             }
             CrateReferenceSelectionMenu.SelectionResult.NextPage,
@@ -42,7 +43,7 @@ object CrateReferenceFieldAdapter : EditorFieldAdapter {
     }
 
     private fun currentValue(context: EditorFieldContext): String? {
-        val rawValue = context.value.toString().trim('"')
+        val rawValue = context.value.stringContentOrNull.orEmpty()
         return rawValue.takeIf { it.isNotBlank() && it != "null" }
     }
 

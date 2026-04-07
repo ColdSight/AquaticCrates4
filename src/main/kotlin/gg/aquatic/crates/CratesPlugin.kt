@@ -30,8 +30,7 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
     override fun onLoad() {
         registryBootstrap(Waves) {
             pre {
-                CrateHandler.crates.clear()
-                CrateHandler.crates.putAll(CrateStorage.loadAllCrates())
+                reloadLoadedCrates()
             }
 
             registry(StackedItem.ITEM_REGISTRY_KEY) {
@@ -68,10 +67,8 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
     override fun onEnable() {
         pluginConfig = Config("config.yml", this).also { it.loadSync() }
         saveResource("messages.yml", false)
-        debugLevel = pluginConfig.configuration.getInt("debug.level", 0).coerceAtLeast(0)
-        CrateStats.initialize(pluginConfig.configuration)
-        CrateStatsPlaceholders.configure(pluginConfig.configuration)
-        CratesLogger.info("Crate stats enabled after init: ${CrateStats.enabled}")
+        configurePluginState()
+        CratesLogger.info("Crate stats configured=${CrateStats.configured}, ready=${CrateStats.ready}")
         CrateStatsPlaceholders.register()
 
         initializeCommands()
@@ -92,14 +89,22 @@ object CratesPlugin : JavaPlugin(), RegistryHolder {
 
     suspend fun reload() {
         pluginConfig.load()
+        configurePluginState()
+        Messages.load()
+        CrateHandler.reloadPlacedCrates {
+            reloadLoadedCrates()
+            Waves.rebuildRegistries(this)
+        }
+    }
+
+    private fun configurePluginState() {
         debugLevel = pluginConfig.configuration.getInt("debug.level", 0).coerceAtLeast(0)
         CrateStats.initialize(pluginConfig.configuration)
         CrateStatsPlaceholders.configure(pluginConfig.configuration)
-        Messages.load()
-        CrateHandler.reloadPlacedCrates {
-            CrateHandler.crates.clear()
-            CrateHandler.crates.putAll(CrateStorage.loadAllCrates())
-            Waves.rebuildRegistries(this)
-        }
+    }
+
+    private fun reloadLoadedCrates() {
+        CrateHandler.crates.clear()
+        CrateHandler.crates.putAll(CrateStorage.loadAllCrates())
     }
 }

@@ -1,10 +1,11 @@
 package gg.aquatic.crates.data.condition
 
+import com.charleskorn.kaml.YamlNode
+import gg.aquatic.crates.data.editor.PolymorphicTypeDefinition
+import gg.aquatic.crates.data.editor.PolymorphicTypeRegistry
+import gg.aquatic.crates.data.editor.createPolymorphicYaml
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -31,28 +32,15 @@ object PlayerConditionFormats {
         }
     }
 
-    val json = Json {
-        serializersModule = module
-        classDiscriminator = "type"
-        prettyPrint = true
-        prettyPrintIndent = "  "
-        encodeDefaults = true
-        ignoreUnknownKeys = true
-    }
+    val yaml = createPolymorphicYaml(module)
 }
 
 object PlayerConditionTypes {
-    data class Definition(
-        val id: String,
-        val displayName: String,
-        val description: List<String>,
-        val icon: Material,
-        val factory: () -> PlayerConditionData,
-        val descriptorFactory: () -> SerialDescriptor,
-    )
-
-    val definitions: List<Definition> = listOf(
-        Definition(
+    private val registry = PolymorphicTypeRegistry(
+        PlayerConditionData::class.java,
+        PlayerConditionFormats.yaml,
+        listOf(
+        PolymorphicTypeDefinition(
             id = "available-rewards",
             displayName = "Available Rewards",
             description = listOf(
@@ -63,7 +51,7 @@ object PlayerConditionTypes {
             factory = { AvailableRewardsPlayerConditionData() },
             descriptorFactory = { AvailableRewardsPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "biome",
             displayName = "Biome",
             description = listOf(
@@ -74,7 +62,7 @@ object PlayerConditionTypes {
             factory = { BiomePlayerConditionData() },
             descriptorFactory = { BiomePlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "date-range",
             displayName = "Date Range",
             description = listOf(
@@ -85,7 +73,7 @@ object PlayerConditionTypes {
             factory = { DateRangePlayerConditionData() },
             descriptorFactory = { DateRangePlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "day-of-month",
             displayName = "Day Of Month",
             description = listOf(
@@ -96,7 +84,7 @@ object PlayerConditionTypes {
             factory = { DayOfMonthPlayerConditionData() },
             descriptorFactory = { DayOfMonthPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "day-of-week",
             displayName = "Day Of Week",
             description = listOf(
@@ -107,7 +95,7 @@ object PlayerConditionTypes {
             factory = { DayOfWeekPlayerConditionData() },
             descriptorFactory = { DayOfWeekPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "month",
             displayName = "Month",
             description = listOf(
@@ -118,7 +106,7 @@ object PlayerConditionTypes {
             factory = { MonthPlayerConditionData() },
             descriptorFactory = { MonthPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "has-empty-inventory-slot",
             displayName = "Has Empty Inventory Slot",
             description = listOf(
@@ -129,7 +117,7 @@ object PlayerConditionTypes {
             factory = { HasEmptyInventorySlotPlayerConditionData() },
             descriptorFactory = { HasEmptyInventorySlotPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "online-player-count",
             displayName = "Online Player Count",
             description = listOf(
@@ -140,7 +128,7 @@ object PlayerConditionTypes {
             factory = { OnlinePlayerCountPlayerConditionData() },
             descriptorFactory = { OnlinePlayerCountPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "permission",
             displayName = "Permission",
             description = listOf(
@@ -151,7 +139,7 @@ object PlayerConditionTypes {
             factory = { PermissionPlayerConditionData() },
             descriptorFactory = { PermissionPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "week-of-year-mod",
             displayName = "Week Of Year Mod",
             description = listOf(
@@ -162,7 +150,7 @@ object PlayerConditionTypes {
             factory = { WeekOfYearModuloPlayerConditionData() },
             descriptorFactory = { WeekOfYearModuloPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "week-parity",
             displayName = "Week Parity",
             description = listOf(
@@ -173,7 +161,7 @@ object PlayerConditionTypes {
             factory = { WeekParityPlayerConditionData() },
             descriptorFactory = { WeekParityPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "time-range",
             displayName = "Time Range",
             description = listOf(
@@ -184,7 +172,7 @@ object PlayerConditionTypes {
             factory = { TimeRangePlayerConditionData() },
             descriptorFactory = { TimeRangePlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "world-blacklist",
             displayName = "World Blacklist",
             description = listOf(
@@ -195,7 +183,7 @@ object PlayerConditionTypes {
             factory = { WorldBlacklistPlayerConditionData() },
             descriptorFactory = { WorldBlacklistPlayerConditionData.serializer().descriptor }
         ),
-        Definition(
+        PolymorphicTypeDefinition(
             id = "world",
             displayName = "World",
             description = listOf(
@@ -205,28 +193,13 @@ object PlayerConditionTypes {
             icon = Material.GRASS_BLOCK,
             factory = { WorldPlayerConditionData() },
             descriptorFactory = { WorldPlayerConditionData.serializer().descriptor }
+        ),
         )
     )
 
-    private val definitionsById = definitions.associateBy { it.id }
-
-    fun definition(id: String): Definition? {
-        return definitionsById[id]
-    }
-
-    fun create(id: String): PlayerConditionData? {
-        return definition(id)?.factory?.invoke()
-    }
-
-    fun defaultElement(id: String): JsonElement? {
-        val condition = create(id) ?: return null
-        return PlayerConditionFormats.json.encodeToJsonElement(
-            PolymorphicSerializer(PlayerConditionData::class),
-            condition
-        )
-    }
-
-    fun descriptor(id: String): SerialDescriptor? {
-        return definition(id)?.descriptorFactory?.invoke()
-    }
+    val definitions get() = registry.selectionDefinitions()
+    fun definition(id: String) = registry.definition(id)
+    fun create(id: String): PlayerConditionData? = registry.create(id)
+    fun defaultElement(id: String): YamlNode? = registry.defaultElement(id)
+    fun descriptor(id: String): SerialDescriptor? = registry.descriptor(id)
 }

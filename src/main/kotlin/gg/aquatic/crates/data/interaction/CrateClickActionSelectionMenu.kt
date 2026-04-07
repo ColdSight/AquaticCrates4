@@ -33,13 +33,5 @@ object CrateClickActionSelectionMenu {
     private fun definitions(allowDestroy: Boolean): List<PolymorphicSelectionMenu.Definition> {
         return CrateClickActionTypes.definitions
             .filterNot { !allowDestroy && it.id == "destroy" }
-            .map { definition ->
-                PolymorphicSelectionMenu.Definition(
-                    id = definition.id,
-                    displayName = definition.displayName,
-                    description = definition.description,
-                    icon = definition.icon
-                )
-            }
     }
 }

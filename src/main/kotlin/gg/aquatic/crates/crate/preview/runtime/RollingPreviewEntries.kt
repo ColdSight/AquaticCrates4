@@ -1,4 +1,4 @@
-package gg.aquatic.crates.crate.preview
+package gg.aquatic.crates.crate.preview.runtime
 
 import gg.aquatic.crates.reward.Reward
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
@@ -43,19 +43,10 @@ class RollingPreviewEntrySet(
     }
 
     private fun nextEntry(id: String): ListMenu.Entry<Reward>? {
-        if (entries.isEmpty()) {
-            return null
-        }
-        if (!unique) {
-            return entries.random(Random.Default)
-        }
+        if (entries.isEmpty()) return null
+        if (!unique) return entries.random(Random.Default)
 
-        val used = currentEntries
-            .filterKeys { it != id }
-            .values
-            .filterNotNull()
-            .toSet()
-
+        val used = currentEntries.filterKeys { it != id }.values.filterNotNull().toSet()
         val available = entries.filter { it !in used }
         if (available.isEmpty()) {
             return currentEntries[id]
@@ -67,9 +58,7 @@ class RollingPreviewEntrySet(
     }
 
     private fun rerollAll() {
-        if (registeredIds.isEmpty()) {
-            return
-        }
+        if (registeredIds.isEmpty()) return
 
         val shuffled = entries.shuffled(Random.Default)
         registeredIds.forEachIndexed { index, id ->

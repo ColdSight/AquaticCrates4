@@ -8,8 +8,12 @@ object CratesDebug {
     fun enabled(level: Int): Boolean = CratesPlugin.debugLevel >= level
 
     fun log(level: Int, message: String) {
+        log(CratesLogCategory.GENERAL, level, message)
+    }
+
+    fun log(category: CratesLogCategory, level: Int, message: String) {
         if (!enabled(level)) return
-        CratesLogger.info("[debug:$level] $message")
+        CratesLogger.info(category, "[debug:$level] $message")
     }
 
     fun message(player: Player, level: Int, message: String) {

@@ -2,6 +2,7 @@ package gg.aquatic.crates.crate.preview
 
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandle
+import gg.aquatic.crates.crate.preview.runtime.PreviewRewardEntries
 import gg.aquatic.kmenu.menu.util.ListMenu
 import gg.aquatic.kmenu.privateMenu
 import gg.aquatic.replace.PlaceholderContext

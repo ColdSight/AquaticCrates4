@@ -19,7 +19,7 @@ object CrateEditor {
             player = player,
             title = Component.text("Editing crate: $id"),
             serializer = CrateData.serializer(),
-            json = CrateDataFormats.json,
+            yaml = CrateDataFormats.yaml,
             schema = CrateDataEditorSchema,
             loadFresh = {
                 CrateStorage.loadData(id)

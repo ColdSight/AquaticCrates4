@@ -10,10 +10,6 @@ import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -56,7 +52,7 @@ object ItemFlagFieldAdapter : EditorFieldAdapter {
 
     override suspend fun edit(player: Player, context: EditorFieldContext): FieldEditResult {
         val selected = selectFlags(player, currentFlags(context).toMutableSet()) ?: return FieldEditResult.NoChange
-        return FieldEditResult.Updated(JsonArray(selected.sorted().map(::JsonPrimitive)))
+        return FieldEditResult.Updated(yamlList(selected.sorted().map(::yamlScalar)))
     }
 
     private suspend fun selectFlags(player: Player, selected: MutableSet<String>): Set<String>? {
@@ -147,8 +143,8 @@ object ItemFlagFieldAdapter : EditorFieldAdapter {
     }
 
     private fun currentFlags(context: EditorFieldContext): List<String> {
-        val array = context.value as? JsonArray ?: return emptyList()
-        return array.mapNotNull { element -> element.jsonPrimitive.contentOrNull }.distinct()
+        val array = context.value as? com.charleskorn.kaml.YamlList ?: return emptyList()
+        return array.items.mapNotNull { element -> element.stringContentOrNull }.distinct()
     }
 
     private fun buildFlagItem(flagName: String, enabled: Boolean) = stackedItem(

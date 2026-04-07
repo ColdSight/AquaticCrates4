@@ -4,7 +4,6 @@ import gg.aquatic.stacked.stackedItem
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.FieldEditResult
-import kotlinx.serialization.json.JsonPrimitive
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -28,14 +27,14 @@ object RewardRarityFieldAdapter : EditorFieldAdapter {
     override suspend fun edit(player: Player, context: EditorFieldContext): FieldEditResult {
         return when (val result = RewardRaritySelectionMenu.select(player, context, currentValue(context))) {
             RewardRaritySelectionMenu.SelectionResult.Cancelled -> FieldEditResult.NoChange
-            is RewardRaritySelectionMenu.SelectionResult.Selected -> FieldEditResult.Updated(JsonPrimitive(result.rarityId))
+            is RewardRaritySelectionMenu.SelectionResult.Selected -> FieldEditResult.Updated(yamlScalar(result.rarityId))
             RewardRaritySelectionMenu.SelectionResult.NextPage,
             RewardRaritySelectionMenu.SelectionResult.PreviousPage -> FieldEditResult.NoChange
         }
     }
 
     private fun currentValue(context: EditorFieldContext): String {
-        return context.value.toString().trim('"')
+        return context.value.stringContentOrNull ?: ""
     }
 
     private fun text(content: String, color: NamedTextColor): Component {

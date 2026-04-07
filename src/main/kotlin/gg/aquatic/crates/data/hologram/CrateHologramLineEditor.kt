@@ -1,8 +1,10 @@
 package gg.aquatic.crates.data.hologram
 
+import gg.aquatic.crates.data.editor.listValue
+import gg.aquatic.crates.data.editor.mapValue
+import gg.aquatic.crates.data.editor.stringContentOrNull
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
-import kotlinx.serialization.json.*
 
 fun TypedNestedSchemaBuilder<CrateHologramLineData>.defineHologramLineEditor() {
     fieldPattern(
@@ -62,26 +64,22 @@ internal fun EditorFieldContext.matchesHologramLineSubtype(id: String): Boolean 
 }
 
 internal fun EditorFieldContext.findHologramLineSubtypeId(): String? {
-    val direct = (value as? JsonObject)?.get("type")?.let { it as? JsonPrimitive }?.contentOrNull
+    val direct = value.mapValue("type")?.stringContentOrNull
     if (direct != null) return direct
 
-    var current: JsonElement = root
+    var current: com.charleskorn.kaml.YamlNode = root
     var candidate: String? = null
     for (segment in pathSegments) {
         current = when (val index = segment.toIntOrNull()) {
             null -> {
-                val obj = current as? JsonObject ?: return candidate
-                obj[segment] ?: return candidate
+                current.mapValue(segment) ?: return candidate
             }
             else -> {
-                val arr = current as? JsonArray ?: return candidate
-                arr.getOrNull(index) ?: return candidate
+                current.listValue(index) ?: return candidate
             }
         }
 
-        val currentType = (current as? JsonObject)?.get("type")
-            ?.let { it as? JsonPrimitive }
-            ?.contentOrNull
+        val currentType = current.mapValue("type")?.stringContentOrNull
         if (currentType != null) {
             candidate = currentType
         }

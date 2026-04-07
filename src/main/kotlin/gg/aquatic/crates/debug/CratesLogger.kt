@@ -17,4 +17,16 @@ object CratesLogger {
     fun severe(message: String) {
         logger.log(Level.SEVERE, message)
     }
+
+    fun info(category: CratesLogCategory, message: String) {
+        info("[${category.name.lowercase()}] $message")
+    }
+
+    fun warning(category: CratesLogCategory, message: String) {
+        warning("[${category.name.lowercase()}] $message")
+    }
+
+    fun severe(category: CratesLogCategory, message: String) {
+        severe("[${category.name.lowercase()}] $message")
+    }
 }

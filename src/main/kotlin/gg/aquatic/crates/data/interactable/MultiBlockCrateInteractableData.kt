@@ -3,6 +3,8 @@ package gg.aquatic.crates.data.interactable
 import gg.aquatic.blokk.BlockShape
 import gg.aquatic.blokk.MultiBlokk
 import gg.aquatic.clientside.serialize.ClientsideMultiBlockSettings
+import gg.aquatic.crates.data.CrateDataFormats
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
 import gg.aquatic.waves.serialization.editor.meta.IntFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.IntFieldConfig
@@ -56,7 +58,7 @@ data class MultiBlockCrateInteractableData(
                         if (raw.length == 1) null else "Use exactly one character."
                     },
                     valueFactory = {
-                        schemaJson.encodeToJsonElement(BlockDefinitionData.serializer(), BlockDefinitionData())
+                        CrateDataFormats.yaml.encodeToNode(BlockDefinitionData.serializer(), BlockDefinitionData())
                     }
                 )
             ) {
@@ -78,7 +80,7 @@ data class MultiBlockCrateInteractableData(
                         if (raw.trim().toIntOrNull() != null) null else "Layer Y coordinate must be an integer."
                     },
                     valueFactory = {
-                        schemaJson.encodeToJsonElement(MultiBlockLayerData.serializer(), MultiBlockLayerData())
+                        CrateDataFormats.yaml.encodeToNode(MultiBlockLayerData.serializer(), MultiBlockLayerData())
                     }
                 )
             ) {

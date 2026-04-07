@@ -1,6 +1,6 @@
 package gg.aquatic.crates.command.impl
 
-import gg.aquatic.crates.message.MessagesEditor
+import gg.aquatic.crates.message.editor.MessagesEditor
 import gg.aquatic.kommand.CommandBuilder
 import gg.aquatic.kommand.hasPermission
 import io.papermc.paper.command.brigadier.CommandSourceStack

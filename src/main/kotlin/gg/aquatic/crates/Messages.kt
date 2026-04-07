@@ -3,7 +3,7 @@ package gg.aquatic.crates
 import gg.aquatic.klocale.LocaleManager
 import gg.aquatic.klocale.impl.paper.PaperMessage
 import gg.aquatic.klocale.impl.paper.handler.CfgMessageHandler
-import gg.aquatic.crates.message.MessagesProvider
+import gg.aquatic.crates.message.storage.MessagesProvider
 import gg.aquatic.waves.Waves
 import org.bukkit.Material
 

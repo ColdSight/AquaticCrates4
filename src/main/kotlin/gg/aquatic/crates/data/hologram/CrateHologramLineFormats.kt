@@ -1,12 +1,13 @@
 package gg.aquatic.crates.data.hologram
 
+import com.charleskorn.kaml.YamlNode
+import gg.aquatic.crates.data.editor.createPolymorphicYaml
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.crates.data.editor.PolymorphicSelectionMenu
 import gg.aquatic.waves.serialization.editor.meta.EntryFactory
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -23,14 +24,7 @@ object CrateHologramLineFormats {
         }
     }
 
-    val json = Json {
-        serializersModule = module
-        classDiscriminator = "type"
-        prettyPrint = true
-        prettyPrintIndent = "  "
-        encodeDefaults = true
-        ignoreUnknownKeys = true
-    }
+    val yaml = createPolymorphicYaml(module)
 }
 
 object CrateHologramLineTypes {
@@ -82,17 +76,17 @@ object CrateHologramLineTypes {
 
     fun descriptor(id: String): SerialDescriptor? = byId[id]?.descriptorFactory?.invoke()
 
-    fun defaultElement(id: String): JsonElement? {
+    fun defaultElement(id: String): YamlNode? {
         val line = byId[id]?.factory?.invoke() ?: return null
-        return CrateHologramLineFormats.json.encodeToJsonElement(
+        return CrateHologramLineFormats.yaml.encodeToNode(
             PolymorphicSerializer(CrateHologramLineData::class),
             line
         )
     }
 
-    fun defaultFrameElement(id: String): JsonElement? {
+    fun defaultFrameElement(id: String): YamlNode? {
         val line = byId[id]?.factory?.invoke() ?: return null
-        return CrateHologramLineFormats.json.encodeToJsonElement(
+        return CrateHologramLineFormats.yaml.encodeToNode(
             AnimatedHologramFrameData.serializer(),
             AnimatedHologramFrameData(line = line)
         )

@@ -1,4 +1,4 @@
-package gg.aquatic.crates.message
+package gg.aquatic.crates.message.storage
 
 import gg.aquatic.klocale.LocaleProvider
 import gg.aquatic.klocale.impl.paper.PaperMessage

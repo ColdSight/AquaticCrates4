@@ -7,18 +7,9 @@ object PlayerConditionSelectionMenu {
 
     private val entrySlots = listOf(13)
 
-    private fun selectionDefinitions(definitions: List<PlayerConditionTypes.Definition>) = definitions.map { definition ->
-        PolymorphicSelectionMenu.Definition(
-            id = definition.id,
-            displayName = definition.displayName,
-            description = definition.description,
-            icon = definition.icon
-        )
-    }
-
-    private val definitions = selectionDefinitions(PlayerConditionTypes.definitions.filterNot {
+    private val definitions = PlayerConditionTypes.definitions.filterNot {
         it.id == "world-blacklist" || it.id == "available-rewards"
-    })
+    }
 
     val entryFactory: EntryFactory = PolymorphicSelectionMenu.entryFactory(
         title = "Select Condition",
@@ -42,14 +33,7 @@ object PlayerConditionSelectionMenu {
 object OpenPlayerConditionSelectionMenu {
 
     private val entrySlots = listOf(13)
-    private val definitions = PlayerConditionTypes.definitions.map { definition ->
-        PolymorphicSelectionMenu.Definition(
-            id = definition.id,
-            displayName = definition.displayName,
-            description = definition.description,
-            icon = definition.icon
-        )
-    }
+    private val definitions = PlayerConditionTypes.definitions
 
     val entryFactory: EntryFactory = PolymorphicSelectionMenu.entryFactory(
         title = "Select Condition",

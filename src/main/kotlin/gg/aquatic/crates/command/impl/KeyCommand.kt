@@ -5,7 +5,7 @@ import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
-import gg.aquatic.crates.message.MessageStorage
+import gg.aquatic.crates.message.storage.MessageStorage
 import gg.aquatic.crates.message.replacePlaceholder
 import gg.aquatic.kommand.CommandBuilder
 import gg.aquatic.kommand.hasPermission

@@ -2,6 +2,7 @@ package gg.aquatic.crates.stats
 
 import gg.aquatic.replace.dslPlaceholder
 import gg.aquatic.crates.crate.CrateHandler
+import gg.aquatic.crates.debug.CratesLogCategory
 import gg.aquatic.crates.debug.CratesDebug
 import gg.aquatic.crates.debug.CratesLogger
 import gg.aquatic.treepapi.papiPlaceholder
@@ -27,6 +28,7 @@ object CrateStatsPlaceholders {
         timestampFormatter = runCatching { createFormatter(pattern) }
             .getOrElse {
                 CratesLogger.warning(
+                    CratesLogCategory.STATS,
                     "Invalid stats.timestamp-format '$pattern'. Falling back to '$DEFAULT_TIMESTAMP_FORMAT'."
                 )
                 createFormatter(DEFAULT_TIMESTAMP_FORMAT)
@@ -89,12 +91,12 @@ object CrateStatsPlaceholders {
 
     private fun resolveCrateOpens(crateId: String, timeframeRaw: String): String {
         val timeframe = parseTimeframe(timeframeRaw) ?: return "0"
-        if (!CrateStats.enabled) {
-            CratesDebug.log(1, "Stats placeholder opens crate='$crateId' timeframe='${timeframe.name}' -> stats disabled")
+        if (!CrateStats.ready) {
+            CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder opens crate='$crateId' timeframe='${timeframe.name}' -> stats unavailable")
             return "0"
         }
         val result = CrateStats.getCrateOpensCached(crateId, timeframe).toString()
-        CratesDebug.log(1, "Stats placeholder opens crate='$crateId' timeframe='${timeframe.name}' -> $result")
+        CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder opens crate='$crateId' timeframe='${timeframe.name}' -> $result")
         return result
     }
 
@@ -106,10 +108,11 @@ object CrateStatsPlaceholders {
     ): String {
         val timeframe = parseTimeframe(timeframeRaw) ?: return "0"
         val metric = parseRewardMetric(metricRaw) ?: return "0"
-        if (!CrateStats.enabled) {
+        if (!CrateStats.ready) {
             CratesDebug.log(
+                CratesLogCategory.STATS,
                 1,
-                "Stats placeholder reward crate='$crateId' reward='$rewardId' timeframe='${timeframe.name}' metric='${metric.name}' -> stats disabled"
+                "Stats placeholder reward crate='$crateId' reward='$rewardId' timeframe='${timeframe.name}' metric='${metric.name}' -> stats unavailable"
             )
             return "0"
         }
@@ -120,6 +123,7 @@ object CrateStatsPlaceholders {
             RewardMetric.AMOUNT -> snapshot.amountSum.toString()
         }
         CratesDebug.log(
+            CratesLogCategory.STATS,
             1,
             "Stats placeholder reward crate='$crateId' reward='$rewardId' timeframe='${timeframe.name}' metric='${metric.name}' -> $result"
         )
@@ -127,36 +131,36 @@ object CrateStatsPlaceholders {
     }
 
     private fun resolveLatestCrate(crateId: String, indexRaw: Int, fieldRaw: String): String {
-        if (!CrateStats.enabled) {
-            CratesDebug.log(1, "Stats placeholder latest crate='$crateId' index='$indexRaw' field='$fieldRaw' -> stats disabled")
+        if (!CrateStats.ready) {
+            CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder latest crate='$crateId' index='$indexRaw' field='$fieldRaw' -> stats unavailable")
             return ""
         }
         val latestReward = CrateStats.getLatestCrateRewardsCached(crateId).getOrNull(indexRaw - 1) ?: return ""
         val result = resolveLatestField(latestReward, fieldRaw)
-        CratesDebug.log(1, "Stats placeholder latest crate='$crateId' index='$indexRaw' field='$fieldRaw' -> $result")
+        CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder latest crate='$crateId' index='$indexRaw' field='$fieldRaw' -> $result")
         return result
     }
 
     private fun resolveLatestPlayer(player: OfflinePlayer, indexRaw: Int, fieldRaw: String): String {
-        if (!CrateStats.enabled) {
-            CratesDebug.log(1, "Stats placeholder latest player='${player.name ?: player.uniqueId}' index='$indexRaw' field='$fieldRaw' -> stats disabled")
+        if (!CrateStats.ready) {
+            CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder latest player='${player.name ?: player.uniqueId}' index='$indexRaw' field='$fieldRaw' -> stats unavailable")
             return ""
         }
         val latestReward = CrateStats.getLatestPlayerRewardsCached(player.uniqueId).getOrNull(indexRaw - 1) ?: return ""
         val result = resolveLatestField(latestReward, fieldRaw)
-        CratesDebug.log(1, "Stats placeholder latest player='${player.name ?: player.uniqueId}' index='$indexRaw' field='$fieldRaw' -> $result")
+        CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder latest player='${player.name ?: player.uniqueId}' index='$indexRaw' field='$fieldRaw' -> $result")
         return result
     }
 
     private fun resolveLatestPlayerByName(playerName: String, indexRaw: Int, fieldRaw: String): String {
-        if (!CrateStats.enabled) {
-            CratesDebug.log(1, "Stats placeholder latest playerName='$playerName' index='$indexRaw' field='$fieldRaw' -> stats disabled")
+        if (!CrateStats.ready) {
+            CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder latest playerName='$playerName' index='$indexRaw' field='$fieldRaw' -> stats unavailable")
             return ""
         }
         val offlinePlayer = org.bukkit.Bukkit.getOfflinePlayer(playerName)
         val latestReward = CrateStats.getLatestPlayerRewardsCached(offlinePlayer.uniqueId).getOrNull(indexRaw - 1) ?: return ""
         val result = resolveLatestField(latestReward, fieldRaw)
-        CratesDebug.log(1, "Stats placeholder latest playerName='$playerName' index='$indexRaw' field='$fieldRaw' -> $result")
+        CratesDebug.log(CratesLogCategory.STATS, 1, "Stats placeholder latest playerName='$playerName' index='$indexRaw' field='$fieldRaw' -> $result")
         return result
     }
 

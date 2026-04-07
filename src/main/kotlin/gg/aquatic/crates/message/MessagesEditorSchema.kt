@@ -1,6 +1,7 @@
-package gg.aquatic.crates.message
+package gg.aquatic.crates.message.editor
 
 import gg.aquatic.crates.Messages
+import gg.aquatic.crates.message.MessagesFileData
 import gg.aquatic.waves.serialization.editor.meta.EditableModel
 import gg.aquatic.waves.serialization.editor.meta.TypedEditorSchemaBuilder
 

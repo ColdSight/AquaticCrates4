@@ -1,10 +1,11 @@
 package gg.aquatic.crates.message.condition
 
+import com.charleskorn.kaml.YamlNode
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.crates.message.MessagesFormats
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -73,9 +74,9 @@ object MessageConditionTypes {
 
     fun create(id: String): MessageConditionData? = definition(id)?.factory?.invoke()
 
-    fun defaultElement(id: String): JsonElement? {
+    fun defaultElement(id: String): YamlNode? {
         val condition = create(id) ?: return null
-        return MessagesFormats.json.encodeToJsonElement(
+        return MessagesFormats.yaml.encodeToNode(
             PolymorphicSerializer(MessageConditionData::class),
             condition
         )

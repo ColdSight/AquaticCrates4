@@ -144,6 +144,6 @@ private fun hint(text: String): Component {
 
 private fun <T> EditorFieldContext.decodeOrNull(serializer: kotlinx.serialization.KSerializer<T>): T? {
     return runCatching {
-        MessagesFormats.json.decodeFromJsonElement(serializer, value)
+        MessagesFormats.yaml.decodeFromYamlNode(serializer, value)
     }.getOrNull()
 }
