@@ -1,12 +1,15 @@
 package gg.aquatic.crates.message.storage
 
+import com.charleskorn.kaml.YamlNode
 import gg.aquatic.crates.CratesPlugin
 import gg.aquatic.crates.Messages
+import gg.aquatic.crates.data.editor.encodeToNode
 import gg.aquatic.crates.debug.CratesLogger
 import gg.aquatic.crates.message.MessagesFileData
 import gg.aquatic.crates.message.MessagesFormats
 import gg.aquatic.klocale.impl.paper.PaperMessage
 import gg.aquatic.crates.yaml.encodeCompactString
+import gg.aquatic.crates.yaml.mergeMissing
 import gg.aquatic.crates.yaml.parseCompactNode
 import java.io.File
 
@@ -16,6 +19,7 @@ object MessageStorage {
 
     fun loadData(): MessagesFileData {
         val defaults = loadDefaultData()
+        val defaultNode = MessagesFormats.yaml.encodeToNode(MessagesFileData.serializer(), defaults)
         val target = file
         if (!target.exists()) {
             saveData(defaults)
@@ -23,16 +27,25 @@ object MessageStorage {
         }
 
         val currentText = target.readText(Charsets.UTF_8)
-        val decoded = runCatching {
-            MessagesFormats.yaml.decodeFromYamlNode(MessagesFileData.serializer(), MessagesFormats.yaml.parseCompactNode(currentText))
+        val mergedNode = runCatching {
+            MessagesFormats.yaml.parseCompactNode(currentText).mergeMissing(defaultNode)
         }.getOrElse { exception ->
             CratesLogger.warning(
                 "Failed to load messages.yml, falling back to defaults: ${exception.message ?: exception.javaClass.simpleName}"
             )
+            defaultNode
+        }
+
+        val decoded = runCatching {
+            MessagesFormats.yaml.decodeFromYamlNode(MessagesFileData.serializer(), mergedNode)
+        }.getOrElse { exception ->
+            CratesLogger.warning(
+                "Failed to decode merged messages.yml, falling back to defaults: ${exception.message ?: exception.javaClass.simpleName}"
+            )
             defaults
         }
 
-        val mergedText = MessagesFormats.yaml.encodeCompactString(MessagesFileData.serializer(), decoded)
+        val mergedText = MessagesFormats.yaml.encodeToString(YamlNode.serializer(), mergedNode)
         if (mergedText != currentText) {
             target.writeText(mergedText, Charsets.UTF_8)
         }

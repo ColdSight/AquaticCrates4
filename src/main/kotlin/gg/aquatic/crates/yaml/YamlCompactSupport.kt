@@ -17,6 +17,25 @@ fun Yaml.parseCompactNode(text: String): YamlNode {
     return parseToYamlNode(text).pruneEmpty()
 }
 
+fun YamlNode.mergeMissing(defaults: YamlNode): YamlNode {
+    return when {
+        this is YamlNull -> defaults
+        this is YamlMap && defaults is YamlMap -> {
+            val merged = LinkedHashMap(entries)
+            for ((key, defaultValue) in defaults.entries) {
+                val currentValue = merged[key]
+                merged[key] = when {
+                    currentValue == null -> defaultValue
+                    else -> currentValue.mergeMissing(defaultValue)
+                }
+            }
+            copy(entries = merged)
+        }
+
+        else -> this
+    }
+}
+
 private fun YamlNode.pruneEmpty(): YamlNode {
     return when (this) {
         is YamlNull -> this
