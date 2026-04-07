@@ -174,7 +174,7 @@ internal fun JdbcTransaction.exactRollingOpenCount(crateId: String, startMillis:
             .where {
                 (HourlyCrateStatsTable.crateId eq crateId) and
                     (HourlyCrateStatsTable.bucketHourMillis greaterEq firstFullHour) and
-                    (HourlyCrateStatsTable.bucketHourMillis less (currentHour + CrateStats.HOUR_MILLIS))
+                    (HourlyCrateStatsTable.bucketHourMillis less currentHour + CrateStats.HOUR_MILLIS)
             }
             .singleOrNull()
             ?.get(sumExpr)
@@ -216,7 +216,7 @@ internal fun JdbcTransaction.exactRollingRewardStats(crateId: String, rewardId: 
                 (HourlyRewardStatsTable.crateId eq crateId) and
                     (HourlyRewardStatsTable.rewardId eq rewardId) and
                     (HourlyRewardStatsTable.bucketHourMillis greaterEq firstFullHour) and
-                    (HourlyRewardStatsTable.bucketHourMillis less (currentHour + CrateStats.HOUR_MILLIS))
+                    (HourlyRewardStatsTable.bucketHourMillis less currentHour + CrateStats.HOUR_MILLIS)
             }
             .singleOrNull()
 
@@ -271,5 +271,5 @@ internal fun JdbcTransaction.queryLatestRewards(crateId: String?, playerUuid: UU
 
 internal fun timeframeCondition(column: org.jetbrains.exposed.v1.core.Column<Long>, timeframe: CrateStatsTimeframe): Op<Boolean> {
     val windowMillis = timeframe.windowMillis ?: return Op.TRUE
-    return column greaterEq (System.currentTimeMillis() - windowMillis)
+    return column greaterEq System.currentTimeMillis() - windowMillis
 }

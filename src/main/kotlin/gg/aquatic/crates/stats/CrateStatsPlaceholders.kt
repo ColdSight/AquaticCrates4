@@ -220,117 +220,43 @@ private fun gg.aquatic.replace.PlaceholderDSLNode<Player>.configureStatsTree(
     latestPlayerHandler: (Player, Int, String) -> String,
     latestPlayerNamedHandler: (String, Int, String) -> String,
 ) {
-    "stats" {
-        "opens" {
-            stringArgument("crateId") {
-                stringArgument("timeframe") {
-                    handle {
-                        crateOpensHandler(
-                            string("crateId").orEmpty(),
-                            string("timeframe").orEmpty()
-                        )
-                    }
-                }
-            }
-        }
-
-        "reward" {
-            stringArgument("crateId") {
-                stringArgument("rewardId") {
-                    stringArgument("timeframe") {
-                        stringArgument("metric") {
-                            handle {
-                                rewardMetricHandler(
-                                    string("crateId").orEmpty(),
-                                    string("rewardId").orEmpty(),
-                                    string("timeframe").orEmpty(),
-                                    string("metric").orEmpty()
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    "opens" {
-        stringArgument("crateId") {
-            stringArgument("timeframe") {
-                handle {
-                    crateOpensHandler(
-                        string("crateId").orEmpty(),
-                        string("timeframe").orEmpty()
-                    )
-                }
-            }
-        }
-    }
-
-    "reward" {
-        stringArgument("crateId") {
-            stringArgument("rewardId") {
-                stringArgument("timeframe") {
-                    stringArgument("metric") {
-                        handle {
-                            rewardMetricHandler(
-                                string("crateId").orEmpty(),
-                                string("rewardId").orEmpty(),
-                                string("timeframe").orEmpty(),
-                                string("metric").orEmpty()
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    "latest" {
-        "crate" {
-            stringArgument("crateId") {
-                intArgument("index") {
-                    stringArgument("field") {
-                        handle {
-                            latestCrateHandler(
-                                string("crateId").orEmpty(),
-                                arg<Int>("index") ?: 0,
-                                string("field").orEmpty()
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        "player" {
-            intArgument("index") {
-                stringArgument("field") {
-                    handle {
-                        latestPlayerHandler(
-                            binder,
-                            arg<Int>("index") ?: 0,
-                            string("field").orEmpty()
-                        )
-                    }
-                }
-            }
-
-            stringArgument("playerName") {
-                intArgument("index") {
-                    stringArgument("field") {
-                        handle {
-                            latestPlayerNamedHandler(
-                                string("playerName").orEmpty(),
-                                arg<Int>("index") ?: 0,
-                                string("field").orEmpty()
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    configureStatsBranches(
+        root = this,
+        group = { name, block -> name(block) },
+        stringArg = { name, block -> stringArgument(name, block) },
+        intArg = { name, block -> intArgument(name, block) },
+        crateOpensValue = { crateOpensHandler(string("crateId").orEmpty(), string("timeframe").orEmpty()) },
+        rewardMetricValue = {
+            rewardMetricHandler(
+                string("crateId").orEmpty(),
+                string("rewardId").orEmpty(),
+                string("timeframe").orEmpty(),
+                string("metric").orEmpty()
+            )
+        },
+        latestCrateValue = {
+            latestCrateHandler(
+                string("crateId").orEmpty(),
+                arg<Int>("index") ?: 0,
+                string("field").orEmpty()
+            )
+        },
+        latestPlayerValue = {
+            latestPlayerHandler(
+                binder,
+                arg<Int>("index") ?: 0,
+                string("field").orEmpty()
+            )
+        },
+        latestPlayerNamedValue = {
+            latestPlayerNamedHandler(
+                string("playerName").orEmpty(),
+                arg<Int>("index") ?: 0,
+                string("field").orEmpty()
+            )
+        },
+        handleValue = { handle(it) }
+    )
 }
 
 private fun gg.aquatic.treepapi.PlaceholderNode.configureStatsTree(
@@ -340,111 +266,107 @@ private fun gg.aquatic.treepapi.PlaceholderNode.configureStatsTree(
     latestPlayerHandler: (OfflinePlayer, Int, String) -> String,
     latestPlayerNamedHandler: (String, Int, String) -> String,
 ) {
-    "stats" {
-        "opens" {
-            stringArgument("crateId") {
-                stringArgument("timeframe") {
-                    handle {
-                        crateOpensHandler(
-                            string("crateId").orEmpty(),
-                            string("timeframe").orEmpty()
-                        )
+    configureStatsBranches(
+        root = this,
+        group = { name, block -> name(block) },
+        stringArg = { name, block -> stringArgument(name, block) },
+        intArg = { name, block -> intArgument(name, block) },
+        crateOpensValue = { crateOpensHandler(string("crateId").orEmpty(), string("timeframe").orEmpty()) },
+        rewardMetricValue = {
+            rewardMetricHandler(
+                string("crateId").orEmpty(),
+                string("rewardId").orEmpty(),
+                string("timeframe").orEmpty(),
+                string("metric").orEmpty()
+            )
+        },
+        latestCrateValue = {
+            latestCrateHandler(
+                string("crateId").orEmpty(),
+                getOrNull<Int>("index") ?: 0,
+                string("field").orEmpty()
+            )
+        },
+        latestPlayerValue = {
+            latestPlayerHandler(
+                binder,
+                getOrNull<Int>("index") ?: 0,
+                string("field").orEmpty()
+            )
+        },
+        latestPlayerNamedValue = {
+            latestPlayerNamedHandler(
+                string("playerName").orEmpty(),
+                getOrNull<Int>("index") ?: 0,
+                string("field").orEmpty()
+            )
+        },
+        handleValue = { handle(it) }
+    )
+}
+
+private fun <N, C> configureStatsBranches(
+    root: N,
+    group: N.(String, N.() -> Unit) -> Unit,
+    stringArg: N.(String, N.() -> Unit) -> Unit,
+    intArg: N.(String, N.() -> Unit) -> Unit,
+    crateOpensValue: C.() -> String,
+    rewardMetricValue: C.() -> String,
+    latestCrateValue: C.() -> String,
+    latestPlayerValue: C.() -> String,
+    latestPlayerNamedValue: C.() -> String,
+    handleValue: N.(C.() -> String) -> Unit,
+) {
+    with(root) {
+        fun N.configureOpenBranches() {
+            group("opens") {
+                stringArg("crateId") {
+                    stringArg("timeframe") {
+                        handleValue(crateOpensValue)
                     }
                 }
             }
-        }
 
-        "reward" {
-            stringArgument("crateId") {
-                stringArgument("rewardId") {
-                    stringArgument("timeframe") {
-                        stringArgument("metric") {
-                            handle {
-                                rewardMetricHandler(
-                                    string("crateId").orEmpty(),
-                                    string("rewardId").orEmpty(),
-                                    string("timeframe").orEmpty(),
-                                    string("metric").orEmpty()
-                                )
+            group("reward") {
+                stringArg("crateId") {
+                    stringArg("rewardId") {
+                        stringArg("timeframe") {
+                            stringArg("metric") {
+                                handleValue(rewardMetricValue)
                             }
                         }
                     }
                 }
             }
         }
-    }
 
-    "opens" {
-        stringArgument("crateId") {
-            stringArgument("timeframe") {
-                handle {
-                    crateOpensHandler(
-                        string("crateId").orEmpty(),
-                        string("timeframe").orEmpty()
-                    )
-                }
-            }
+        group("stats") {
+            configureOpenBranches()
         }
-    }
+        configureOpenBranches()
 
-    "reward" {
-        stringArgument("crateId") {
-            stringArgument("rewardId") {
-                stringArgument("timeframe") {
-                    stringArgument("metric") {
-                        handle {
-                            rewardMetricHandler(
-                                string("crateId").orEmpty(),
-                                string("rewardId").orEmpty(),
-                                string("timeframe").orEmpty(),
-                                string("metric").orEmpty()
-                            )
+        group("latest") {
+            group("crate") {
+                stringArg("crateId") {
+                    intArg("index") {
+                        stringArg("field") {
+                            handleValue(latestCrateValue)
                         }
                     }
                 }
             }
-        }
-    }
 
-    "latest" {
-        "crate" {
-            stringArgument("crateId") {
-                intArgument("index") {
-                    stringArgument("field") {
-                        handle {
-                            latestCrateHandler(
-                                string("crateId").orEmpty(),
-                                getOrNull<Int>("index") ?: 0,
-                                string("field").orEmpty()
-                            )
-                        }
+            group("player") {
+                intArg("index") {
+                    stringArg("field") {
+                        handleValue(latestPlayerValue)
                     }
                 }
-            }
-        }
 
-        "player" {
-            intArgument("index") {
-                stringArgument("field") {
-                    handle {
-                        latestPlayerHandler(
-                            binder,
-                            getOrNull<Int>("index") ?: 0,
-                            string("field").orEmpty()
-                        )
-                    }
-                }
-            }
-
-            stringArgument("playerName") {
-                intArgument("index") {
-                    stringArgument("field") {
-                        handle {
-                            latestPlayerNamedHandler(
-                                string("playerName").orEmpty(),
-                                getOrNull<Int>("index") ?: 0,
-                                string("field").orEmpty()
-                            )
+                stringArg("playerName") {
+                    intArg("index") {
+                        stringArg("field") {
+                            handleValue(latestPlayerNamedValue)
                         }
                     }
                 }

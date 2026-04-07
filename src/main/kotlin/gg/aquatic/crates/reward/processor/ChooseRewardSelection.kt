@@ -16,11 +16,18 @@ internal object ChooseRewardSelection {
             return normalizedSelected
         }
 
-        (0 until rewardCount)
-            .filterNot { it in normalizedSelected }
-            .shuffled(random)
-            .take(missingChoices)
-            .forEach { normalizedSelected += it }
+        val remaining = ArrayList<Int>(rewardCount)
+        for (index in 0 until rewardCount) {
+            if (index !in normalizedSelected) {
+                remaining += index
+            }
+        }
+        remaining.shuffle(random)
+
+        val takeCount = missingChoices.coerceAtMost(remaining.size)
+        for (index in 0 until takeCount) {
+            normalizedSelected += remaining[index]
+        }
 
         return normalizedSelected
     }
