@@ -13,7 +13,10 @@ class CrateHandle(
     val persistent: Boolean,
 ) {
 
-    val hologram = crate.hologram?.create(location.clone().add(0.5, 1.0, 0.5), { PlaceholderContext.player })
+    val hologram = crate.hologram?.create(
+        location.clone().add(0.5, 1.0 + crate.hologramYOffset, 0.5),
+        { PlaceholderContext.player }
+    )
     val interactables = crate.interactables.map {
         it.toSettings().create(location, GlobalAudience()) { _, player, isLeft ->
             val clickType = CrateClickType.fromInteraction(isLeft, player)

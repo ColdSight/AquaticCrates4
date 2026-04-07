@@ -13,7 +13,7 @@ import gg.aquatic.crates.data.provider.RewardProviderType
 import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 
 internal fun resolveCrateDataDescriptor(context: EditorFieldContext) = when {
-    context.pathSegments.contains("hologram") ->
+    context.isHologramLineContext() ->
         context.currentSubtypeId()?.let(CrateHologramLineTypes::descriptor)
     context.pathSegments.contains("interactables") ->
         context.currentSubtypeId()?.let(CrateInteractableTypes::descriptor)
@@ -30,6 +30,13 @@ internal fun resolveCrateDataDescriptor(context: EditorFieldContext) = when {
 
 private fun EditorFieldContext.currentSubtypeId(): String? {
     return value.mapValue("type")?.stringContentOrNull
+}
+
+private fun EditorFieldContext.isHologramLineContext(): Boolean {
+    if (pathSegments.contains("hologram")) return true
+    if (descriptor.serialName.contains("CrateHologramLineData")) return true
+    if (pathSegments.contains("lines")) return true
+    return pathSegments.contains("frames") && pathSegments.contains("line")
 }
 
 internal fun EditorFieldContext.isRewardProviderType(type: RewardProviderType): Boolean {

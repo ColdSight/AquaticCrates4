@@ -27,6 +27,7 @@ fun CrateData.toCrate(id: String): Crate {
         keyClickMapping = normalized.keyClickMapping,
         displayName = normalized.displayName.toMMComponent(),
         hologramSupplier = { normalized.hologram?.toSettings(rewardHologramEntries) },
+        hologramYOffset = normalized.hologram?.yOffset ?: 0.0,
         priceGroupsSupplier = { normalized.priceGroups.map { it.toOpenPriceGroup(id, crateKeyItem) } },
         openConditionsSupplier = {
             normalized.openConditions

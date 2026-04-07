@@ -43,6 +43,7 @@ class Crate(
     val keyClickMapping: CrateClickMappingData,
     val displayName: Component,
     hologramSupplier: () -> Hologram.Settings?,
+    val hologramYOffset: Double,
     priceGroupsSupplier: () -> Collection<OpenPriceGroup>,
     openConditionsSupplier: () -> OpenConditions = { OpenConditions.DUMMY },
     val interactables: Collection<CrateInteractableData>,

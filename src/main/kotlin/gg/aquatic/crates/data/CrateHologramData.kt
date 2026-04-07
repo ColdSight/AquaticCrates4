@@ -16,6 +16,7 @@ import org.bukkit.Material
 data class CrateHologramData(
     val lines: List<@Polymorphic CrateHologramLineData> = emptyList(),
     val viewDistance: Int = 20,
+    val yOffset: Double = 0.0,
 ) {
 
     fun toSettings(rewardEntries: List<RewardHologramEntry> = emptyList()): Hologram.Settings? {
@@ -46,6 +47,14 @@ data class CrateHologramData(
                 displayName = "Hologram View Distance",
                 iconMaterial = Material.SPYGLASS,
                 description = listOf("Maximum distance where the hologram is rendered.")
+            )
+            field(
+                CrateHologramData::yOffset,
+                gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
+                gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter hologram Y offset:"),
+                displayName = "Hologram Y Offset",
+                iconMaterial = Material.FEATHER,
+                description = listOf("Additional vertical offset applied to the spawned hologram location.")
             )
         }
     }
