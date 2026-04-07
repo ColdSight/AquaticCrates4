@@ -12,58 +12,20 @@ import gg.aquatic.crates.stats.table.HourlyRewardStatsTable
 import org.jetbrains.exposed.v1.core.plus
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 import org.jetbrains.exposed.v1.jdbc.batchInsert
-import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.upsert
 
 internal suspend fun CrateStats.logOpeningInternal(opening: LoggedOpening) {
     if (!ready) return
-    runCatching {
-        dbQuery {
-            val openingId = CrateOpeningsTable.insert {
-                it[playerUuid] = opening.playerUuid.toString()
-                it[crateId] = opening.crateId
-                it[openedAtMillis] = opening.openedAtMillis
-            }[CrateOpeningsTable.id]
+    updateHotCaches(opening)
+    pendingOpenings += opening
+    val queuedCount = pendingOpeningsCount.incrementAndGet()
+    statsCache.clear()
 
-            if (opening.rewards.isNotEmpty()) {
-                CrateOpeningRewardsTable.batchInsert(opening.rewards) { reward ->
-                    this[CrateOpeningRewardsTable.openingId] = openingId
-                    this[CrateOpeningRewardsTable.playerUuid] = opening.playerUuid.toString()
-                    this[CrateOpeningRewardsTable.crateId] = opening.crateId
-                    this[CrateOpeningRewardsTable.rewardId] = reward.rewardId
-                    this[CrateOpeningRewardsTable.rarityId] = reward.rarityId
-                    this[CrateOpeningRewardsTable.amount] = reward.amount
-                    this[CrateOpeningRewardsTable.wonAtMillis] = opening.openedAtMillis
-                }
-            }
-
-            val bucketHour = truncateHour(opening.openedAtMillis)
-            incrementHourlyCrateStats(bucketHour, opening.crateId, 1L)
-            incrementAllTimeCrateStats(opening.crateId, 1L)
-
-            opening.rewards.forEach { reward ->
-                incrementHourlyRewardStats(
-                    bucketHour = bucketHour,
-                    crateId = opening.crateId,
-                    rewardId = reward.rewardId,
-                    wins = 1L,
-                    amountSum = reward.amount.toLong()
-                )
-                incrementAllTimeRewardStats(
-                    crateId = opening.crateId,
-                    rewardId = reward.rewardId,
-                    wins = 1L,
-                    amountSum = reward.amount.toLong()
-                )
-            }
-        }
-
-        CratesDebug.log(CratesLogCategory.STATS, 1, "Logged opening for crate '${opening.crateId}' with ${opening.rewards.size} rewards.")
-    }.onFailure {
-        CratesLogger.severe(CratesLogCategory.STATS, "Failed to log crate opening for '${opening.crateId}': ${it.message ?: it.javaClass.simpleName}")
+    if (queuedCount >= WRITE_BATCH_SIZE) {
+        requestFlush()
     }
 
-    statsCache.clear()
+    CratesDebug.log(CratesLogCategory.STATS, 1, "Queued opening for crate '${opening.crateId}' with ${opening.rewards.size} rewards.")
 }
 
 internal fun JdbcTransaction.incrementHourlyCrateStats(bucketHour: Long, crateId: String, opens: Long) {
@@ -115,3 +77,106 @@ internal fun JdbcTransaction.incrementAllTimeRewardStats(crateId: String, reward
         it[AllTimeRewardStatsTable.amountSum] = amountSum
     }
 }
+
+internal fun CrateStats.requestFlush() {
+    writeSignalChannel?.trySend(Unit)
+}
+
+internal fun CrateStats.flushPendingOpeningsSync() {
+    if (!ready) return
+
+    val batch = ArrayList<LoggedOpening>(WRITE_BATCH_SIZE)
+    while (batch.size < WRITE_BATCH_SIZE) {
+        val opening = pendingOpenings.poll() ?: break
+        batch += opening
+    }
+    if (batch.isEmpty()) return
+    pendingOpeningsCount.addAndGet(-batch.size)
+
+    runCatching {
+        dbQuerySync {
+            flushOpeningBatch(batch)
+        }
+        CratesDebug.log(CratesLogCategory.STATS, 1, "Flushed ${batch.size} queued crate openings.")
+    }.onFailure {
+        batch.asReversed().forEach { pendingOpenings.add(it) }
+        pendingOpeningsCount.addAndGet(batch.size)
+        CratesLogger.severe(CratesLogCategory.STATS, "Failed to flush queued crate openings: ${it.message ?: it.javaClass.simpleName}")
+    }
+
+    if (pendingOpeningsCount.get() > 0) {
+        requestFlush()
+    }
+}
+
+internal fun JdbcTransaction.flushOpeningBatch(openings: List<LoggedOpening>) {
+    val insertedOpenings = CrateOpeningsTable.batchInsert(openings, shouldReturnGeneratedValues = true) { opening ->
+        this[CrateOpeningsTable.playerUuid] = opening.playerUuid.toString()
+        this[CrateOpeningsTable.crateId] = opening.crateId
+        this[CrateOpeningsTable.openedAtMillis] = opening.openedAtMillis
+    }
+
+    if (insertedOpenings.size != openings.size) {
+        error("Expected ${openings.size} inserted openings, got ${insertedOpenings.size}.")
+    }
+
+    val rewardRows = buildList {
+        openings.forEachIndexed { index, opening ->
+            val openingId = insertedOpenings[index][CrateOpeningsTable.id]
+            opening.rewards.forEach { reward ->
+                add(QueuedRewardRow(openingId, opening, reward))
+            }
+        }
+    }
+
+    if (rewardRows.isNotEmpty()) {
+        CrateOpeningRewardsTable.batchInsert(rewardRows) { row ->
+            this[CrateOpeningRewardsTable.openingId] = row.openingId
+            this[CrateOpeningRewardsTable.playerUuid] = row.opening.playerUuid.toString()
+            this[CrateOpeningRewardsTable.crateId] = row.opening.crateId
+            this[CrateOpeningRewardsTable.rewardId] = row.reward.rewardId
+            this[CrateOpeningRewardsTable.rarityId] = row.reward.rarityId
+            this[CrateOpeningRewardsTable.amount] = row.reward.amount
+            this[CrateOpeningRewardsTable.wonAtMillis] = row.opening.openedAtMillis
+        }
+    }
+
+    val aggregation = CrateStatsBatchAggregator.aggregate(openings)
+
+    aggregation.hourlyCrateOpens.forEach { (key, opens) ->
+        incrementHourlyCrateStats(bucketHour = key.first, crateId = key.second, opens = opens)
+    }
+    aggregation.allTimeCrateOpens.forEach { (crateId, opens) ->
+        incrementAllTimeCrateStats(crateId, opens)
+    }
+    aggregation.hourlyRewardStats.forEach { (key, aggregate) ->
+        incrementHourlyRewardStats(
+            bucketHour = key.first,
+            crateId = key.second,
+            rewardId = key.third,
+            wins = aggregate.wins,
+            amountSum = aggregate.amountSum
+        )
+    }
+    aggregation.allTimeRewardStats.forEach { (key, aggregate) ->
+        incrementAllTimeRewardStats(
+            crateId = key.first,
+            rewardId = key.second,
+            wins = aggregate.wins,
+            amountSum = aggregate.amountSum
+        )
+    }
+}
+
+internal fun CrateStats.updateHotCaches(opening: LoggedOpening) {
+    playerAllTimeOpenCache.merge(playerCrateKey(opening.playerUuid, opening.crateId), 1L, Long::plus)
+    opening.rewards.forEach { reward ->
+        playerAllTimeRewardWinCache.merge(playerRewardKey(opening.playerUuid, opening.crateId, reward.rewardId), 1L, Long::plus)
+    }
+}
+
+private data class QueuedRewardRow(
+    val openingId: Long,
+    val opening: LoggedOpening,
+    val reward: LoggedRewardWin,
+)

@@ -5,7 +5,7 @@ import org.bukkit.entity.Player
 
 object CratesDebug {
 
-    fun enabled(level: Int): Boolean = CratesPlugin.debugLevel >= level
+    fun enabled(level: Int): Boolean = runCatching { CratesPlugin.debugLevel >= level }.getOrDefault(false)
 
     fun log(level: Int, message: String) {
         log(CratesLogCategory.GENERAL, level, message)

@@ -8,7 +8,7 @@ import org.bukkit.entity.Player
 
 object CrateMilestoneService {
     suspend fun grantReachedMilestones(player: Player, crate: Crate): List<RolledReward> {
-        if (!CrateStats.ready) {
+        if (!crate.milestoneManager.hasAnyMilestones || !CrateStats.ready) {
             return emptyList()
         }
 

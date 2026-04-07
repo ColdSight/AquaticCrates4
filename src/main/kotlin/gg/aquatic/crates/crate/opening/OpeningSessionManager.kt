@@ -6,19 +6,18 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 object OpeningSessionManager {
-    private val sessions = ConcurrentHashMap<UUID, OpeningSession>()
+    private val reservation = OpeningReservation()
 
     fun tryStart(player: Player, crate: Crate): OpeningSession? {
         val session = OpeningSession(player = player, crate = crate)
-        return if (sessions.putIfAbsent(player.uniqueId, session) == null) session else null
+        return reservation.tryStart(session)
     }
 
     fun current(player: Player): OpeningSession? {
-        return sessions[player.uniqueId]
+        return reservation.current(player.uniqueId)
     }
 
     fun finish(session: OpeningSession, failed: Boolean = false) {
-        session.stage = if (failed) OpeningStage.FAILED else OpeningStage.COMPLETED
-        sessions.remove(session.player.uniqueId, session)
+        reservation.finish(session, failed)
     }
 }

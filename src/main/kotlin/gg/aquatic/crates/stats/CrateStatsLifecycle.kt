@@ -3,6 +3,14 @@ package gg.aquatic.crates.stats
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.crates.debug.CratesLogCategory
 import gg.aquatic.crates.debug.CratesLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bukkit.configuration.ConfigurationSection
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
@@ -32,6 +40,7 @@ internal fun CrateStats.initializeLifecycle(configuration: ConfigurationSection)
 
     runCatching {
         statsDatabase = CrateStatsDatabase.connect(url, driver, user, password)
+        startWriteLoop()
         CratesLogger.info(CratesLogCategory.STATS, "Crate stats database connected successfully.")
     }.onFailure {
         CratesLogger.severe(CratesLogCategory.STATS, "Failed to initialize crate stats database: ${it.message ?: it.javaClass.simpleName}")
@@ -39,10 +48,20 @@ internal fun CrateStats.initializeLifecycle(configuration: ConfigurationSection)
 }
 
 internal fun CrateStats.shutdownLifecycle() {
+    flushPendingOpeningsSync()
+    writeLoopJob?.cancel()
+    writeLoopJob = null
+    writeSignalChannel?.close()
+    writeSignalChannel = null
+    writeScope = null
     statsDatabase?.close()
     statsDatabase = null
     configuredEnabled = false
     statsCache.clear()
+    pendingOpenings.clear()
+    pendingOpeningsCount.set(0)
+    playerAllTimeOpenCache.clear()
+    playerAllTimeRewardWinCache.clear()
 }
 
 internal suspend fun <T> CrateStats.dbQuery(block: suspend JdbcTransaction.() -> T): T {
@@ -55,4 +74,23 @@ internal suspend fun <T> CrateStats.dbQuery(block: suspend JdbcTransaction.() ->
 internal fun <T> CrateStats.dbQuerySync(block: JdbcTransaction.() -> T): T {
     val database = statsDatabase ?: error("Crate stats database is not available.")
     return transaction(database.database) { block() }
+}
+
+private fun CrateStats.startWriteLoop() {
+    writeSignalChannel?.close()
+    writeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    writeSignalChannel = Channel(Channel.CONFLATED)
+    writeLoopJob = writeScope?.launch {
+        launch {
+            while (isActive) {
+                delay(WRITE_FLUSH_INTERVAL_MILLIS)
+                requestFlush()
+            }
+        }
+
+        val signalChannel = writeSignalChannel ?: return@launch
+        for (@Suppress("unused") signal in signalChannel) {
+            flushPendingOpeningsSync()
+        }
+    }
 }

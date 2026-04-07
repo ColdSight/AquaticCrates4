@@ -30,12 +30,30 @@ internal suspend fun CrateStats.getRewardStatsInternal(crateId: String, rewardId
 
 internal suspend fun CrateStats.getPlayerCrateOpensInternal(playerUuid: UUID, crateId: String, timeframe: CrateStatsTimeframe): Long {
     if (!ready) return 0L
-    return dbQuery { queryPlayerCrateOpens(playerUuid, crateId, timeframe) }
+    if (timeframe == CrateStatsTimeframe.ALL_TIME) {
+        val key = playerCrateKey(playerUuid, crateId)
+        playerAllTimeOpenCache[key]?.let { return it }
+    }
+
+    val value = dbQuery { queryPlayerCrateOpens(playerUuid, crateId, timeframe) }
+    if (timeframe == CrateStatsTimeframe.ALL_TIME) {
+        playerAllTimeOpenCache[playerCrateKey(playerUuid, crateId)] = value
+    }
+    return value
 }
 
 internal suspend fun CrateStats.getPlayerRewardWinsInternal(playerUuid: UUID, crateId: String, rewardId: String, timeframe: CrateStatsTimeframe): Long {
     if (!ready) return 0L
-    return dbQuery { queryPlayerRewardWins(playerUuid, crateId, rewardId, timeframe) }
+    if (timeframe == CrateStatsTimeframe.ALL_TIME) {
+        val key = playerRewardKey(playerUuid, crateId, rewardId)
+        playerAllTimeRewardWinCache[key]?.let { return it }
+    }
+
+    val value = dbQuery { queryPlayerRewardWins(playerUuid, crateId, rewardId, timeframe) }
+    if (timeframe == CrateStatsTimeframe.ALL_TIME) {
+        playerAllTimeRewardWinCache[playerRewardKey(playerUuid, crateId, rewardId)] = value
+    }
+    return value
 }
 
 internal fun CrateStats.getCrateOpensCachedInternal(crateId: String, timeframe: CrateStatsTimeframe): Long {

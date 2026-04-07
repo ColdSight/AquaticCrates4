@@ -15,12 +15,12 @@ import java.util.concurrent.ConcurrentHashMap
 
 object CrateInteractionService {
     private const val WINDOW_MILLIS = 75L
-    private val lastInteractions = ConcurrentHashMap<UUID, Long>()
-    private val lastCrateClaims = ConcurrentHashMap<UUID, Long>()
+    private val interactionWindow = CrateInteractionWindow(WINDOW_MILLIS)
 
     fun handleCrateInteraction(crateHandle: CrateHandle, player: Player, clickType: CrateClickType) {
-        claimCrateInteraction(player.uniqueId)
-        if (!tryMarkExecuted(player.uniqueId)) {
+        val now = System.currentTimeMillis()
+        interactionWindow.claimCrateInteraction(player.uniqueId, now)
+        if (!interactionWindow.tryMarkExecuted(player.uniqueId, now)) {
             return
         }
 
@@ -53,10 +53,10 @@ object CrateInteractionService {
         event.cancelled = true
 
         fun execute() {
-            if (wasCrateInteractionClaimedSince(player.uniqueId, startedAt)) {
+            if (interactionWindow.wasCrateInteractionClaimedSince(player.uniqueId, startedAt)) {
                 return
             }
-            if (!tryMarkExecuted(player.uniqueId)) {
+            if (!interactionWindow.tryMarkExecuted(player.uniqueId, System.currentTimeMillis())) {
                 return
             }
 
@@ -88,24 +88,5 @@ object CrateInteractionService {
 
     fun isPhysicalCrateInteraction(event: PlayerInteractEvent?): Boolean {
         return event?.clickedBlock?.location?.let { CrateHandler.crateHandles[it] } != null
-    }
-
-    private fun tryMarkExecuted(playerId: UUID): Boolean {
-        val now = System.currentTimeMillis()
-        val previous = lastInteractions[playerId]
-        if (previous != null && now - previous < WINDOW_MILLIS) {
-            return false
-        }
-        lastInteractions[playerId] = now
-        return true
-    }
-
-    private fun claimCrateInteraction(playerId: UUID) {
-        lastCrateClaims[playerId] = System.currentTimeMillis()
-    }
-
-    private fun wasCrateInteractionClaimedSince(playerId: UUID, sinceMillis: Long): Boolean {
-        val claimedAt = lastCrateClaims[playerId] ?: return false
-        return claimedAt >= sinceMillis
     }
 }

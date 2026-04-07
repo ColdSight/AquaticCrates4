@@ -5,6 +5,7 @@ import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlNull
+import com.charleskorn.kaml.YamlScalar
 import gg.aquatic.crates.data.editor.encodeToNode
 import kotlinx.serialization.KSerializer
 
@@ -22,17 +23,26 @@ fun YamlNode.mergeMissing(defaults: YamlNode): YamlNode {
         this is YamlNull -> defaults
         this is YamlMap && defaults is YamlMap -> {
             val merged = LinkedHashMap(entries)
-            for ((key, defaultValue) in defaults.entries) {
-                val currentValue = merged[key]
-                merged[key] = when {
-                    currentValue == null -> defaultValue
-                    else -> currentValue.mergeMissing(defaultValue)
+            val currentEntriesByName = entries.entries.associateBy { it.key.lookupKey() }
+
+            for ((defaultKey, defaultValue) in defaults.entries) {
+                val currentEntry = currentEntriesByName[defaultKey.lookupKey()]
+                when {
+                    currentEntry == null -> merged[defaultKey] = defaultValue
+                    else -> merged[currentEntry.key] = currentEntry.value.mergeMissing(defaultValue)
                 }
             }
             copy(entries = merged)
         }
 
         else -> this
+    }
+}
+
+private fun YamlNode.lookupKey(): String {
+    return when (this) {
+        is YamlScalar -> content
+        else -> toString()
     }
 }
 

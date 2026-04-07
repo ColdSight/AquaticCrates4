@@ -123,14 +123,13 @@ class ChooseRewardMenu private constructor(
     private suspend fun completeSelectionWithRandomChoices(closeMenu: Boolean) {
         if (completed) return
 
-        val missingChoices = (chooseCount - selectedIndices.size).coerceAtLeast(0)
-        if (missingChoices > 0) {
-            rewards.indices
-                .filter { it !in selectedIndices }
-                .shuffled()
-                .take(missingChoices)
-                .forEach { selectedIndices += it }
-        }
+        val completedSelection = ChooseRewardSelection.completedSelection(
+            rewardCount = rewards.size,
+            chooseCount = chooseCount,
+            selectedIndices = selectedIndices
+        )
+        selectedIndices.clear()
+        selectedIndices += completedSelection
 
         completeSelection(closeMenu)
     }

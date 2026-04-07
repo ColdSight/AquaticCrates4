@@ -4,6 +4,9 @@ class CrateMilestoneManager(
     val milestones: List<CrateMilestone>,
     val repeatableMilestones: List<CrateMilestone>,
 ) {
+    val hasAnyMilestones: Boolean
+        get() = milestones.isNotEmpty() || repeatableMilestones.isNotEmpty()
+
     fun milestonesReached(totalOpened: Int): List<CrateMilestone> {
         if (totalOpened < 1) return emptyList()
 

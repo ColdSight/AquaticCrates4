@@ -85,6 +85,17 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.9")
     testImplementation(kotlin("test"))
     testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    testImplementation("gg.aquatic:Common:26.0.17")
+    testImplementation("gg.aquatic:Waves:26.0.54")
+    testImplementation("gg.aquatic.execute:Execute:26.0.2")
+    testImplementation("com.charleskorn.kaml:kaml:0.104.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
+    testImplementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    testImplementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    testImplementation("com.zaxxer:HikariCP:7.0.2")
+    testImplementation("org.mariadb.jdbc:mariadb-java-client:3.5.8")
+    testImplementation("org.xerial:sqlite-jdbc:3.51.3.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
 kotlin {

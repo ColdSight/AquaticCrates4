@@ -27,23 +27,8 @@ object MessageStorage {
         }
 
         val currentText = target.readText(Charsets.UTF_8)
-        val mergedNode = runCatching {
-            MessagesFormats.yaml.parseCompactNode(currentText).mergeMissing(defaultNode)
-        }.getOrElse { exception ->
-            CratesLogger.warning(
-                "Failed to load messages.yml, falling back to defaults: ${exception.message ?: exception.javaClass.simpleName}"
-            )
-            defaultNode
-        }
-
-        val decoded = runCatching {
-            MessagesFormats.yaml.decodeFromYamlNode(MessagesFileData.serializer(), mergedNode)
-        }.getOrElse { exception ->
-            CratesLogger.warning(
-                "Failed to decode merged messages.yml, falling back to defaults: ${exception.message ?: exception.javaClass.simpleName}"
-            )
-            defaults
-        }
+        val mergedNode = mergeWithDefaultsOrFallback(currentText, defaultNode)
+        val decoded = decodeOrFallback(mergedNode, defaults)
 
         val mergedText = MessagesFormats.yaml.encodeToString(YamlNode.serializer(), mergedNode)
         if (mergedText != currentText) {
@@ -99,6 +84,28 @@ object MessageStorage {
                 "Failed to load default messages.yml, falling back to hardcoded defaults: ${exception.message ?: exception.javaClass.simpleName}"
             )
             MessagesFileData()
+        }
+    }
+
+    internal fun mergeWithDefaultsOrFallback(currentText: String, defaultNode: YamlNode): YamlNode {
+        return runCatching {
+            MessagesFormats.yaml.parseCompactNode(currentText).mergeMissing(defaultNode)
+        }.getOrElse { exception ->
+            CratesLogger.warning(
+                "Failed to load messages.yml, falling back to defaults: ${exception.message ?: exception.javaClass.simpleName}"
+            )
+            defaultNode
+        }
+    }
+
+    internal fun decodeOrFallback(node: YamlNode, defaults: MessagesFileData): MessagesFileData {
+        return runCatching {
+            MessagesFormats.yaml.decodeFromYamlNode(MessagesFileData.serializer(), node)
+        }.getOrElse { exception ->
+            CratesLogger.warning(
+                "Failed to decode merged messages.yml, falling back to defaults: ${exception.message ?: exception.javaClass.simpleName}"
+            )
+            defaults
         }
     }
 }
