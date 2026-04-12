@@ -40,54 +40,15 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
                 suspendExecute<CommandSender> {
                     val crate = get<Crate>("crate")
                     val playerArgument = onlinePlayerArgumentResult("player")
-                    if (playerArgument.isInvalid) {
-                        Messages.PLAYER_NOT_FOUND.message()
-                            .replacePlaceholder("%player%", playerArgument.rawName ?: "unknown")
-                            .send(sender)
+                    if (handleInvalidPlayerArgument(sender, playerArgument)) {
                         return@suspendExecute
                     }
 
-                    val player = playerArgument.player
                     val amount = getOrNull<BigInteger>("amount") ?: BigInteger.ONE
                     val silent = hasFlag("options", "-s")
                     val virtual = hasFlag("options", "-v")
-
-                    if (player == null) {
-                        if (sender !is Player) {
-                            if (!silent) {
-                                Messages.KEYS_SELF_REQUIRES_PLAYER.message().send(sender)
-                            }
-                            return@suspendExecute
-                        }
-                        val self = sender as Player
-                        withContext(BukkitCtx.ofEntity(self)) {
-                            giveKeys(crate, self, amount, virtual)
-                            if (!silent) {
-                                Messages.KEYS_GIVEN_SELF.message()
-                                    .replacePlaceholder("%amount%", amount.toString())
-                                    .replacePlaceholder("%key_type%", keyTypeName(virtual))
-                                    .send(self)
-                            }
-                        }
-                        return@suspendExecute
-                    }
-
-                    withContext(BukkitCtx.ofEntity(player)) {
-                        giveKeys(crate, player, amount, virtual)
-                        if (!silent) {
-                            Messages.KEYS_GIVEN_TARGET.message()
-                                .replacePlaceholder("%amount%", amount.toString())
-                                .replacePlaceholder("%key_type%", keyTypeName(virtual))
-                                .send(player)
-                            if (sender != player) {
-                                Messages.KEYS_GIVEN_SENDER.message()
-                                    .replacePlaceholder("%player%", player.name)
-                                    .replacePlaceholder("%amount%", amount.toString())
-                                    .replacePlaceholder("%key_type%", keyTypeName(virtual))
-                                    .send(sender)
-                            }
-                        }
-                    }
+                    val target = resolveKeyGiveTarget(sender, playerArgument, silent) ?: return@suspendExecute
+                    executeKeyGive(sender, crate, target, amount, virtual, silent)
                 }
             }
         }
@@ -149,6 +110,75 @@ private fun givePhysicalKeys(keyItem: ItemStack, player: Player, amount: BigInte
 }
 
 private fun keyTypeName(virtual: Boolean): String = if (virtual) "virtual" else "physical"
+
+private fun handleInvalidPlayerArgument(
+    sender: CommandSender,
+    playerArgument: gg.aquatic.crates.command.OnlinePlayerArgumentResult,
+): Boolean {
+    if (!playerArgument.isInvalid) {
+        return false
+    }
+    Messages.PLAYER_NOT_FOUND.message()
+        .replacePlaceholder("%player%", playerArgument.rawName ?: "unknown")
+        .send(sender)
+    return true
+}
+
+private fun resolveKeyGiveTarget(
+    sender: CommandSender,
+    playerArgument: gg.aquatic.crates.command.OnlinePlayerArgumentResult,
+    silent: Boolean,
+): Player? {
+    playerArgument.player?.let { return it }
+    if (sender !is Player) {
+        if (!silent) {
+            Messages.KEYS_SELF_REQUIRES_PLAYER.message().send(sender)
+        }
+        return null
+    }
+    return sender
+}
+
+private suspend fun executeKeyGive(
+    sender: CommandSender,
+    crate: Crate,
+    player: Player,
+    amount: BigInteger,
+    virtual: Boolean,
+    silent: Boolean,
+) {
+    withContext(BukkitCtx.ofEntity(player)) {
+        giveKeys(crate, player, amount, virtual)
+        if (!silent) {
+            sendKeyGiveMessages(sender, player, amount, virtual)
+        }
+    }
+}
+
+private fun sendKeyGiveMessages(
+    sender: CommandSender,
+    player: Player,
+    amount: BigInteger,
+    virtual: Boolean,
+) {
+    if (sender == player) {
+        Messages.KEYS_GIVEN_SELF.message()
+            .replacePlaceholder("%amount%", amount.toString())
+            .replacePlaceholder("%key_type%", keyTypeName(virtual))
+            .send(player)
+        return
+    }
+
+    Messages.KEYS_GIVEN_TARGET.message()
+        .replacePlaceholder("%amount%", amount.toString())
+        .replacePlaceholder("%key_type%", keyTypeName(virtual))
+        .send(player)
+    Messages.KEYS_GIVEN_SENDER.message()
+        .replacePlaceholder("%player%", player.name)
+        .replacePlaceholder("%amount%", amount.toString())
+        .replacePlaceholder("%key_type%", keyTypeName(virtual))
+        .send(sender)
+}
 
 private suspend fun sendKeyBank(sender: CommandSender, target: Player) {
     val data = MessageStorage.loadData()

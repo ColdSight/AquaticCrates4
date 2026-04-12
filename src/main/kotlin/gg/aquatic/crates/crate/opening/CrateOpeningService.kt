@@ -197,67 +197,35 @@ object CrateOpeningService {
         ignoreKeyRequirement: Boolean,
     ): MassOpenChunkResult {
         if (!canAttemptOpen(session, crateHandle, ignoreKeyRequirement)) {
-            return MassOpenChunkResult(success = false, aggregation = MassOpenAggregation(0, emptyList()), strategy = null)
+            return emptyMassChunkResult()
         }
 
-        val crateLimitCap = maxOpenCountFromCrateLimits(session)
-        val priceSelection = if (ignoreKeyRequirement) {
-            MassPriceSelection(null, Long.MAX_VALUE)
-        } else {
-            selectMassPriceGroup(session.player, session.crate.priceGroups, requestedAmount.toLong())
-        }
-        val effectiveAmount = minOf(requestedAmount.toLong(), priceSelection.maxAffordable, crateLimitCap)
-            .coerceAtMost(Int.MAX_VALUE.toLong())
-            .toInt()
+        val priceSelection = selectMassPriceSelection(session, requestedAmount, ignoreKeyRequirement)
+        val effectiveAmount = selectEffectiveMassOpenAmount(session, requestedAmount, priceSelection)
         if (effectiveAmount < 1) {
             priceSelection.group?.onFail?.invoke(session.player)
-            return MassOpenChunkResult(success = false, aggregation = MassOpenAggregation(0, emptyList()), strategy = null)
+            return emptyMassChunkResult()
         }
 
         val selectedPriceGroup = priceSelection.group
-        if (!ignoreKeyRequirement && selectedPriceGroup != null && !selectedPriceGroup.tryTake(session.player, effectiveAmount)) {
-            return MassOpenChunkResult(success = false, aggregation = MassOpenAggregation(0, emptyList()), strategy = null)
+        if (!takeMassOpeningPrice(session.player, selectedPriceGroup, effectiveAmount, ignoreKeyRequirement)) {
+            return emptyMassChunkResult()
         }
 
-        val resolvedProvider = resolveWinnableProvider(session)
-            ?: return MassOpenChunkResult(success = false, aggregation = MassOpenAggregation(0, emptyList()), strategy = null)
+        val massContext = createMassOpeningContext(session)
+            ?: return emptyMassChunkResult()
         session.stage = OpeningStage.PROCESSING_REWARDS
 
-        val rewardProcessor = session.crate.rewardProcessor
-        val rewardTracker = MassRewardLimitTracker.create(session.player, session.crate.id, resolvedProvider.rewards)
-        val massRewardCountRanges = when (rewardProcessor) {
-            is ChooseRewardProcessor -> rewardProcessor.chooseCountRanges
-            else -> resolvedProvider.rewardCountRanges
-        }
-        val compiledSampler = CompiledMassOpeningSampler.compile(
-            massRewardCountRanges,
-            resolvedProvider.rewards.filter { it.canWinIgnoringLimits(session.player) }
-        )
-        // Unique choose menus require sampling without replacement per open, so the aggregated fast path
-        // is only correct when each open can resolve to at most one reward.
-        val chooseNeedsUniqueExact = rewardProcessor is ChooseRewardProcessor &&
-            rewardProcessor.uniqueRewards &&
-            compiledSampler.maxRewardCount > 1
-        val strategy = if (chooseNeedsUniqueExact) {
-            MassAggregationStrategy.EXACT
-        } else {
-            selectMassAggregationStrategy(compiledSampler, rewardTracker, effectiveAmount)
-        }
+        val strategy = selectMassChunkStrategy(massContext, effectiveAmount)
         CratesDebug.log(
             CratesLogCategory.INTERACTION,
             2,
             "Mass opening crate '${session.crate.id}' using strategy $strategy for amount=$effectiveAmount " +
-                "(statsReady=${CrateStats.ready}, randomRewardCount=${compiledSampler.hasRandomRewardCount}, " +
-                "randomRewardAmounts=${compiledSampler.hasRandomRewardAmounts}, rewardLimits=${!rewardTracker.hasNoLimits})"
+                "(statsReady=${CrateStats.ready}, randomRewardCount=${massContext.compiledSampler.hasRandomRewardCount}, " +
+                "randomRewardAmounts=${massContext.compiledSampler.hasRandomRewardAmounts}, rewardLimits=${!massContext.rewardTracker.hasNoLimits})"
         )
 
-        val rewardGrants = withContext(VirtualsCtx) {
-            if (chooseNeedsUniqueExact) {
-                aggregateMassUniqueChooseRewards(session.player, effectiveAmount, rewardTracker, compiledSampler)
-            } else {
-                aggregateMassRewards(session.player, effectiveAmount, rewardTracker, compiledSampler, strategy)
-            }
-        }
+        val rewardGrants = aggregateMassChunkRewards(session.player, effectiveAmount, massContext, strategy)
         if (rewardGrants.openedCount < 1) {
             if (!ignoreKeyRequirement) {
                 selectedPriceGroup?.refund(session.player, effectiveAmount)
@@ -919,9 +887,97 @@ object CrateOpeningService {
     private fun createSamplingSeed(vararg components: Long): Long {
         var seed = ThreadLocalRandom.current().nextLong() xor System.nanoTime()
         components.forEachIndexed { index, component ->
-            seed = MassRandom.mixSeed(seed xor (component + (index.toLong() * 0x9E3779B97F4A7C15uL.toLong())))
+            seed = MassRandom.mixSeed(seed xor (component + index.toLong() * 0x9E3779B97F4A7C15uL.toLong()))
         }
         return seed
+    }
+
+    private suspend fun selectMassPriceSelection(
+        session: OpeningSession,
+        requestedAmount: Int,
+        ignoreKeyRequirement: Boolean,
+    ): MassPriceSelection {
+        return if (ignoreKeyRequirement) {
+            MassPriceSelection(null, Long.MAX_VALUE)
+        } else {
+            selectMassPriceGroup(session.player, session.crate.priceGroups, requestedAmount.toLong())
+        }
+    }
+
+    private suspend fun selectEffectiveMassOpenAmount(
+        session: OpeningSession,
+        requestedAmount: Int,
+        priceSelection: MassPriceSelection,
+    ): Int {
+        val crateLimitCap = maxOpenCountFromCrateLimits(session)
+        return minOf(requestedAmount.toLong(), priceSelection.maxAffordable, crateLimitCap)
+            .coerceAtMost(Int.MAX_VALUE.toLong())
+            .toInt()
+    }
+
+    private suspend fun takeMassOpeningPrice(
+        player: Player,
+        selectedPriceGroup: OpenPriceGroup?,
+        effectiveAmount: Int,
+        ignoreKeyRequirement: Boolean,
+    ): Boolean {
+        if (ignoreKeyRequirement || selectedPriceGroup == null) {
+            return true
+        }
+        return selectedPriceGroup.tryTake(player, effectiveAmount)
+    }
+
+    private suspend fun createMassOpeningContext(session: OpeningSession): MassOpeningContext? {
+        val resolvedProvider = resolveWinnableProvider(session) ?: return null
+        val rewardProcessor = session.crate.rewardProcessor
+        val rewardTracker = MassRewardLimitTracker.create(session.player, session.crate.id, resolvedProvider.rewards)
+        val massRewardCountRanges = when (rewardProcessor) {
+            is ChooseRewardProcessor -> rewardProcessor.chooseCountRanges
+            else -> resolvedProvider.rewardCountRanges
+        }
+        val compiledSampler = CompiledMassOpeningSampler.compile(
+            massRewardCountRanges,
+            resolvedProvider.rewards.filter { it.canWinIgnoringLimits(session.player) }
+        )
+        val chooseNeedsUniqueExact = rewardProcessor is ChooseRewardProcessor &&
+            rewardProcessor.uniqueRewards &&
+            compiledSampler.maxRewardCount > 1
+
+        return MassOpeningContext(
+            compiledSampler = compiledSampler,
+            rewardTracker = rewardTracker,
+            chooseNeedsUniqueExact = chooseNeedsUniqueExact
+        )
+    }
+
+    private fun selectMassChunkStrategy(
+        context: MassOpeningContext,
+        effectiveAmount: Int,
+    ): MassAggregationStrategy {
+        return if (context.chooseNeedsUniqueExact) {
+            MassAggregationStrategy.EXACT
+        } else {
+            selectMassAggregationStrategy(context.compiledSampler, context.rewardTracker, effectiveAmount)
+        }
+    }
+
+    private suspend fun aggregateMassChunkRewards(
+        player: Player,
+        effectiveAmount: Int,
+        context: MassOpeningContext,
+        strategy: MassAggregationStrategy,
+    ): MassOpenAggregation {
+        return withContext(VirtualsCtx) {
+            if (context.chooseNeedsUniqueExact) {
+                aggregateMassUniqueChooseRewards(player, effectiveAmount, context.rewardTracker, context.compiledSampler)
+            } else {
+                aggregateMassRewards(player, effectiveAmount, context.rewardTracker, context.compiledSampler, strategy)
+            }
+        }
+    }
+
+    private fun emptyMassChunkResult(): MassOpenChunkResult {
+        return MassOpenChunkResult(success = false, aggregation = MassOpenAggregation(0, emptyList()), strategy = null)
     }
 
     private fun createMassRandom(vararg components: Long): MassRandom {
@@ -962,3 +1018,9 @@ object CrateOpeningService {
     private val MULTINOMIAL_OPEN_THRESHOLD = MassOpeningSupport.MULTINOMIAL_OPEN_THRESHOLD
     private val VECTORIZE_OPEN_THRESHOLD = MassOpeningSupport.VECTORIZE_OPEN_THRESHOLD
 }
+
+private data class MassOpeningContext(
+    val compiledSampler: CompiledMassOpeningSampler,
+    val rewardTracker: MassRewardLimitTracker,
+    val chooseNeedsUniqueExact: Boolean,
+)

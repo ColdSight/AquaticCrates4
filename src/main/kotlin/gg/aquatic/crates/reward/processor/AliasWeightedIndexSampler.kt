@@ -52,7 +52,7 @@ internal class AliasWeightedIndexSampler private constructor(
                 val more = large[--largeSize]
                 probability[less] = scaled[less]
                 alias[less] = more
-                scaled[more] = (scaled[more] + scaled[less]) - 1.0
+                scaled[more] = scaled[more] + scaled[less] - 1.0
                 if (scaled[more] < 1.0) {
                     small[smallSize++] = more
                 } else {

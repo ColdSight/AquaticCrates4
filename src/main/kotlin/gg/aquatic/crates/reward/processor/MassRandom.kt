@@ -33,7 +33,7 @@ internal class MassRandom(seed: Long) {
         return origin + nextInt(bound - origin)
     }
 
-    fun nextDouble(): Double = (nextLong().ushr(11) * DOUBLE_UNIT)
+    fun nextDouble(): Double = nextLong().ushr(11) * DOUBLE_UNIT
 
     fun nextLong(): Long {
         val s0 = state0
