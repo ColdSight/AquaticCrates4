@@ -72,9 +72,6 @@ internal data class OnlinePlayerArgumentResult(
     val rawName: String?,
     val player: Player?,
 ) {
-    val wasSpecified: Boolean
-        get() = rawName != null
-
     val isInvalid: Boolean
         get() = rawName != null && player == null
 }

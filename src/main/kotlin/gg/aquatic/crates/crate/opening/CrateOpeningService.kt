@@ -159,37 +159,6 @@ object CrateOpeningService {
         }
     }
 
-    private suspend fun processMassOpening(
-        session: OpeningSession,
-        crateHandle: CrateHandle?,
-        requestedAmount: Int,
-        ignoreKeyRequirement: Boolean,
-    ): MassOpenExecutionResult {
-        val chunkResult = processMassOpeningChunk(session, crateHandle, requestedAmount, ignoreKeyRequirement)
-        val milestoneBaseOpenCount = if (session.crate.milestoneManager.hasAnyMilestones && CrateStats.ready) {
-            CrateStats.getPlayerCrateOpens(session.player.uniqueId, session.crate.id, CrateStatsTimeframe.ALL_TIME)
-        } else {
-            0L
-        }
-        val milestoneGrants = aggregateMassMilestones(
-            player = session.player,
-            crate = session.crate,
-            baseOpenCount = milestoneBaseOpenCount,
-            openedCount = chunkResult.aggregation.openedCount.toLong()
-        )
-        val allGrants = MassOpeningSupport.mergeMassRewardGrants(chunkResult.aggregation.grants + milestoneGrants)
-        allGrants.forEach { grant ->
-            grant.reward.massWin(session.player, grant.winCount, grant.totalAmount)
-        }
-
-        logGrantedRewards(session.player, session.crate, chunkResult.aggregation.openedCount.toLong(), allGrants)
-        return MassOpenExecutionResult(
-            success = chunkResult.success,
-            openedCount = chunkResult.aggregation.openedCount,
-            strategy = chunkResult.strategy
-        )
-    }
-
     private suspend fun processMassOpeningChunk(
         session: OpeningSession,
         crateHandle: CrateHandle?,
@@ -225,7 +194,7 @@ object CrateOpeningService {
                 "randomRewardAmounts=${massContext.compiledSampler.hasRandomRewardAmounts}, rewardLimits=${!massContext.rewardTracker.hasNoLimits})"
         )
 
-        val rewardGrants = aggregateMassChunkRewards(session.player, effectiveAmount, massContext, strategy)
+        val rewardGrants = aggregateMassChunkRewards(effectiveAmount, massContext, strategy)
         if (rewardGrants.openedCount < 1) {
             if (!ignoreKeyRequirement) {
                 selectedPriceGroup?.refund(session.player, effectiveAmount)
@@ -289,12 +258,6 @@ object CrateOpeningService {
             return false
         }
         return LimitService.canOpenCrate(player, crate.id, crate.limits)
-    }
-
-    private suspend fun takeOpeningPrice(session: OpeningSession): Boolean {
-        val crate = session.crate
-        val player = session.player
-        return takeOpeningPrice(player, crate.priceGroups, ignoreKeyRequirement = false)
     }
 
     private suspend fun takeOpeningPrice(
@@ -387,7 +350,6 @@ object CrateOpeningService {
     }
 
     private suspend fun aggregateMassRewards(
-        player: Player,
         amount: Int,
         tracker: MassRewardLimitTracker,
         compiledSampler: CompiledMassOpeningSampler,
@@ -449,7 +411,6 @@ object CrateOpeningService {
     }
 
     private fun aggregateMassUniqueChooseRewards(
-        player: Player,
         amount: Int,
         tracker: MassRewardLimitTracker,
         compiledSampler: CompiledMassOpeningSampler,
@@ -506,7 +467,7 @@ object CrateOpeningService {
         // Every open contributes the same number of draws, so the whole batch can be collapsed into one multinomial
         // experiment over totalDraws = opens * drawsPerOpen.
         val rewardCountPerOpen = compiledSampler.fixedRewardCount ?: return aggregateMassRewardsVectorizedSingleWorker(compiledSampler, amount)
-        val fixedAmounts = compiledSampler.allFixedRewardAmounts() ?: return aggregateMassRewardsVectorizedSingleWorker(compiledSampler, amount)
+        compiledSampler.allFixedRewardAmounts() ?: return aggregateMassRewardsVectorizedSingleWorker(compiledSampler, amount)
         val totalDraws = rewardCountPerOpen.toLong() * amount.toLong()
         val random = createMassRandom(amount.toLong(), compiledSampler.rewards.size.toLong(), totalDraws)
         val counts = gg.aquatic.crates.reward.processor.MassSampling.sampleMultinomialCounts(
@@ -871,14 +832,13 @@ object CrateOpeningService {
             return MassAggregationStrategy.DETERMINISTIC
         }
         if (
-            tracker.hasNoLimits &&
             amount >= MULTINOMIAL_OPEN_THRESHOLD &&
             compiledSampler.fixedRewardCount != null &&
             !compiledSampler.hasRandomRewardAmounts
         ) {
             return MassAggregationStrategy.MULTINOMIAL
         }
-        if (tracker.hasNoLimits && amount >= VECTORIZE_OPEN_THRESHOLD) {
+        if (amount >= VECTORIZE_OPEN_THRESHOLD) {
             return MassAggregationStrategy.VECTORIZED
         }
         return MassAggregationStrategy.EXACT
@@ -887,7 +847,7 @@ object CrateOpeningService {
     private fun createSamplingSeed(vararg components: Long): Long {
         var seed = ThreadLocalRandom.current().nextLong() xor System.nanoTime()
         components.forEachIndexed { index, component ->
-            seed = MassRandom.mixSeed(seed xor (component + index.toLong() * 0x9E3779B97F4A7C15uL.toLong()))
+            seed = MassRandom.mixSeed(seed xor component + index.toLong() * SAMPLING_SEED_INDEX_STEP)
         }
         return seed
     }
@@ -962,16 +922,15 @@ object CrateOpeningService {
     }
 
     private suspend fun aggregateMassChunkRewards(
-        player: Player,
         effectiveAmount: Int,
         context: MassOpeningContext,
         strategy: MassAggregationStrategy,
     ): MassOpenAggregation {
         return withContext(VirtualsCtx) {
             if (context.chooseNeedsUniqueExact) {
-                aggregateMassUniqueChooseRewards(player, effectiveAmount, context.rewardTracker, context.compiledSampler)
+                aggregateMassUniqueChooseRewards(effectiveAmount, context.rewardTracker, context.compiledSampler)
             } else {
-                aggregateMassRewards(player, effectiveAmount, context.rewardTracker, context.compiledSampler, strategy)
+                aggregateMassRewards(effectiveAmount, context.rewardTracker, context.compiledSampler, strategy)
             }
         }
     }
@@ -1017,6 +976,7 @@ object CrateOpeningService {
 
     private val MULTINOMIAL_OPEN_THRESHOLD = MassOpeningSupport.MULTINOMIAL_OPEN_THRESHOLD
     private val VECTORIZE_OPEN_THRESHOLD = MassOpeningSupport.VECTORIZE_OPEN_THRESHOLD
+    private val SAMPLING_SEED_INDEX_STEP = 0x9E3779B97F4A7C15uL.toLong()
 }
 
 private data class MassOpeningContext(

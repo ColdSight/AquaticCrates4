@@ -11,9 +11,6 @@ import gg.aquatic.crates.reward.RewardAmountRange
 internal class WeightedRangeAmountSampler(
     private val ranges: List<RewardAmountRange>,
 ) : CompiledAmountSampler {
-    private val sampler = AliasWeightedIndexSampler.fromWeights(ranges.map { it.chance })
-    private val minBounds = IntArray(ranges.size) { index -> minOf(ranges[index].min, ranges[index].max) }
-    private val maxBoundsExclusive = IntArray(ranges.size) { index -> maxOf(ranges[index].min, ranges[index].max) + 1 }
     private val discreteValues: IntArray
     private val discreteProbabilities: DoubleArray
     private val discreteSampler: AliasWeightedIndexSampler
@@ -21,10 +18,11 @@ internal class WeightedRangeAmountSampler(
     init {
         val weightByValue = LinkedHashMap<Int, Double>()
         for (index in ranges.indices) {
-            val low = minBounds[index]
-            val highExclusive = maxBoundsExclusive[index]
+            val range = ranges[index]
+            val low = minOf(range.min, range.max)
+            val highExclusive = maxOf(range.min, range.max) + 1
             val rangeWidth = (highExclusive - low).coerceAtLeast(1)
-            val weightPerValue = ranges[index].chance / rangeWidth.toDouble()
+            val weightPerValue = range.chance / rangeWidth.toDouble()
             for (value in low until highExclusive) {
                 weightByValue.merge(value, weightPerValue, Double::plus)
             }
@@ -43,16 +41,7 @@ internal class WeightedRangeAmountSampler(
         discreteSampler = AliasWeightedIndexSampler.fromNormalizedWeights(discreteProbabilities)
     }
 
-    override fun sample(random: MassRandom): Int {
-        if (discreteValues.isNotEmpty()) {
-            return discreteValues[discreteSampler.sample(random)]
-        }
-
-        val rangeIndex = sampler.sample(random)
-        val low = minBounds[rangeIndex]
-        val highExclusive = maxBoundsExclusive[rangeIndex]
-        return if (low + 1 >= highExclusive) low else random.nextInt(low, highExclusive)
-    }
+    override fun sample(random: MassRandom): Int = discreteValues[discreteSampler.sample(random)]
 
     override fun fixedValueOrNull(): Int? = null
 
@@ -63,23 +52,13 @@ internal class WeightedRangeAmountSampler(
             return 0L
         }
 
-        if (discreteValues.isNotEmpty()) {
-            val counts = MassSampling.sampleMultinomialCounts(trials, discreteProbabilities, random)
-            var total = 0L
-            for (index in counts.indices) {
-                val count = counts[index]
-                if (count > 0L) {
-                    total += count * discreteValues[index].toLong()
-                }
-            }
-            return total
-        }
-
+        val counts = MassSampling.sampleMultinomialCounts(trials, discreteProbabilities, random)
         var total = 0L
-        var remaining = trials
-        while (remaining > 0L) {
-            total += sample(random).toLong()
-            remaining--
+        for (index in counts.indices) {
+            val count = counts[index]
+            if (count > 0L) {
+                total += count * discreteValues[index].toLong()
+            }
         }
         return total
     }
