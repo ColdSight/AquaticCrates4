@@ -10,6 +10,7 @@ object CrateOpeningRewardsTable : Table("acrates_opening_rewards") {
     val rewardId = varchar("reward_id", 64)
     val rarityId = varchar("rarity_id", 64).nullable()
     val amount = integer("amount")
+    val winCount = long("win_count").default(1L)
     val wonAtMillis = long("won_at_millis")
 
     override val primaryKey = PrimaryKey(id)

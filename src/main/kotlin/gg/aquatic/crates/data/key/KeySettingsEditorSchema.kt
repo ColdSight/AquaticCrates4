@@ -26,6 +26,7 @@ object KeySettingsEditorSchema : EditableModel<KeySettingsData>(KeySettingsData.
         field(
             KeySettingsData::keyMustBeHeld,
             displayName = "Key Must Be Held",
+            searchTags = listOf("must be held", "hold key", "hand", "require held key", "key requirement"),
             prompt = "Enter true or false:",
             iconMaterial = Material.TRIPWIRE_HOOK,
             description = listOf("If enabled, players must hold this crate key in hand when opening the crate directly in the world.")

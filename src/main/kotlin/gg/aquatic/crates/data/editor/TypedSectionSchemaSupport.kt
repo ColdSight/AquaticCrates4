@@ -13,6 +13,8 @@ fun <T, S> TypedEditorSchemaBuilder<T>.switchingSection(
     displayName: String,
     iconMaterial: Material,
     description: List<String>,
+    searchTags: List<String> = emptyList(),
+    searchable: Boolean = true,
     visibleWhen: (EditorFieldContext) -> Boolean,
     block: TypedNestedSchemaBuilder<S>.() -> Unit
 ) {
@@ -22,6 +24,8 @@ fun <T, S> TypedEditorSchemaBuilder<T>.switchingSection(
         displayName = displayName,
         iconMaterial = iconMaterial,
         description = description,
+        searchTags = searchTags,
+        searchable = searchable,
         visibleWhen = visibleWhen
     )
     include<T>(visibleWhen = visibleWhen) {

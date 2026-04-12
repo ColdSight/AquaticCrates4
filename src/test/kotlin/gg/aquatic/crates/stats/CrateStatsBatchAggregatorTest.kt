@@ -91,4 +91,36 @@ class CrateStatsBatchAggregatorTest {
         assertEquals(emptyMap(), aggregation.allTimeCrateOpens)
         assertEquals(emptyMap(), aggregation.allTimeRewardStats)
     }
+
+    @Test
+    fun `aggregate respects compressed open and reward counts`() {
+        val player = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+        val openedAt = 1_700_000_000_000L
+
+        val aggregation = CrateStatsBatchAggregator.aggregate(
+            listOf(
+                LoggedOpening(
+                    playerUuid = player,
+                    crateId = "alpha",
+                    openedAtMillis = openedAt,
+                    rewards = listOf(
+                        LoggedRewardWin("common", "c", amount = 12, winCount = 4),
+                        LoggedRewardWin("rare", "r", amount = 9, winCount = 3)
+                    ),
+                    openCount = 7
+                )
+            )
+        )
+
+        assertEquals(7L, aggregation.hourlyCrateOpens[CrateStats.truncateHour(openedAt) to "alpha"])
+        assertEquals(7L, aggregation.allTimeCrateOpens["alpha"])
+        assertEquals(
+            RewardTotals(wins = 4, amountSum = 12),
+            aggregation.hourlyRewardStats[Triple(CrateStats.truncateHour(openedAt), "alpha", "common")]
+        )
+        assertEquals(
+            RewardTotals(wins = 3, amountSum = 9),
+            aggregation.allTimeRewardStats["alpha" to "rare"]
+        )
+    }
 }

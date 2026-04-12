@@ -1,15 +1,15 @@
 package gg.aquatic.crates.stats
 
-import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import gg.aquatic.crates.stats.table.AllTimeCrateStatsTable
 import gg.aquatic.crates.stats.table.AllTimeRewardStatsTable
 import gg.aquatic.crates.stats.table.CrateOpeningRewardsTable
 import gg.aquatic.crates.stats.table.CrateOpeningsTable
 import gg.aquatic.crates.stats.table.HourlyCrateStatsTable
 import gg.aquatic.crates.stats.table.HourlyRewardStatsTable
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class CrateStatsDatabase private constructor(
@@ -53,6 +53,10 @@ class CrateStatsDatabase private constructor(
                     AllTimeCrateStatsTable,
                     AllTimeRewardStatsTable,
                 )
+            }
+
+            dataSource.connection.use { connection ->
+                StatsMigrations.runAll(connection)
             }
 
             return CrateStatsDatabase(database, dataSource)

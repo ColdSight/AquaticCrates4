@@ -6,6 +6,7 @@ import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandle
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.debug.CratesDebug
+import gg.aquatic.crates.util.withPlayerPlaceholder
 import gg.aquatic.execute.executeActions
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import org.bukkit.entity.Player
@@ -42,7 +43,7 @@ object CrateInteractionService {
         )
 
         VirtualsCtx {
-            actions.map { it.toActionHandle() }.executeActions(binder) { _, str -> str }
+            actions.map { it.toActionHandle() }.executeActions(binder, withPlayerPlaceholder(player))
         }
     }
 
@@ -75,7 +76,7 @@ object CrateInteractionService {
             )
 
             VirtualsCtx {
-                actions.map { it.toActionHandle() }.executeActions(binder) { _, str -> str }
+                actions.map { it.toActionHandle() }.executeActions(binder, withPlayerPlaceholder(player))
             }
         }
 

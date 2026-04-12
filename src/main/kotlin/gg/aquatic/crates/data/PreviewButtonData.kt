@@ -18,6 +18,7 @@ import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
 import org.bukkit.Material
+import gg.aquatic.crates.util.withPlayerPlaceholder
 
 @Serializable
 data class PreviewButtonData(
@@ -45,7 +46,7 @@ data class PreviewButtonData(
             click = ClickSettings(
                 hashMapOf(
                     ButtonType.LEFT to mutableListOf({ player, updater ->
-                        actions.executeActions(player, updater)
+                        actions.executeActions(player, withPlayerPlaceholder(player, updater))
                     })
                 )
             ),
@@ -71,6 +72,7 @@ data class PreviewButtonData(
             list(
                 PreviewButtonData::slots,
                 displayName = "Slots",
+                searchTags = listOf("slots", "button slots", "position", "menu position"),
                 iconMaterial = Material.HOPPER,
                 description = listOf("Slots where this custom button should appear."),
                 newValueFactory = EditorEntryFactories.int("Enter button slot or range (e.g. 0-8):", unique = true)
@@ -78,6 +80,7 @@ data class PreviewButtonData(
             list(
                 PreviewButtonData::viewConditions,
                 displayName = "View Conditions",
+                searchTags = listOf("view conditions", "visibility", "show conditions", "display conditions"),
                 iconMaterial = Material.TRIPWIRE_HOOK,
                 description = listOf("Conditions that must pass for the button to be visible."),
                 newValueFactory = PlayerConditionSelectionMenu.entryFactory
@@ -87,6 +90,7 @@ data class PreviewButtonData(
             list(
                 PreviewButtonData::clickActions,
                 displayName = "Click Actions",
+                searchTags = listOf("click actions", "button actions", "on click", "left click actions"),
                 iconMaterial = Material.BLAZE_POWDER,
                 description = listOf("Actions executed when the player left-clicks this button."),
                 newValueFactory = RewardActionSelectionMenu.entryFactory

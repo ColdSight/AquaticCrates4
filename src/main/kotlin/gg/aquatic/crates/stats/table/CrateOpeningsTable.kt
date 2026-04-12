@@ -7,6 +7,7 @@ object CrateOpeningsTable : Table("acrates_openings") {
     val playerUuid = varchar("player_uuid", 36)
     val crateId = varchar("crate_id", 64)
     val openedAtMillis = long("opened_at_millis")
+    val openCount = long("open_count").default(1L)
 
     override val primaryKey = PrimaryKey(id)
 

@@ -34,6 +34,7 @@ data class CrateHologramData(
             list(
                 CrateHologramData::lines,
                 "Hologram Lines",
+                searchTags = listOf("lines", "hologram lines", "text", "item line", "animated line", "floating text"),
                 iconMaterial = Material.END_CRYSTAL,
                 description = listOf("All hologram lines displayed above the crate, including text, item and animated lines."),
                 newValueFactory = HologramLineSelectionMenu.entryFactory
@@ -45,6 +46,7 @@ data class CrateHologramData(
                 IntFieldAdapter,
                 IntFieldConfig(prompt = "Enter hologram view distance:", min = 1),
                 displayName = "Hologram View Distance",
+                searchTags = listOf("view distance", "distance", "range", "visibility", "render distance"),
                 iconMaterial = Material.SPYGLASS,
                 description = listOf("Maximum distance where the hologram is rendered.")
             )
@@ -53,6 +55,7 @@ data class CrateHologramData(
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldAdapter,
                 gg.aquatic.waves.serialization.editor.meta.DoubleFieldConfig(prompt = "Enter hologram Y offset:"),
                 displayName = "Hologram Y Offset",
+                searchTags = listOf("offset", "y offset", "height", "vertical offset", "spawn offset"),
                 iconMaterial = Material.FEATHER,
                 description = listOf("Additional vertical offset applied to the spawned hologram location.")
             )

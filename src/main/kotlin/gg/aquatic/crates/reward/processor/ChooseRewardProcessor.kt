@@ -10,8 +10,8 @@ import kotlinx.coroutines.CompletableDeferred
 import org.bukkit.entity.Player
 
 class ChooseRewardProcessor(
-    private val chooseCountRanges: Collection<gg.aquatic.crates.reward.RewardAmountRange>,
-    private val uniqueRewards: Boolean,
+    internal val chooseCountRanges: Collection<gg.aquatic.crates.reward.RewardAmountRange>,
+    internal val uniqueRewards: Boolean,
     private val hiddenRewards: Boolean,
     private val onSelectActions: Collection<ActionHandle<Player>>,
     private val hiddenItem: org.bukkit.inventory.ItemStack?,

@@ -32,6 +32,7 @@ object RewardRuntimeFactory {
             previewItem = { previewItemStack.clone() },
             fallbackItem = fallbackItemStack?.let { built -> { built.clone() } },
             winActions = data.winActions.map { it.toActionHandle() },
+            massWinActions = data.massWinActions.map { it.toActionHandle() },
             conditions = data.conditions.map { it.toConditionHandle() },
             purchaseManager = purchaseManager,
             amountRanges = data.amountRanges.map { it.toRange() },

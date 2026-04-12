@@ -91,7 +91,7 @@ class ChooseRewardMenu private constructor(
         val rolled = rewards.getOrNull(index)
         if (rolled != null && onSelectActions.isNotEmpty()) {
             onSelectActions.executeActions(player) { _, str ->
-                rolled.reward.updatePlaceholders(str, rolled.amount)
+                rolled.reward.updatePlaceholders(str, player, rolled.amount)
             }
         }
         if (selectedIndices.size >= chooseCount) {

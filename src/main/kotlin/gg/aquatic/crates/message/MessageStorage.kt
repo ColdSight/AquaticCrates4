@@ -50,6 +50,14 @@ object MessageStorage {
             "en" to mapOf(
                 Messages.HELP.path to data.help.toPaperMessage(),
                 Messages.CRATE_GIVEN.path to data.crateGiven.toPaperMessage(),
+                Messages.CRATE_OPEN_SELF_REQUIRES_PLAYER.path to data.crateOpenSelfRequiresPlayer.toPaperMessage(),
+                Messages.CRATE_OPENED_SELF.path to data.crateOpenedSelf.toPaperMessage(),
+                Messages.CRATE_OPENED_TARGET.path to data.crateOpenedTarget.toPaperMessage(),
+                Messages.CRATE_OPENED_SENDER.path to data.crateOpenedSender.toPaperMessage(),
+                Messages.CRATE_OPEN_KEY_REQUIRED.path to data.crateOpenKeyRequired.toPaperMessage(),
+                Messages.CRATE_OPEN_FAILED.path to data.crateOpenFailed.toPaperMessage(),
+                Messages.PLAYER_ONLY_COMMAND.path to data.playerOnlyCommand.toPaperMessage(),
+                Messages.PLAYER_NOT_FOUND.path to data.playerNotFound.toPaperMessage(),
                 Messages.KEYS_SELF_REQUIRES_PLAYER.path to data.keysSelfRequiresPlayer.toPaperMessage(),
                 Messages.KEYS_GIVEN_SELF.path to data.keysGivenSelf.toPaperMessage(),
                 Messages.KEYS_GIVEN_TARGET.path to data.keysGivenTarget.toPaperMessage(),
@@ -65,6 +73,7 @@ object MessageStorage {
                 Messages.CRATE_SAVED.path to data.crateSaved.toPaperMessage(),
                 Messages.CRATE_CREATE_PROMPT.path to data.crateCreatePrompt.toPaperMessage(),
                 Messages.CRATE_INVALID_ID.path to data.crateInvalidId.toPaperMessage(),
+                Messages.CRATE_NOT_FOUND.path to data.crateNotFound.toPaperMessage(),
                 Messages.CRATE_ALREADY_EXISTS.path to data.crateAlreadyExists.toPaperMessage(),
                 Messages.CRATE_EDITOR_OPEN_FAILED.path to data.crateEditorOpenFailed.toPaperMessage(),
             )

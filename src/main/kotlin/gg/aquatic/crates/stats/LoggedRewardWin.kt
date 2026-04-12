@@ -6,6 +6,7 @@ data class LoggedRewardWin(
     val rewardId: String,
     val rarityId: String?,
     val amount: Int,
+    val winCount: Long = 1L,
 ) {
     companion object {
         fun from(rolledReward: RolledReward): LoggedRewardWin {

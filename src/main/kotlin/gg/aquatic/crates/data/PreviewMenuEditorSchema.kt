@@ -30,6 +30,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
         TextFieldAdapter,
         TextFieldConfig(prompt = "Enter preview title:", showFormattedPreview = true),
         displayName = "Preview Title",
+        searchTags = listOf("title", "preview title", "menu title", "inventory title"),
         iconMaterial = Material.NAME_TAG,
         description = listOf("Menu title shown at the top of the preview inventory."),
         visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
@@ -37,6 +38,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
     list(
         PreviewMenuData::rewardSlots,
         "Reward Slots",
+        searchTags = listOf("reward slots", "slots", "static reward slots", "preview slots"),
         iconMaterial = Material.HOPPER,
         description = listOf("Slots where reward icons can appear in the preview menu."),
         newValueFactory = EditorEntryFactories.int("Enter reward slot or range (e.g. 10-16 or 10,12,14):", unique = true),
@@ -45,6 +47,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
     list(
         PreviewMenuData::randomRewardSlots,
         "Random Reward Slots",
+        searchTags = listOf("random slots", "random reward slots", "rolling rewards", "random preview"),
         iconMaterial = Material.CHEST,
         description = listOf("Slots where randomly selected reward icons can appear in the preview menu."),
         newValueFactory = EditorEntryFactories.int("Enter random reward slot or range (e.g. 19-25):", unique = true),
@@ -55,6 +58,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
         IntFieldAdapter,
         IntFieldConfig(prompt = "Enter random reward switch ticks:", min = 1),
         displayName = "Random Reward Switch Ticks",
+        searchTags = listOf("switch ticks", "reroll", "refresh interval", "random reward speed"),
         iconMaterial = Material.CLOCK,
         description = listOf("How often random reward slots reroll to a new reward."),
         visibleWhen = { it.isPreviewType(PREVIEW_TYPE_AUTOMATIC) }
@@ -62,6 +66,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
     field(
         PreviewMenuData::randomRewardUnique,
         displayName = "Random Reward Unique",
+        searchTags = listOf("unique", "unique rewards", "no duplicates", "random unique"),
         prompt = "Enter true or false:",
         iconMaterial = Material.COMPARATOR,
         description = listOf(
@@ -73,6 +78,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
     list(
         PreviewMenuData::rewardLore,
         displayName = "Reward Lore",
+        searchTags = listOf("reward lore", "preview lore", "extra lore", "tooltip"),
         iconMaterial = Material.WRITABLE_BOOK,
         description = listOf(
             "Extra lore appended to preview reward items.",
@@ -83,6 +89,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
     map(
         PreviewMenuData::customButtons,
         displayName = "Custom Buttons",
+        searchTags = listOf("buttons", "custom buttons", "pagination", "next page", "prev page"),
         iconMaterial = Material.STONE_BUTTON,
         description = listOf(
             "Additional buttons shown in the preview menu.",
@@ -98,6 +105,7 @@ fun TypedNestedSchemaBuilder<PreviewMenuData>.definePreviewMenuEditor() {
     list(
         PreviewMenuData::pages,
         displayName = "Pages",
+        searchTags = listOf("pages", "custom pages", "multi page", "page list"),
         iconMaterial = Material.BOOK,
         description = listOf("Custom preview pages used when preview type is set to custom-pages."),
         newValueFactory = EntryFactory { _, _ ->
@@ -120,12 +128,14 @@ fun TypedNestedSchemaBuilder<PreviewPageData>.definePreviewPageEditor() {
         TextFieldAdapter,
         TextFieldConfig(prompt = "Enter page title:", showFormattedPreview = true),
         displayName = "Page Title",
+        searchTags = listOf("page title", "title", "menu title", "inventory title"),
         iconMaterial = Material.NAME_TAG,
         description = listOf("Menu title shown at the top of this preview page.")
     )
     list(
         PreviewPageData::rewardSlots,
         "Reward Slots",
+        searchTags = listOf("reward slots", "slots", "static reward slots", "page slots"),
         iconMaterial = Material.HOPPER,
         description = listOf("Slots where reward icons can appear on this page."),
         newValueFactory = EditorEntryFactories.int("Enter reward slot or range (e.g. 10-16 or 10,12,14):", unique = true)
@@ -133,6 +143,7 @@ fun TypedNestedSchemaBuilder<PreviewPageData>.definePreviewPageEditor() {
     list(
         PreviewPageData::randomRewardSlots,
         "Random Reward Slots",
+        searchTags = listOf("random slots", "random reward slots", "rolling rewards", "page random rewards"),
         iconMaterial = Material.CHEST,
         description = listOf("Slots where randomly selected reward icons can appear on this page."),
         newValueFactory = EditorEntryFactories.int("Enter random reward slot or range (e.g. 19-25):", unique = true)
@@ -142,12 +153,14 @@ fun TypedNestedSchemaBuilder<PreviewPageData>.definePreviewPageEditor() {
         IntFieldAdapter,
         IntFieldConfig(prompt = "Enter random reward switch ticks:", min = 1),
         displayName = "Random Reward Switch Ticks",
+        searchTags = listOf("switch ticks", "reroll", "refresh interval", "random reward speed"),
         iconMaterial = Material.CLOCK,
         description = listOf("How often random reward slots reroll to a new reward on this page.")
     )
     field(
         PreviewPageData::randomRewardUnique,
         displayName = "Random Reward Unique",
+        searchTags = listOf("unique", "unique rewards", "no duplicates", "random unique"),
         prompt = "Enter true or false:",
         iconMaterial = Material.COMPARATOR,
         description = listOf(
@@ -158,6 +171,7 @@ fun TypedNestedSchemaBuilder<PreviewPageData>.definePreviewPageEditor() {
     list(
         PreviewPageData::rewardLore,
         displayName = "Reward Lore",
+        searchTags = listOf("reward lore", "preview lore", "extra lore", "tooltip"),
         iconMaterial = Material.WRITABLE_BOOK,
         description = listOf(
             "Extra lore appended to preview reward items on this page.",
@@ -168,6 +182,7 @@ fun TypedNestedSchemaBuilder<PreviewPageData>.definePreviewPageEditor() {
     map(
         PreviewPageData::customButtons,
         displayName = "Custom Buttons",
+        searchTags = listOf("buttons", "custom buttons", "pagination", "next page", "prev page"),
         iconMaterial = Material.STONE_BUTTON,
         description = listOf(
             "Additional buttons shown on this page.",

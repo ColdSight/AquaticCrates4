@@ -21,4 +21,5 @@ data class RewardData(
     val cost: List<OpenPriceGroupData> = emptyList(),
     val amountRanges: List<RewardAmountRangeData> = emptyList(),
     val winActions: List<@Polymorphic RewardActionData> = emptyList(),
+    val massWinActions: List<@Polymorphic RewardActionData> = emptyList(),
 )

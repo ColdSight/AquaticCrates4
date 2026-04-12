@@ -22,12 +22,14 @@ object RewardDataEditorSchema {
             TextFieldAdapter,
             TextFieldConfig(prompt = "Enter reward display name:", showFormattedPreview = true),
             displayName = "Reward Name",
+            searchTags = listOf("reward name", "display name", "title", "preview name"),
             iconMaterial = Material.NAME_TAG,
             description = listOf("Optional custom name used for the reward in previews.")
         )
         list(
             RewardData::conditions,
             displayName = "Conditions",
+            searchTags = listOf("conditions", "requirements", "player conditions", "must pass"),
             iconMaterial = Material.IRON_BARS,
             description = listOf("Conditions that must pass before this reward can be selected."),
             newValueFactory = PlayerConditionSelectionMenu.entryFactory
@@ -37,6 +39,7 @@ object RewardDataEditorSchema {
         list(
             RewardData::limits,
             displayName = "Limits",
+            searchTags = listOf("limits", "reward limits", "cap", "cooldown", "max wins"),
             iconMaterial = Material.CLOCK,
             description = listOf("Per-player rolling limits for how often this reward can be won.")
         ) {
@@ -47,12 +50,14 @@ object RewardDataEditorSchema {
             DoubleFieldAdapter,
             DoubleFieldConfig(prompt = "Enter reward chance:", min = 0.0),
             displayName = "Chance",
+            searchTags = listOf("chance", "weight", "odds", "probability", "drop chance"),
             iconMaterial = Material.EMERALD,
             description = listOf("Relative weight used inside the selected rarity.")
         )
         list(
             RewardData::amountRanges,
             displayName = "Amount Ranges",
+            searchTags = listOf("amount", "amount ranges", "random amount", "quantity", "stack size"),
             iconMaterial = Material.COPPER_INGOT,
             description = listOf(
                 "Weighted random amount multiplier for this reward.",
@@ -71,6 +76,7 @@ object RewardDataEditorSchema {
         list(
             RewardData::cost,
             displayName = "Cost",
+            searchTags = listOf("cost", "buy", "purchase", "shop", "price", "price groups"),
             iconMaterial = Material.GOLD_INGOT,
             description = listOf(
                 "Alternative price groups used to purchase this reward directly in preview.",
@@ -84,16 +90,33 @@ object RewardDataEditorSchema {
             RewardData::rarity,
             adapter = RewardRarityFieldAdapter,
             displayName = "Rarity",
+            searchTags = listOf("rarity", "group", "tier", "rarity group"),
             iconMaterial = Material.NETHER_STAR,
             description = listOf("Which crate rarity group this reward belongs to.")
         )
         list(
             RewardData::winActions,
             displayName = "Win Actions",
+            searchTags = listOf("actions", "win actions", "reward actions", "normal actions", "on win"),
             iconMaterial = Material.BLAZE_POWDER,
             description = listOf(
                 "Actions executed when this reward is won.",
+                "Use %player%, %random-amount%, %reward-chance% and %reward-chance-formatted% placeholders in normal opening actions.",
                 "If empty, the preview item is given automatically."
+            ),
+            newValueFactory = RewardActionSelectionMenu.entryFactory
+        ) {
+            defineRewardActionEditor()
+        }
+        list(
+            RewardData::massWinActions,
+            displayName = "Mass Win Actions",
+            searchTags = listOf("mass open", "mass win actions", "bulk actions", "batch actions", "mass opening"),
+            iconMaterial = Material.FIRE_CHARGE,
+            description = listOf(
+                "Actions executed once per reward during mass opening.",
+                "Use %player%, %reward-win-count% / %reward-drawn-count%, %reward-total-amount% / %reward-total-random-amount%, and %reward-chance% / %reward-chance-formatted% placeholders.",
+                "If empty, mass opening falls back to the normal win action behavior."
             ),
             newValueFactory = RewardActionSelectionMenu.entryFactory
         ) {
@@ -113,6 +136,7 @@ object RewardDataEditorSchema {
         field(
             RewardData::fallbackPreviewItem,
             displayName = "Fallback Item",
+            searchTags = listOf("fallback", "locked item", "unavailable item", "preview fallback"),
             iconMaterial = Material.CHEST_MINECART,
             description = listOf(
                 "Optional item shown in preview when the player does not meet this reward's conditions.",

@@ -22,7 +22,7 @@ object PreviewRewardEntries {
 
         val meta = item.itemMeta ?: return item
         val originalLore = meta.lore().orEmpty()
-        val appendedLore = rewardLore.map { reward.updatePlaceholders(it, 1).toMMComponent() }
+        val appendedLore = rewardLore.map { reward.updatePlaceholders(it, player, 1).toMMComponent() }
         meta.lore(originalLore + appendedLore)
         item.itemMeta = meta
         return item

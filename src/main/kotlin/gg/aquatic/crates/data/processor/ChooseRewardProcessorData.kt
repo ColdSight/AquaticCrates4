@@ -36,6 +36,7 @@ data class ChooseRewardProcessorData(
             list(
                 ChooseRewardProcessorData::chooseCountRanges,
                 displayName = "Choose Count Ranges",
+                searchTags = listOf("choose count", "choice count", "amount of choices", "pick amount", "selection count"),
                 iconMaterial = Material.HOPPER,
                 description = listOf(
                     "Controls how many offered rewards the player may choose from the menu.",
@@ -53,6 +54,7 @@ data class ChooseRewardProcessorData(
             field(
                 ChooseRewardProcessorData::uniqueRewards,
                 displayName = "Unique Rewards",
+                searchTags = listOf("unique", "no duplicates", "distinct rewards", "offered rewards"),
                 prompt = "Enter true or false:",
                 iconMaterial = Material.TARGET,
                 description = listOf("If enabled, the offered reward list will not contain duplicate rewards.")
@@ -60,6 +62,7 @@ data class ChooseRewardProcessorData(
             field(
                 ChooseRewardProcessorData::hiddenRewards,
                 displayName = "Hidden Rewards",
+                searchTags = listOf("hidden", "blind pick", "mystery rewards", "concealed rewards"),
                 prompt = "Enter true or false:",
                 iconMaterial = Material.ENDER_EYE,
                 description = listOf(
@@ -71,6 +74,7 @@ data class ChooseRewardProcessorData(
             list(
                 ChooseRewardProcessorData::onSelectActions,
                 displayName = "On Select Actions",
+                searchTags = listOf("on select", "select actions", "choose actions", "on pick", "selection actions"),
                 iconMaterial = Material.BLAZE_POWDER,
                 description = listOf(
                     "Actions executed each time the player selects one offered reward.",

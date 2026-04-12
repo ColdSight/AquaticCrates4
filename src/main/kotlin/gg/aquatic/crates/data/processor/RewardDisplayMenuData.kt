@@ -5,13 +5,17 @@ import gg.aquatic.crates.data.CrateDataFormats
 import gg.aquatic.crates.data.PreviewButtonData
 import gg.aquatic.crates.data.editor.CrateEditorValidators
 import gg.aquatic.crates.data.editor.encodeToNode
+import gg.aquatic.crates.data.resolveCrateDataDescriptor
 import gg.aquatic.crates.data.menu.AnvilMenuRuntimeSettings
 import gg.aquatic.crates.data.menu.MenuInventoryData
 import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
+import gg.aquatic.waves.serialization.editor.meta.EditableModel
 import gg.aquatic.waves.serialization.editor.meta.EditorEntryFactories
+import gg.aquatic.waves.serialization.editor.meta.EditorFieldContext
 import gg.aquatic.waves.serialization.editor.meta.TextFieldAdapter
 import gg.aquatic.waves.serialization.editor.meta.TextFieldConfig
 import gg.aquatic.waves.serialization.editor.meta.TypedNestedSchemaBuilder
+import gg.aquatic.waves.serialization.editor.meta.TypedEditorSchemaBuilder
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.bukkit.Material
@@ -56,12 +60,14 @@ data class RewardDisplayMenuData(
                 TextFieldAdapter,
                 TextFieldConfig(prompt = "Enter menu title:", showFormattedPreview = true),
                 displayName = "Title",
+                searchTags = listOf("title", "menu title", "result title", "reward menu title", "inventory title"),
                 iconMaterial = Material.NAME_TAG,
                 description = listOf("Menu title shown at the top of this reward menu.")
             )
             list(
                 RewardDisplayMenuData::rewardSlots,
                 displayName = "Reward Slots",
+                searchTags = listOf("reward slots", "slots", "won rewards", "result slots", "menu slots"),
                 iconMaterial = Material.HOPPER,
                 description = listOf(
                     "Slots where rolled reward items should appear.",
@@ -72,6 +78,7 @@ data class RewardDisplayMenuData(
             map(
                 RewardDisplayMenuData::customButtons,
                 displayName = "Custom Buttons",
+                searchTags = listOf("buttons", "custom buttons", "result buttons", "pagination", "next page", "prev page"),
                 iconMaterial = Material.STONE_BUTTON,
                 description = listOf(
                     "Additional buttons shown in this reward menu.",
@@ -98,6 +105,16 @@ data class RewardDisplayMenuData(
                     defineEditor()
                 }
             }
+        }
+    }
+}
+
+object RewardDisplayMenuEditorSchema : EditableModel<RewardDisplayMenuData>(RewardDisplayMenuData.serializer()) {
+    override fun resolveDescriptor(context: EditorFieldContext) = resolveCrateDataDescriptor(context)
+
+    override fun TypedEditorSchemaBuilder<RewardDisplayMenuData>.define() {
+        include<RewardDisplayMenuData> {
+            with(RewardDisplayMenuData) { defineEditor() }
         }
     }
 }

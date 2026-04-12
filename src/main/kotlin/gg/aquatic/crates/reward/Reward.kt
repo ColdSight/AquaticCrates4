@@ -1,6 +1,7 @@
 package gg.aquatic.crates.reward
 import gg.aquatic.crates.limit.LimitHandle
 import gg.aquatic.crates.limit.LimitService
+import gg.aquatic.crates.util.replacePlayerPlaceholder
 import gg.aquatic.crates.util.Weightable
 import gg.aquatic.crates.util.randomItem
 import gg.aquatic.execute.ActionHandle
@@ -12,6 +13,8 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class Reward(
     val id: String,
@@ -20,6 +23,7 @@ class Reward(
     val previewItem: () -> ItemStack,
     val fallbackItem: (() -> ItemStack)?,
     val winActions: Collection<ActionHandle<Player>>,
+    val massWinActions: Collection<ActionHandle<Player>>,
     val conditions: Collection<ConditionHandle<Player>>,
     val purchaseManager: RewardPurchaseHandler?,
     val amountRanges: Collection<RewardAmountRange>,
@@ -31,8 +35,12 @@ class Reward(
 
     val isPurchasable: Boolean = purchaseManager != null
 
+    suspend fun canWinIgnoringLimits(player: Player): Boolean {
+        return conditions.checkConditions(player)
+    }
+
     suspend fun canWin(player: Player): Boolean {
-        return conditions.checkConditions(player) && LimitService.canWinReward(player, crateId, id, limits)
+        return canWinIgnoringLimits(player) && LimitService.canWinReward(player, crateId, id, limits)
     }
 
     fun rollAmount(): Int {
@@ -41,12 +49,12 @@ class Reward(
 
     suspend fun win(player: Player, randomAmount: Int = rollAmount()) {
         if (winActions.isEmpty()) {
-            giveDefaultItem(player, randomAmount)
+            giveDefaultItem(player, randomAmount.toLong())
             return
         }
 
         winActions.executeActions(player) { _, str ->
-            updatePlaceholders(str, randomAmount)
+            updatePlaceholders(str, player, randomAmount)
         }
     }
 
@@ -67,31 +75,76 @@ class Reward(
         return success
     }
 
+    suspend fun massWin(player: Player, winCount: Long, totalAmount: Long) {
+        if (winCount <= 0L || totalAmount <= 0L) {
+            return
+        }
+
+        if (massWinActions.isNotEmpty()) {
+            massWinActions.executeActions(player) { _, str ->
+                updateMassPlaceholders(str, player, winCount, totalAmount)
+            }
+            return
+        }
+
+        if (winActions.isEmpty()) {
+            giveDefaultItem(player, totalAmount)
+            return
+        }
+
+        winActions.executeActions(player) { _, str ->
+            updateMassPlaceholders(str, player, winCount, totalAmount)
+        }
+    }
+
     val displayName by lazy {
         displayName ?: previewItem().itemMeta.displayName() ?: Component.text(id)
     }
 
-    fun updatePlaceholders(str: String, randomAmount: Int): String {
-        return str
+    fun updatePlaceholders(str: String, player: Player, randomAmount: Int): String {
+        return updateMassPlaceholders(str, player, 1L, randomAmount.toLong())
             .replace("%random-amount%", randomAmount.toString())
+    }
+
+    fun updateMassPlaceholders(str: String, player: Player, winCount: Long, totalAmount: Long): String {
+        val chanceRaw = formatChanceValue(chance)
+        val chanceFormatted = formatChanceValue(chance * 100.0)
+
+        return str
+            .replacePlayerPlaceholder(player)
             .replace("%reward-id%", id)
             .replace("%reward-name%", PlainTextComponentSerializer.plainText().serialize(displayName))
             .replace("%reward-rarity-id%", rarity.id)
             .replace("%reward-rarity-name%", PlainTextComponentSerializer.plainText().serialize(rarity.displayName))
+            .replace("%reward-chance%", chanceRaw)
+            .replace("%reward-chance-formatted%", chanceFormatted)
+            .replace("%reward-real-chance%", chanceFormatted)
+            .replace("%reward-real-chance-formatted%", chanceFormatted)
+            .replace("%reward-win-count%", winCount.toString())
+            .replace("%reward-drawn-count%", winCount.toString())
+            .replace("%reward-total-amount%", totalAmount.toString())
+            .replace("%reward-total-random-amount%", totalAmount.toString())
     }
 
-    private fun giveDefaultItem(player: Player, randomAmount: Int) {
+    private fun formatChanceValue(value: Double): String {
+        return BigDecimal.valueOf(value)
+            .setScale(2, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString()
+    }
+
+    private fun giveDefaultItem(player: Player, totalAmount: Long) {
         val item = previewItem()
-        val originalAmount = item.amount.coerceAtLeast(1)
-        var remaining = (originalAmount * randomAmount).coerceAtLeast(1)
+        val originalAmount = item.amount.coerceAtLeast(1).toLong()
+        var remaining = (originalAmount * totalAmount).coerceAtLeast(1L)
         val maxStackSize = item.maxStackSize.coerceAtLeast(1)
 
-        while (remaining > 0) {
-            val stackAmount = minOf(remaining, maxStackSize)
+        while (remaining > 0L) {
+            val stackAmount = minOf(remaining, maxStackSize.toLong())
             remaining -= stackAmount
 
             val stack = item.clone()
-            stack.amount = stackAmount
+            stack.amount = stackAmount.toInt()
 
             val leftovers = player.inventory.addItem(stack)
             leftovers.values.forEach { player.world.dropItemNaturally(player.location, it) }

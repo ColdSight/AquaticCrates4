@@ -14,6 +14,7 @@ object MilestoneSettingsEditorSchema : EditableModel<MilestoneSettingsData>(Mile
         list(
             MilestoneSettingsData::milestones,
             displayName = "Milestones",
+            searchTags = listOf("milestones", "one time milestones", "alltime opens", "progress rewards"),
             iconMaterial = Material.DIAMOND,
             description = listOf("Rewards granted once when the player's alltime opens reach the exact target.")
         ) {
@@ -22,6 +23,7 @@ object MilestoneSettingsEditorSchema : EditableModel<MilestoneSettingsData>(Mile
         list(
             MilestoneSettingsData::repeatableMilestones,
             displayName = "Repeatable Milestones",
+            searchTags = listOf("repeatable milestones", "repeatable", "every x opens", "progress rewards"),
             iconMaterial = Material.CLOCK,
             description = listOf("Rewards granted every time the player's alltime opens are divisible by the target.")
         ) {

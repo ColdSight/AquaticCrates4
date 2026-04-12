@@ -123,7 +123,7 @@ internal fun JdbcTransaction.queryRewardStats(crateId: String, rewardId: String,
 }
 
 internal fun JdbcTransaction.queryPlayerCrateOpens(playerUuid: UUID, crateId: String, timeframe: CrateStatsTimeframe): Long {
-    val countExpr = CrateOpeningsTable.id.count()
+    val countExpr = CrateOpeningsTable.openCount.sum()
     return CrateOpeningsTable
         .select(countExpr)
         .where {
@@ -137,7 +137,7 @@ internal fun JdbcTransaction.queryPlayerCrateOpens(playerUuid: UUID, crateId: St
 }
 
 internal fun JdbcTransaction.queryPlayerRewardWins(playerUuid: UUID, crateId: String, rewardId: String, timeframe: CrateStatsTimeframe): Long {
-    val countExpr = CrateOpeningRewardsTable.id.count()
+    val countExpr = CrateOpeningRewardsTable.winCount.sum()
     return CrateOpeningRewardsTable
         .select(countExpr)
         .where {
@@ -154,7 +154,7 @@ internal fun JdbcTransaction.queryPlayerRewardWins(playerUuid: UUID, crateId: St
 internal fun JdbcTransaction.exactRollingOpenCount(crateId: String, startMillis: Long): Long {
     val currentHour = CrateStats.truncateHour(System.currentTimeMillis())
     val firstFullHour = CrateStats.truncateHour(startMillis) + CrateStats.HOUR_MILLIS
-    val rawCountExpr = CrateOpeningsTable.id.count()
+    val rawCountExpr = CrateOpeningsTable.openCount.sum()
 
     val rawCount = CrateOpeningsTable
         .select(rawCountExpr)
@@ -190,7 +190,7 @@ internal fun JdbcTransaction.exactRollingRewardStats(crateId: String, rewardId: 
     val currentHour = CrateStats.truncateHour(System.currentTimeMillis())
     val firstFullHour = CrateStats.truncateHour(startMillis) + CrateStats.HOUR_MILLIS
 
-    val rawWinsExpr = CrateOpeningRewardsTable.id.count()
+    val rawWinsExpr = CrateOpeningRewardsTable.winCount.sum()
     val rawAmountExpr = CrateOpeningRewardsTable.amount.sum()
     val rawRow = CrateOpeningRewardsTable
         .select(rawWinsExpr, rawAmountExpr)

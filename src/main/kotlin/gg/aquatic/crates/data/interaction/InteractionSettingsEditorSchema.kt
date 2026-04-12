@@ -24,6 +24,7 @@ object InteractionSettingsEditorSchema : EditableModel<InteractionSettingsData>(
         list(
             InteractionSettingsData::interactables,
             displayName = "Interactables",
+            searchTags = listOf("interactables", "click objects", "clientside", "entity", "block", "hologram click"),
             iconMaterial = Material.ARMOR_STAND,
             description = listOf("Clientside objects players can click to open this crate."),
             newValueFactory = CrateInteractableSelectionMenu.entryFactory
@@ -44,6 +45,7 @@ object InteractionSettingsEditorSchema : EditableModel<InteractionSettingsData>(
         list(
             InteractionSettingsData::openConditions,
             displayName = "Open Conditions",
+            searchTags = listOf("open conditions", "conditions", "requirements", "must pass", "open requirements"),
             iconMaterial = Material.TRIPWIRE_HOOK,
             description = listOf("Conditions that must pass before the crate can be opened."),
             newValueFactory = OpenPlayerConditionSelectionMenu.entryFactory
@@ -56,6 +58,7 @@ object InteractionSettingsEditorSchema : EditableModel<InteractionSettingsData>(
         field(
             InteractionSettingsData::disableOpenStats,
             displayName = "Disable Open Stats",
+            searchTags = listOf("stats", "disable stats", "no stats", "tracking", "database"),
             prompt = "Enter true or false:",
             iconMaterial = Material.LECTERN,
             description = listOf("If enabled, openings and won rewards from this crate will not be written into the stats database.")
@@ -63,6 +66,7 @@ object InteractionSettingsEditorSchema : EditableModel<InteractionSettingsData>(
         list(
             InteractionSettingsData::limits,
             displayName = "Limits",
+            searchTags = listOf("limits", "open limits", "crate limits", "cooldown", "max opens"),
             iconMaterial = Material.CLOCK,
             description = listOf("Per-player rolling limits for how often this crate can be opened.")
         ) {
@@ -71,6 +75,7 @@ object InteractionSettingsEditorSchema : EditableModel<InteractionSettingsData>(
         list(
             InteractionSettingsData::priceGroups,
             displayName = "Price Groups",
+            searchTags = listOf("price", "prices", "price groups", "open cost", "cost", "keys", "currency"),
             iconMaterial = Material.GOLD_INGOT,
             description = listOf(
                 "Alternative price groups used to open this crate.",

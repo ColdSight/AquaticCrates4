@@ -7,4 +7,5 @@ data class LoggedOpening(
     val crateId: String,
     val openedAtMillis: Long,
     val rewards: List<LoggedRewardWin>,
+    val openCount: Long = 1L,
 )

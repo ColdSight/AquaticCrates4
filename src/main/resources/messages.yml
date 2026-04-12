@@ -103,6 +103,24 @@ help:
             value: "/aqcrates crate give "
     - components:
         - text: "<#18788C><bold>|</bold> "
+        - text: "<#3EC4DE>/aqcrates crate open <gray><crate-id> [player] [amount] [-nokey]"
+          hover:
+            - "<white>Open a crate for a player."
+            - ""
+            - "<gray>Arguments:"
+            - "<gray><crate-id> <white>= target crate id"
+            - "<gray>[player] <white>= target player, defaults to self"
+            - "<gray>[amount] <white>= open amount, defaults to 1"
+            - ""
+            - "<gray>Flags:"
+            - "<gray>-nokey <white>= bypass held key requirement"
+            - ""
+            - "<gray>Click to suggest this command."
+          click:
+            type: SUGGEST_COMMAND
+            value: "/aqcrates crate open "
+    - components:
+        - text: "<#18788C><bold>|</bold> "
         - text: "<#3EC4DE>/aqcrates key give <gray><crate-id> [player] [amount] [-v] [-s]"
           hover:
             - "<white>Give crate keys."
@@ -173,6 +191,42 @@ crate-given:
   lines:
     - components:
         - text: "<green>You have been given the crate!"
+  actions: []
+
+crate-open-self-requires-player:
+  lines:
+    - components:
+        - text: "<red>You must specify a player when running this command from console!"
+  actions: []
+
+crate-opened-self:
+  lines:
+    - components:
+        - text: "<green>Opened <yellow>%amount%x</yellow> <gold>%crate_id%</gold> for yourself."
+  actions: []
+
+crate-opened-target:
+  lines:
+    - components:
+        - text: "<green><yellow>%amount%x</yellow> <gold>%crate_id%</gold> has been opened for you."
+  actions: []
+
+crate-opened-sender:
+  lines:
+    - components:
+        - text: "<green>Opened <yellow>%amount%x</yellow> <gold>%crate_id%</gold> for <yellow>%player%</yellow>."
+  actions: []
+
+crate-open-key-required:
+  lines:
+    - components:
+        - text: "<red><gold>%crate_id%</gold> requires the target player to hold its key. Use <yellow>-nokey</yellow> to bypass."
+  actions: []
+
+crate-open-failed:
+  lines:
+    - components:
+        - text: "<red>Failed to open <gold>%crate_id%</gold> <yellow>%amount%x</yellow>."
   actions: []
 
 keys-self-requires-player:

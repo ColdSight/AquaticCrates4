@@ -3,6 +3,10 @@ package gg.aquatic.crates.command.impl
 import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.Messages
+import gg.aquatic.crates.command.crateArgument
+import gg.aquatic.crates.command.onlinePlayerArgument
+import gg.aquatic.crates.command.onlinePlayerArgumentIncludingSelf
+import gg.aquatic.crates.command.onlinePlayerArgumentResult
 import gg.aquatic.crates.crate.Crate
 import gg.aquatic.crates.crate.CrateHandler
 import gg.aquatic.crates.message.storage.MessageStorage
@@ -10,7 +14,6 @@ import gg.aquatic.crates.message.replacePlaceholder
 import gg.aquatic.kommand.CommandBuilder
 import gg.aquatic.kommand.hasPermission
 import gg.aquatic.klocale.impl.paper.replacePlaceholders
-import gg.aquatic.kommand.playerArgument
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
@@ -28,15 +31,23 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
         hasPermission("aqcrates.admin")
 
         "give" {
-            listArgument("crate", { CrateHandler.crates.values }, { it.id }) {
-                playerArgument("player", true) {
-                    bigIntegerArgument("amount") {
+            crateArgument("crate") {
+                onlinePlayerArgumentIncludingSelf("player") {
+                    bigIntegerArgument("amount", min = BigInteger.ONE) {
                         flagsArgument("options", listOf("-s", "-v"))
                     }
                 }
                 suspendExecute<CommandSender> {
                     val crate = get<Crate>("crate")
-                    val player = getOrNull<Player>("player")
+                    val playerArgument = onlinePlayerArgumentResult("player")
+                    if (playerArgument.isInvalid) {
+                        Messages.PLAYER_NOT_FOUND.message()
+                            .replacePlaceholder("%player%", playerArgument.rawName ?: "unknown")
+                            .send(sender)
+                        return@suspendExecute
+                    }
+
+                    val player = playerArgument.player
                     val amount = getOrNull<BigInteger>("amount") ?: BigInteger.ONE
                     val silent = hasFlag("options", "-s")
                     val virtual = hasFlag("options", "-v")
@@ -82,11 +93,18 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.keyCommand() =
         }
 
         "bank" {
-            playerArgument("player") {
-            }
+            onlinePlayerArgument("player") {}
 
             suspendExecute<CommandSender> {
-                val target = getOrNull<Player>("player") ?: run {
+                val playerArgument = onlinePlayerArgumentResult("player")
+                if (playerArgument.isInvalid) {
+                    Messages.PLAYER_NOT_FOUND.message()
+                        .replacePlaceholder("%player%", playerArgument.rawName ?: "unknown")
+                        .send(sender)
+                    return@suspendExecute
+                }
+
+                val target = playerArgument.player ?: run {
                     if (sender !is Player) {
                         Messages.KEYS_SELF_REQUIRES_PLAYER.message().send(sender)
                         return@suspendExecute

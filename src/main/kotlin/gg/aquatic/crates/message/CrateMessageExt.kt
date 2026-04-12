@@ -7,14 +7,23 @@ fun PaperMessage.replacePlaceholder(
     placeholder: String,
     replacement: String
 ): PaperMessage {
-    return replace(normalizePlaceholderKey(placeholder), replacement)
+    val normalized = normalizePlaceholderKey(placeholder)
+    val replacements = lines
+        .flatMap { it.placeholders }
+        .toSet()
+        .associateWith { key ->
+            if (key == normalized) replacement else "%$key%"
+        }
+
+    return replace(replacements)
 }
 
 fun PaperMessage.replacePlaceholder(
     placeholder: String,
     component: Component
 ): PaperMessage {
-    return replace(normalizePlaceholderKey(placeholder), component)
+    val normalized = normalizePlaceholderKey(placeholder)
+    return replace(normalized, component)
 }
 
 private fun normalizePlaceholderKey(placeholder: String): String {

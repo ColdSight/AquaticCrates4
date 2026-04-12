@@ -66,6 +66,24 @@ class CrateMilestoneManagerTest {
         assertTrue(manager.milestonesReached(-5).isEmpty())
     }
 
+    @Test
+    fun `milestoneHitsInRange preserves repeatable hits across chunk boundaries`() {
+        val repeatable = milestone(5)
+        val manager = CrateMilestoneManager(
+            milestones = emptyList(),
+            repeatableMilestones = listOf(repeatable)
+        )
+
+        val hits = manager.milestoneHitsInRange(
+            previousOpened = 0L,
+            currentOpened = 5_000_000_000L
+        )
+
+        assertEquals(1, hits.size)
+        assertEquals(repeatable, hits.single().milestone)
+        assertEquals(1_000_000_000L, hits.single().hitCount)
+    }
+
     private fun milestone(at: Int): CrateMilestone {
         return CrateMilestone(
             milestone = at,

@@ -1,5 +1,6 @@
 package gg.aquatic.crates.command.impl
 
+import gg.aquatic.crates.command.requirePlayerSender
 import gg.aquatic.crates.message.editor.MessagesEditor
 import gg.aquatic.kommand.CommandBuilder
 import gg.aquatic.kommand.hasPermission
@@ -12,7 +13,7 @@ internal fun CommandBuilder<CommandSourceStack, CommandSender>.messagesCommand()
         hasPermission("aqcrates.admin")
 
         suspendExecute<CommandSender> {
-            val player = sender as? Player ?: return@suspendExecute
+            val player = sender.requirePlayerSender() ?: return@suspendExecute
             MessagesEditor.open(player)
         }
     }

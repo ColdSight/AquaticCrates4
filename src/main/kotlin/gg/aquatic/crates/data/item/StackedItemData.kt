@@ -10,6 +10,7 @@ import gg.aquatic.stacked.option.*
 import gg.aquatic.waves.serialization.editor.meta.*
 import kotlinx.serialization.Serializable
 import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
@@ -50,11 +51,11 @@ data class StackedItemData(
         options += AmountOptionHandle(amount.coerceIn(1, 64))
 
         displayName?.let {
-            options += DisplayNameOptionHandle(it.toMMComponent())
+            options += DisplayNameOptionHandle(it.toMMComponent().decoration(TextDecoration.ITALIC, false))
         }
 
         if (lore.isNotEmpty()) {
-            options += LoreOptionHandle(lore.map { it.toMMComponent() })
+            options += LoreOptionHandle(lore.map { it.toMMComponent().decoration(TextDecoration.ITALIC, false) })
         }
 
         customModelDataLegacy?.let {

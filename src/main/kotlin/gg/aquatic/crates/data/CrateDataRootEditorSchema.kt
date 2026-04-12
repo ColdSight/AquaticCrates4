@@ -30,6 +30,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         TextFieldAdapter,
         TextFieldConfig(prompt = "Enter crate display name:", showFormattedPreview = true),
         displayName = "Display Name",
+        searchTags = listOf("name", "title", "crate name", "display"),
         iconMaterial = Material.NAME_TAG,
         description = listOf("Main crate name shown in menus and other UI.")
     )
@@ -37,6 +38,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::interactables,
         adapter = InteractionSettingsSectionFieldAdapter,
         displayName = "Interaction Settings",
+        searchTags = listOf("interaction", "open", "click", "price", "conditions", "limits", "stats", "crate click", "open settings"),
         iconMaterial = Material.ARMOR_STAND,
         description = listOf(
             "Open behaviour, interactables, price groups and crate click mapping.",
@@ -51,6 +53,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
     map(
         CrateData::rarities,
         displayName = "Rarities",
+        searchTags = listOf("rarity", "rarities", "groups", "chance groups", "tiers"),
         iconMaterial = Material.NETHER_STAR,
         description = listOf(
             "All rarity groups available in this crate.",
@@ -74,6 +77,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::simpleProvider,
         adapter = RewardProviderSectionFieldAdapter,
         displayName = "Rewards",
+        searchTags = listOf("rewards", "provider", "reward provider", "simple provider", "reward pool"),
         iconMaterial = Material.CHEST_MINECART,
         description = listOf(
             "Active reward provider for this crate.",
@@ -88,6 +92,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::conditionalPoolsProvider,
         adapter = RewardProviderSectionFieldAdapter,
         displayName = "Rewards",
+        searchTags = listOf("rewards", "provider", "reward provider", "conditional pools", "pools", "reward pool"),
         iconMaterial = Material.CHEST_MINECART,
         description = listOf(
             "Active reward provider for this crate.",
@@ -102,6 +107,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::basicProcessor,
         adapter = RewardProcessorSectionFieldAdapter,
         displayName = "Reward Processor",
+        searchTags = listOf("processor", "reward processor", "basic processor", "result menu", "reward display"),
         iconMaterial = Material.HOPPER_MINECART,
         description = listOf(
             "Controls what happens after rewards are rolled.",
@@ -116,6 +122,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::chooseProcessor,
         adapter = RewardProcessorSectionFieldAdapter,
         displayName = "Reward Processor",
+        searchTags = listOf("processor", "reward processor", "choose", "choice", "choose menu", "selection menu"),
         iconMaterial = Material.HOPPER_MINECART,
         description = listOf(
             "Controls what happens after rewards are rolled.",
@@ -130,6 +137,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::milestones,
         adapter = MilestoneSettingsSectionFieldAdapter,
         displayName = "Milestones",
+        searchTags = listOf("milestone", "milestones", "repeatable", "opens", "alltime opens", "progress rewards"),
         iconMaterial = Material.DIAMOND,
         description = listOf(
             "Milestone rewards granted based on alltime player opens.",
@@ -140,6 +148,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::keyItem,
         adapter = KeySettingsSectionFieldAdapter,
         displayName = "Key Settings",
+        searchTags = listOf("key", "keys", "crate key", "key item", "key click", "must be held"),
         iconMaterial = Material.TRIPWIRE_HOOK,
         description = listOf(
             "All key-related settings for this crate.",
@@ -153,6 +162,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::hologram,
         adapter = HologramSettingsSectionFieldAdapter,
         displayName = "Hologram Settings",
+        searchTags = listOf("hologram", "holo", "lines", "view distance", "offset", "floating text"),
         iconMaterial = Material.END_CRYSTAL,
         description = listOf(
             "All hologram settings for this crate.",
@@ -163,6 +173,7 @@ internal fun TypedEditorSchemaBuilder<CrateData>.defineCrateDataRootSchema() {
         CrateData::preview,
         adapter = PreviewSectionFieldAdapter,
         displayName = "Preview",
+        searchTags = listOf("preview", "menu", "preview menu", "reward slots", "buttons", "pages"),
         iconMaterial = Material.ENDER_EYE,
         description = listOf(
             "Preview menu configuration for this crate.",

@@ -4,6 +4,7 @@ import gg.aquatic.common.argument.ObjectArguments
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.common.toMMComponent
 import gg.aquatic.crates.message.EditableMessageData
+import gg.aquatic.crates.util.withPlayerPlaceholder
 import gg.aquatic.execute.Condition
 import gg.aquatic.execute.condition.ConditionHandle
 import gg.aquatic.execute.condition.type.MessageConditionBinder
@@ -61,7 +62,7 @@ object EditableMessageRuntimeFactory {
             callbacks = listOf<(CommandSender, PaperMessage) -> Unit>({ sender, _ ->
                 if (sender is Player && actionHandles.isNotEmpty()) {
                     VirtualsCtx {
-                        actionHandles.executeActions(sender)
+                        actionHandles.executeActions(sender, withPlayerPlaceholder(sender))
                     }
                 }
             })

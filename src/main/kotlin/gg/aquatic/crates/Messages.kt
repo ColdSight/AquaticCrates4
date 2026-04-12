@@ -26,6 +26,60 @@ enum class Messages(
         description = listOf("Sent after giving a crate item to a player."),
         icon = Material.CHEST_MINECART
     ),
+    CRATE_OPEN_SELF_REQUIRES_PLAYER(
+        path = "crate-open-self-requires-player",
+        displayName = "Crate Open Self Requires Player",
+        description = listOf("Shown when console tries to open a crate for itself."),
+        icon = Material.BARRIER
+    ),
+    CRATE_OPENED_SELF(
+        path = "crate-opened-self",
+        displayName = "Crate Opened Self",
+        description = listOf("Shown to the executor when they open a crate for themselves."),
+        placeholders = listOf("%crate_id%", "%amount%"),
+        icon = Material.CHEST
+    ),
+    CRATE_OPENED_TARGET(
+        path = "crate-opened-target",
+        displayName = "Crate Opened Target",
+        description = listOf("Shown to the target player after a crate is opened for them."),
+        placeholders = listOf("%crate_id%", "%amount%"),
+        icon = Material.CHEST
+    ),
+    CRATE_OPENED_SENDER(
+        path = "crate-opened-sender",
+        displayName = "Crate Opened Sender",
+        description = listOf("Shown to the sender after opening a crate for another player."),
+        placeholders = listOf("%player%", "%crate_id%", "%amount%"),
+        icon = Material.CHEST
+    ),
+    CRATE_OPEN_KEY_REQUIRED(
+        path = "crate-open-key-required",
+        displayName = "Crate Open Key Required",
+        description = listOf("Shown when a crate requires the target player to hold a key unless -nokey is used."),
+        placeholders = listOf("%crate_id%"),
+        icon = Material.TRIPWIRE_HOOK
+    ),
+    CRATE_OPEN_FAILED(
+        path = "crate-open-failed",
+        displayName = "Crate Open Failed",
+        description = listOf("Shown when a crate open command could not complete."),
+        placeholders = listOf("%crate_id%", "%amount%"),
+        icon = Material.BARRIER
+    ),
+    PLAYER_ONLY_COMMAND(
+        path = "player-only-command",
+        displayName = "Player Only Command",
+        description = listOf("Shown when a command can only be used by a player."),
+        icon = Material.BARRIER
+    ),
+    PLAYER_NOT_FOUND(
+        path = "player-not-found",
+        displayName = "Player Not Found",
+        description = listOf("Shown when a command references a player name that is not online or not valid for the argument."),
+        placeholders = listOf("%player%"),
+        icon = Material.BARRIER
+    ),
     KEYS_SELF_REQUIRES_PLAYER(
         path = "keys-self-requires-player",
         displayName = "Keys Self Requires Player",
@@ -132,6 +186,13 @@ enum class Messages(
         path = "crate-invalid-id",
         displayName = "Crate Invalid ID",
         description = listOf("Shown when the entered crate ID format is invalid."),
+        icon = Material.BARRIER
+    ),
+    CRATE_NOT_FOUND(
+        path = "crate-not-found",
+        displayName = "Crate Not Found",
+        description = listOf("Shown when a command references a crate ID that does not exist."),
+        placeholders = listOf("%crate_id%"),
         icon = Material.BARRIER
     ),
     CRATE_ALREADY_EXISTS(

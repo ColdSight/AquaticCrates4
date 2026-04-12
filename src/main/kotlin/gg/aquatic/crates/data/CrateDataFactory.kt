@@ -116,20 +116,31 @@ private fun buildRewards(
 }
 
 private fun CrateData.rewardHologramEntries(): List<RewardHologramEntry> {
-    val rewards = when (RewardProviderType.of(rewardProviderType)) {
-        RewardProviderType.CONDITIONAL_POOLS -> conditionalPoolsProvider.rewardEntries()
-        RewardProviderType.SIMPLE -> simpleProvider.rewardEntries()
+    val crateKeyItem = keyItem.asStacked().getItem()
+    val runtimeRewards = when (RewardProviderType.of(rewardProviderType)) {
+        RewardProviderType.CONDITIONAL_POOLS -> {
+            conditionalPoolsProvider.pools.flatMap { (poolId, poolData) ->
+                poolData.toRewardPool(
+                    poolId = poolId,
+                    crateId = "hologram-preview",
+                    crateKeyItem = crateKeyItem,
+                    rarities = rarities
+                ).rewards
+            }
+        }
+
+        RewardProviderType.SIMPLE -> buildRewards(
+            rarities = rarities,
+            rewards = simpleProvider.rewards,
+            crateId = "hologram-preview",
+            crateKeyItem = crateKeyItem
+        )
     }
 
-    return rewards.map { (rewardId, rewardData) ->
-        val item = rewardData.previewItem.asStacked().getItem()
-        val displayName = rewardData.displayName?.toMMComponent()
-            ?: item.itemMeta.displayName()
-            ?: net.kyori.adventure.text.Component.text(rewardId)
-
+    return runtimeRewards.map { reward ->
         RewardHologramEntry(
-            item = item,
-            displayName = displayName
+            item = reward.previewItem(),
+            displayName = reward.displayName
         )
     }
 }

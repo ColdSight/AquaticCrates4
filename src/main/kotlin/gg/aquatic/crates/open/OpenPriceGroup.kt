@@ -36,4 +36,27 @@ class OpenPriceGroup(
 
         return true
     }
+
+    suspend fun maxAffordable(player: Player): Long {
+        if (prices.isEmpty()) {
+            return Long.MAX_VALUE
+        }
+
+        var maxAffordable = Long.MAX_VALUE
+        for (price in prices) {
+            maxAffordable = minOf(maxAffordable, price.maxAffordable(player))
+        }
+
+        return maxAffordable
+    }
+
+    suspend fun refund(player: Player, amount: Int) {
+        if (amount <= 0) {
+            return
+        }
+
+        for (price in prices) {
+            price.give(player, amount)
+        }
+    }
 }

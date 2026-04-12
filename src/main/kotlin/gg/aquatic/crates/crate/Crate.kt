@@ -3,6 +3,7 @@ package gg.aquatic.crates.crate
 import gg.aquatic.crates.Messages
 import gg.aquatic.crates.crate.preview.PreviewMenuSettings
 import gg.aquatic.crates.crate.opening.CrateOpeningService
+import gg.aquatic.crates.crate.opening.OpeningExecutionResult
 import gg.aquatic.crates.interact.CrateClickType
 import gg.aquatic.crates.interact.CrateInteractionService
 import gg.aquatic.crates.data.interactable.CrateInteractableData
@@ -24,6 +25,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
+import java.math.BigInteger
 
 /**
  * Rewards Table
@@ -126,11 +128,15 @@ class Crate(
         return player.inventory.itemInMainHand.isSimilar(keyItem) || player.inventory.itemInOffHand.isSimilar(keyItem)
     }
 
-    suspend fun tryOpen(player: Player, crateHandle: CrateHandle? = null): Boolean {
-        return CrateOpeningService.tryOpen(player, this, crateHandle)
+    suspend fun tryOpen(player: Player, crateHandle: CrateHandle? = null, ignoreKeyRequirement: Boolean = false): Boolean {
+        return CrateOpeningService.tryOpen(player, this, crateHandle, ignoreKeyRequirement = ignoreKeyRequirement)
     }
 
-    suspend fun open(player: Player, amount: Int = 1) {
-        CrateOpeningService.tryOpen(player, this, null, amount)
+    suspend fun openResult(player: Player, amount: BigInteger = BigInteger.ONE, ignoreKeyRequirement: Boolean = false): OpeningExecutionResult {
+        return CrateOpeningService.tryOpenResult(player, this, null, amount, ignoreKeyRequirement)
+    }
+
+    suspend fun open(player: Player, amount: BigInteger = BigInteger.ONE, ignoreKeyRequirement: Boolean = false): Boolean {
+        return CrateOpeningService.tryOpen(player, this, null, amount, ignoreKeyRequirement)
     }
 }

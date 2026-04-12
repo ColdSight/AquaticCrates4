@@ -114,6 +114,7 @@ internal fun JdbcTransaction.flushOpeningBatch(openings: List<LoggedOpening>) {
         this[CrateOpeningsTable.playerUuid] = opening.playerUuid.toString()
         this[CrateOpeningsTable.crateId] = opening.crateId
         this[CrateOpeningsTable.openedAtMillis] = opening.openedAtMillis
+        this[CrateOpeningsTable.openCount] = opening.openCount
     }
 
     if (insertedOpenings.size != openings.size) {
@@ -137,6 +138,7 @@ internal fun JdbcTransaction.flushOpeningBatch(openings: List<LoggedOpening>) {
             this[CrateOpeningRewardsTable.rewardId] = row.reward.rewardId
             this[CrateOpeningRewardsTable.rarityId] = row.reward.rarityId
             this[CrateOpeningRewardsTable.amount] = row.reward.amount
+            this[CrateOpeningRewardsTable.winCount] = row.reward.winCount
             this[CrateOpeningRewardsTable.wonAtMillis] = row.opening.openedAtMillis
         }
     }
@@ -169,9 +171,13 @@ internal fun JdbcTransaction.flushOpeningBatch(openings: List<LoggedOpening>) {
 }
 
 internal fun CrateStats.updateHotCaches(opening: LoggedOpening) {
-    playerAllTimeOpenCache.merge(playerCrateKey(opening.playerUuid, opening.crateId), 1L, Long::plus)
+    playerAllTimeOpenCache.merge(playerCrateKey(opening.playerUuid, opening.crateId), opening.openCount, Long::plus)
     opening.rewards.forEach { reward ->
-        playerAllTimeRewardWinCache.merge(playerRewardKey(opening.playerUuid, opening.crateId, reward.rewardId), 1L, Long::plus)
+        playerAllTimeRewardWinCache.merge(
+            playerRewardKey(opening.playerUuid, opening.crateId, reward.rewardId),
+            reward.winCount,
+            Long::plus
+        )
     }
 }
 

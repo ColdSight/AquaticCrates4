@@ -21,19 +21,19 @@ internal object CrateStatsBatchAggregator {
 
         openings.forEach { opening ->
             val bucketHour = CrateStats.truncateHour(opening.openedAtMillis)
-            hourlyCrateOpens.merge(bucketHour to opening.crateId, 1L, Long::plus)
-            allTimeCrateOpens.merge(opening.crateId, 1L, Long::plus)
+            hourlyCrateOpens.merge(bucketHour to opening.crateId, opening.openCount, Long::plus)
+            allTimeCrateOpens.merge(opening.crateId, opening.openCount, Long::plus)
 
             opening.rewards.forEach { reward ->
                 hourlyRewardStats.compute(Triple(bucketHour, opening.crateId, reward.rewardId)) { _, current ->
                     val aggregate = current ?: MutableRewardTotals()
-                    aggregate.wins += 1L
+                    aggregate.wins += reward.winCount
                     aggregate.amountSum += reward.amount.toLong()
                     aggregate
                 }
                 allTimeRewardStats.compute(opening.crateId to reward.rewardId) { _, current ->
                     val aggregate = current ?: MutableRewardTotals()
-                    aggregate.wins += 1L
+                    aggregate.wins += reward.winCount
                     aggregate.amountSum += reward.amount.toLong()
                     aggregate
                 }

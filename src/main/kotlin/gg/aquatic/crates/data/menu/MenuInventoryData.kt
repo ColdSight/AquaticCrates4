@@ -47,12 +47,14 @@ data class MenuInventoryData(
                 MenuInventoryData::type,
                 adapter = InventoryTypeFieldAdapter,
                 displayName = typeLabel,
+                searchTags = listOf("inventory type", "menu type", "layout", "size", "rows"),
                 iconMaterial = Material.CHEST,
                 description = listOf("Menu layout used for this UI.")
             )
             field(
                 MenuInventoryData::anvil,
                 displayName = anvilLabel,
+                searchTags = listOf("anvil", "anvil settings", "confirm", "rename", "anvil input"),
                 iconMaterial = Material.ANVIL,
                 description = listOf(
                     "Optional ANVIL-specific settings.",
@@ -93,6 +95,7 @@ data class AnvilMenuInventoryData(
             field(
                 AnvilMenuInventoryData::closeAfterConfirm,
                 displayName = "Close After Confirm",
+                searchTags = listOf("close", "close after confirm", "auto close", "confirm behavior"),
                 prompt = "Enter true or false:",
                 iconMaterial = Material.BARRIER,
                 description = listOf("If enabled, the anvil menu closes after the confirm button is clicked.")
@@ -111,6 +114,7 @@ data class AnvilMenuInventoryData(
             list(
                 AnvilMenuInventoryData::confirmActions,
                 displayName = "Confirm Actions",
+                searchTags = listOf("confirm actions", "anvil actions", "submit actions", "on confirm"),
                 iconMaterial = Material.LIGHTNING_ROD,
                 description = listOf(
                     "Actions executed when the player confirms the anvil menu.",

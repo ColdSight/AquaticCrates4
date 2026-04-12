@@ -12,19 +12,16 @@ data class BasicRewardProcessorData(
         fun TypedNestedSchemaBuilder<BasicRewardProcessorData>.defineEditor() {
             field(
                 BasicRewardProcessorData::resultMenu,
+                adapter = RewardDisplayMenuSectionFieldAdapter,
                 displayName = "Result Menu",
+                searchTags = listOf("result menu", "reward menu", "showcase", "won rewards", "post open menu"),
                 iconMaterial = Material.CHEST,
                 description = listOf(
                     "Optional showcase menu opened after the rewards are already given.",
                     "Use it to show the player which rewards were won.",
-                    "Click to create it. Press Q to clear it back to null."
+                    "Left click to edit it. Right click to enable or disable it."
                 )
             )
-            optionalGroup(BasicRewardProcessorData::resultMenu) {
-                with(RewardDisplayMenuData) {
-                    defineEditor()
-                }
-            }
         }
     }
 }
