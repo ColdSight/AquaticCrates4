@@ -1,31 +1,4 @@
 "help":
-  "pagination":
-    "page-size": 9
-    "footer":
-      "components":
-      - "text": "<#3EC4DE>[← Previous Page]"
-        "hover":
-        - "<gray>Open the previous help page."
-        "click":
-          "type": "PAGE"
-          "value": "prev"
-        "visibility-conditions":
-        - "type": "has-previous-page"
-      - "text": " <gray>| "
-        "visibility-conditions":
-        - "type": "has-previous-page"
-        - "type": "has-next-page"
-      - "text": "<#3EC4DE>[Next Page →]"
-        "hover":
-        - "<gray>Open the next help page."
-        "click":
-          "type": "PAGE"
-          "value": "next"
-        "visibility-conditions":
-        - "type": "has-next-page"
-      "visibility-conditions":
-      - "type": "has-next-or-previous-page"
-    "header": null
   "lines":
   - "components":
     - "text": " "
@@ -105,8 +78,7 @@
         "value": "/aqcrates crate give "
   - "components":
     - "text": "<gray>➥ "
-    - "text": "<#3EC4DE>/aqcrates crate open <#E5DBD1><crate-id> [player] [amount]\
-        \ [-nokey]"
+    - "text": "<#3EC4DE>/aqcrates crate open <#E5DBD1><crate-id> [player] [amount] -nokey]"
       "hover":
       - "<#E5DBD1>Open a crate for a player."
       - ""
@@ -124,8 +96,7 @@
         "value": "/aqcrates crate open "
   - "components":
     - "text": "<gray>➥ "
-    - "text": "<#3EC4DE>/aqcrates key give <#E5DBD1><crate-id> [player] [amount] [-v]\
-        \ [-s]"
+    - "text": "<#3EC4DE>/aqcrates key give <#E5DBD1><crate-id> [player] [amount] [-v] [-s]"
       "hover":
       - "<white>Give crate keys."
       - ""
@@ -144,8 +115,7 @@
         "value": "/aqcrates key give "
   - "components":
     - "text": "<gray>➥ "
-    - "text": "<#3EC4DE>/aqcrates key giveall <#E5DBD1><crate-id> [amount] [-v]\
-        \ [-s] [-off]"
+    - "text": "<#3EC4DE>/aqcrates key giveall <#E5DBD1><crate-id> [amount] [-v] [-s] [-off]"
       "hover":
       - "<white>Give crate keys to all players."
       - ""
@@ -226,87 +196,109 @@
         "value": "/aqcrates makevisible "
   - "components":
     - "text": " "
-  "actions": []
+  "pagination":
+    "page-size": 9
+    "footer":
+      "components":
+      - "text": "<#3EC4DE>[← Previous Page]"
+        "hover":
+        - "<gray>Open the previous help page."
+        "click":
+          "type": "PAGE"
+          "value": "prev"
+        "visibility-conditions":
+        - "type": "has-previous-page"
+      - "text": " <gray>| "
+        "visibility-conditions":
+        - "type": "has-previous-page"
+        - "type": "has-next-page"
+      - "text": "<#3EC4DE>[Next Page →]"
+        "hover":
+        - "<gray>Open the next help page."
+        "click":
+          "type": "PAGE"
+          "value": "next"
+        "visibility-conditions":
+        - "type": "has-next-page"
+      "visibility-conditions":
+      - "type": "has-next-or-previous-page"
 "crate-given":
   "lines":
   - "components":
     - "text": "<#90EF87>You have been given the crate!"
-  "pagination": null
-  "actions": []
 "crate-open-self-requires-player":
   "lines":
   - "components":
     - "text": "<#EC5656>You must specify a player when running this command from console!"
-  "pagination": null
-  "actions": []
 "crate-opened-self":
   "lines":
   - "components":
-    - "text": "<#90EF87>Opened <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE>\
-        \ for yourself."
-  "pagination": null
-  "actions": []
+    - "text": "<#90EF87>Opened <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE> for yourself."
 "crate-opened-target":
   "lines":
   - "components":
-    - "text": "<#90EF87><#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE>\
-        \ has been opened for you."
-  "pagination": null
-  "actions": []
+    - "text": "<#90EF87><#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE> has been opened for you."
 "crate-opened-sender":
   "lines":
   - "components":
-    - "text": "<#90EF87>Opened <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE>\
-        \ for <#E5DBD1>%player%</#E5DBD1>."
-  "pagination": null
-  "actions": []
+    - "text": "<#90EF87>Opened <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE> for <#E5DBD1>%player%</#E5DBD1>."
 "crate-open-key-required":
   "lines":
   - "components":
-    - "text": "<#EC5656>Crate <#3EC4DE>%crate_id%</#3EC4DE> requires the target player\
-        \ to hold its key. Use <#E5DBD1>-nokey</#E5DBD1> to bypass."
-  "pagination": null
-  "actions": []
+    - "text": "<#EC5656>Crate <#3EC4DE>%crate_id%</#3EC4DE> requires the target player to hold its key. Use <#E5DBD1>-nokey</#E5DBD1> to bypass."
 "crate-open-failed":
   "lines":
   - "components":
     - "text": "<#EC5656>Failed to open crate <#3EC4DE>%crate_id%</#3EC4DE> <#E5DBD1>%amount%x</#E5DBD1>."
-  "pagination": null
-  "actions": []
+"player-only-command":
+  "lines":
+  - "components":
+    - "text": "<#EC5656>This command can only be used by a player."
+"player-not-found":
+  "lines":
+  - "components":
+    - "text": "<#EC5656>Player '<#E5DBD1>%player%</#E5DBD1>' was not found."
 "keys-self-requires-player":
   "lines":
   - "components":
     - "text": "<#EC5656>You must be a player to give yourself keys!"
-  "pagination": null
-  "actions": []
 "keys-given-self":
   "lines":
   - "components":
-    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%key_type%</#3EC4DE>\
-        \ key!"
-  "pagination": null
-  "actions": []
+    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%key_type%</#3EC4DE> key!"
 "keys-given-target":
   "lines":
   - "components":
-    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%key_type%</#3EC4DE>\
-        \ key!"
-  "pagination": null
-  "actions": []
+    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%key_type%</#3EC4DE> key!"
 "keys-given-sender":
   "lines":
   - "components":
-    - "text": "<#90EF87>You have given <#6E7EF0>%player%</#6E7EF0> <#E5DBD1>%amount%x</#E5DBD1>\
-        \ <#3EC4DE>%key_type%</#3EC4DE> key!"
-  "pagination": null
-  "actions": []
+    - "text": "<#90EF87>You have given <#6E7EF0>%player%</#6E7EF0> <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%key_type%</#3EC4DE> key!"
+"keys-given-all-self":
+  "lines":
+  - "components":
+    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE> <#E5DBD1>%key_type%</#E5DBD1> key through giveall."
+"keys-given-all-target":
+  "lines":
+  - "components":
+    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE> <#E5DBD1>%key_type%</#E5DBD1> key."
+"keys-given-all-sender":
+  "lines":
+  - "components":
+    - "text": "<#90EF87>Given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE> <#E5DBD1>%key_type%</#E5DBD1> key to <#E5DBD1>%player_count%</#E5DBD1> players."
+"keys-offline-requires-virtual":
+  "lines":
+  - "components":
+    - "text": "<#EC5656>Offline giveall requires <#E5DBD1>-v</#E5DBD1> because physical keys cannot be given offline."
 "key-bank":
+  "lines":
+  - "components":
+    - "text": "<gray>➥ <#3EC4DE>%crate_name%</#3EC4DE> (<#E5DBD1>%crate_id%</#E5DBD1>) <dark_gray>|</dark_gray> <#90EF87>%amount% Keys</#90EF87> "
   "pagination":
     "page-size": 8
     "header":
       "components":
       - "text": "<#6E7EF0>%player%'s Virtual Key Bank:"
-      "visibility-conditions": []
     "footer":
       "components":
       - "text": "<#6E7EF0>[← Previous Page]"
@@ -317,10 +309,13 @@
           "value": "prev"
         "visibility-conditions":
         - "type": "has-previous-page"
+          "negate": false
       - "text": " <gray>| "
         "visibility-conditions":
         - "type": "has-previous-page"
+          "negate": false
         - "type": "has-next-page"
+          "negate": false
       - "text": "<#6E7EF0>[Next Page →]"
         "hover":
         - "<gray>Open the next page."
@@ -329,42 +324,30 @@
           "value": "next"
         "visibility-conditions":
         - "type": "has-next-page"
+          "negate": false
       "visibility-conditions":
       - "type": "has-next-or-previous-page"
-  "lines":
-  - "components":
-    - "text": "<gray>➥ <#3EC4DE>%crate_name%</#3EC4DE> (<#E5DBD1>%crate_id%</#E5DBD1>)\
-        \ <dark_gray>|</dark_gray> <#90EF87>%amount% Keys</#90EF87> "
-  "actions": []
+        "negate": false
 "key-bank-empty":
   "lines":
   - "components":
     - "text": "<#EC5656>%player% has no virtual keys."
-  "pagination": null
-  "actions": []
 "no-permission":
   "lines":
   - "components":
     - "text": "<#EC5656>You do not have permission to do that."
-  "pagination": null
-  "actions": []
 "plugin-reloading":
   "lines":
   - "components":
     - "text": "<#E9F78D>AqCrates is reloading..."
-  "pagination": null
-  "actions": []
 "plugin-reloaded":
   "lines":
   - "components":
     - "text": "<#90EF87>AqCrates has successfully reloaded!"
-  "pagination": null
-  "actions": []
 "stats-invalidated":
   "lines":
   - "components":
-    - "text": "<#90EF87>Stats invalidation finished. Deleted <#E5DBD1>%total_deleted%</#E5DBD1>\
-        \ rows in total."
+    - "text": "<#90EF87>Stats invalidation finished. Deleted <#E5DBD1>%total_deleted%</#E5DBD1> rows in total."
   - "components":
     - "text": "<gray>Openings <dark_gray>| <#E5DBD1>%deleted_openings%</#E5DBD1>"
   - "components":
@@ -381,123 +364,37 @@
     - "text": "<gray>Expired Hourly Crate Buckets <dark_gray>| <#E5DBD1>%deleted_expired_hourly_crate_buckets%</#E5DBD1>"
   - "components":
     - "text": "<gray>Expired Hourly Reward Buckets <dark_gray>| <#E5DBD1>%deleted_expired_hourly_reward_buckets%</#E5DBD1>"
-  "pagination": null
-  "actions": []
 "crate-placed":
   "lines":
   - "components":
     - "text": "<#90EF87>You have placed the crate!"
-  "pagination": null
-  "actions": []
 "crate-destroyed":
   "lines":
   - "components":
     - "text": "<#EC5656>Crate destroyed!"
-  "pagination": null
-  "actions": []
 "crate-saved":
   "lines":
   - "components":
     - "text": "<#90EF87>Saved crate '<#E5DBD1>%crate_id%</#E5DBD1>'."
-  "pagination": null
-  "actions": []
 "crate-create-prompt":
   "lines":
   - "components":
     - "text": "<gray><i>Type <#E5DBD1>cancel</#E5DBD1>' to stop a crate creation."
   - "components":
     - "text": "<#3EC4DE>Enter new crate ID:"
-  "pagination": null
-  "actions": []
 "crate-invalid-id":
   "lines":
   - "components":
-    - "text": "<#EC5656>Invalid crate ID. Use only letters, numbers, '_' or '-'."
-  "pagination": null
-  "actions": []
-"crate-already-exists":
-  "lines":
-  - "components":
-    - "text": "<#EC5656>Crate '<#E5DBD1>%crate_id%</#E5DBD1>' already exists."
-  "pagination": null
-  "actions": []
-"crate-editor-open-failed":
-  "lines":
-  - "components":
-    - "text": "<#EC5656>Failed to open crate editor: <#E5DBD1>%reason%</#E5DBD1>"
-  "pagination": null
-  "actions": []
-"player-only-command":
-  "lines":
-  - "components":
-    - "text": "<#EC5656>This command can only be used by a player."
-      "hover": []
-      "click": null
-      "visibility-conditions": []
-    "visibility-conditions": []
-  "pagination": null
-  "actions": []
-"player-not-found":
-  "lines":
-  - "components":
-    - "text": "<#EC5656>Player '<#E5DBD1>%player%</#E5DBD1>' was not found."
-      "hover": []
-      "click": null
-      "visibility-conditions": []
-    "visibility-conditions": []
-  "pagination": null
-  "actions": []
-"keys-given-all-self":
-  "lines":
-  - "components":
-    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE>\
-        \ <#E5DBD1>%key_type%</#E5DBD1> key through giveall."
-      "hover": []
-      "click": null
-      "visibility-conditions": []
-    "visibility-conditions": []
-  "pagination": null
-  "actions": []
-"keys-given-all-target":
-  "lines":
-  - "components":
-    - "text": "<#90EF87>You have been given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE>\
-        \ <#E5DBD1>%key_type%</#E5DBD1> key."
-      "hover": []
-      "click": null
-      "visibility-conditions": []
-    "visibility-conditions": []
-  "pagination": null
-  "actions": []
-"keys-given-all-sender":
-  "lines":
-  - "components":
-    - "text": "<#90EF87>Given <#E5DBD1>%amount%x</#E5DBD1> <#3EC4DE>%crate_id%</#3EC4DE> <#E5DBD1>%key_type%</#E5DBD1>\
-        \ key to <#E5DBD1>%player_count%</#E5DBD1> players."
-      "hover": []
-      "click": null
-      "visibility-conditions": []
-    "visibility-conditions": []
-  "pagination": null
-  "actions": []
-"keys-offline-requires-virtual":
-  "lines":
-  - "components":
-    - "text": "<#EC5656>Offline giveall requires <#E5DBD1>-v</#E5DBD1> because physical\
-        \ keys cannot be given offline."
-      "hover": []
-      "click": null
-      "visibility-conditions": []
-    "visibility-conditions": []
-  "pagination": null
-  "actions": []
+    - "text": "<red>Invalid crate ID. Use only letters, numbers, '_' or '-'."
 "crate-not-found":
   "lines":
   - "components":
     - "text": "<#EC5656>Crate '<#3EC4DE>%crate_id%</#3EC4DE>' was not found."
-      "hover": []
-      "click": null
-      "visibility-conditions": []
-    "visibility-conditions": []
-  "pagination": null
-  "actions": []
+"crate-already-exists":
+  "lines":
+  - "components":
+    - "text": "<#EC5656>Crate '<#E5DBD1>%crate_id%</#E5DBD1>' already exists."
+"crate-editor-open-failed":
+  "lines":
+  - "components":
+    - "text": "<#EC5656>Failed to open crate editor: <#E5DBD1>%reason%</#E5DBD1>"
